@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Media Insights Engine - Elasticsearch Consumer stack"
+
+Parameters:
+  NodeType:
+    Description: "The node type to be provisioned for the Elasticsearch cluster"
+    Type: String
+    Default: "t2.small.elasticsearch"
+    AllowedValues:
+      - "t2.small.elasticsearch"
+      - "m4.large.elasticsearch"
+      - "m4.xlarge.elasticsearch"
+      - "c4.large.elasticsearch"
+      - "c4.xlarge.elasticsearch"
+      - "r4.large.elasticsearch"
+      - "r4.xlarge.elasticsearch"
+    ConstraintDescription: "Must be a valid Elasticsearch node type."
+  NodeCount:
+    Description: "The number of nodes in the Elasticsearch cluster."
+    Type: Number
+    Default: 2
+  MieDataplaneBucket:
+    Type: String
+    Description: "Name of the dataplane bucket"
+  AnalyticsStreamArn:
+    Description: "Arn of the MIE kinesis data stream"
+    Type: String
+
+Mappings:
+  SourceCode:
+        General:
+            S3Bucket: "%%BUCKET_NAME%%"
+            KeyPrefix: "content-analysis-solution/%%VERSION%%/code"
+
+Resources:
+  # elastic search cluster
+
+  # TODO: Best Practice - Resource found with an explicit name, this disallows updates that require replacement of this resource
+
+  ESDomain:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties:
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 10
+        VolumeType: gp2
+      ElasticsearchClusterConfig:
+        DedicatedMasterEnabled: false
+        InstanceCount:
+          !Ref NodeCount
+        ZoneAwarenessEnabled: false
+        InstanceType:
+          !Ref NodeType
+      ElasticsearchVersion: 6.3
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: 0
+
+  # elastic search consumer lambda
+
+  ElasticsearchConsumerLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "lambda_handler.lambda_handler"
+      Role: !GetAtt ElasticConsumerRole.Arn
+      Code:
+        S3Bucket: !FindInMap ["SourceCode", "General", "S3Bucket"]
+        S3Key:
+          !Join [
+            "/",
+            [
+              !FindInMap ["SourceCode", "General", "KeyPrefix"],
+              "esconsumer.zip",
+            ],
+          ]
+      Runtime: "python3.7"
+      Timeout: 900
+      MemorySize: 2048
+      Environment:
+        Variables:
+          EsEndpoint: !GetAtt ESDomain.DomainEndpoint
+          DataplaneBucket: !Ref MieDataplaneBucket
+
+  # stream event mapping for lambda
+
+  StreamingFunctionEventMapping:
+    Type: "AWS::Lambda::EventSourceMapping"
+    Properties:
+      Enabled: true
+      EventSourceArn: !Ref AnalyticsStreamArn
+      FunctionName: !GetAtt ElasticsearchConsumerLambda.Arn
+      StartingPosition: "LATEST"
+
+  # IAM
+
+  # TODO: Need to clean up this policy with regards to elasticsearch access
+  ElasticConsumerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-ElasticKinesisAccessPolicy"
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "kinesis:DescribeStream"
+                  - "kinesis:GetShardIterator"
+                  - "kinesis:GetRecords"
+                Resource: !Ref AnalyticsStreamArn
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "es:ESHttpPost"
+                  - "es:ESHttpPut"
+                  - "es:ESHttpDelete"
+                  - "es:ESHttpGet"
+                Resource: !Join ["", [!GetAtt ESDomain.DomainArn, "/*"]]
+              - Effect: Allow
+                Action:
+                  - "es:DescribeElasticsearchDomain"
+                  - "es:GetCompatibleElasticsearchVersions"
+                  - "es:DescribeElasticsearchDomains"
+                Resource: !GetAtt ESDomain.DomainArn
+              - Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                Resource: !Sub "arn:aws:s3:::${MieDataplaneBucket}/*"
+Outputs:
+  ElasticEndpoint:
+    Value: !GetAtt ESDomain.DomainEndpoint
+  DomainArn:
+    Value: !GetAtt ESDomain.DomainArn

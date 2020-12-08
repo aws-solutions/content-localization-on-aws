@@ -66,7 +66,7 @@ fi
 template_dir="$PWD"
 dist_dir="$template_dir/dist"
 source_dir="$template_dir/../source"
-workflows_dir="$template_dir/../source/workflows"
+workflows_dir="$template_dir/../source/mie-workflows"
 webapp_dir="$template_dir/../source/webapp"
 echo "template_dir: ${template_dir}"
 
@@ -197,8 +197,8 @@ cp "$template_dir/string.yaml" "$dist_dir/string.template"
 cp "$template_dir/media-insights-test-operations-stack.yaml" "$dist_dir/media-insights-test-operations-stack.template"
 cp "$template_dir/media-insights-dataplane-streaming-stack.template" "$dist_dir/media-insights-dataplane-streaming-stack.template"
 cp "$workflows_dir/rekognition.yaml" "$dist_dir/rekognition.template"
-cp "$source_dir/consumers/elastic/media-insights-elasticsearch.yaml" "$dist_dir/media-insights-elasticsearch.template"
-cp "$source_dir/consumers/elastic/media-insights-elasticsearch.yaml" "$dist_dir/media-insights-s3.template"
+cp "$source_dir/mie-consumers/elastic/media-insights-elasticsearch.yaml" "$dist_dir/media-insights-elasticsearch.template"
+cp "$source_dir/mie-consumers/elastic/media-insights-elasticsearch.yaml" "$dist_dir/media-insights-s3.template"
 cp "$webapp_dir/media-insights-webapp.yaml" "$dist_dir/media-insights-webapp.template"
 find "$dist_dir"
 echo "Updating code source bucket in template files with '$bucket'"
@@ -524,7 +524,7 @@ echo "Elasticsearch consumer Function"
 echo "------------------------------------------------------------------------------"
 
 echo "Building Elasticsearch Consumer function"
-cd "$source_dir/consumers/elastic" || exit 1
+cd "$source_dir/mie-consumers/elastic" || exit 1
 
 [ -e dist ] && rm -r dist
 mkdir -p dist

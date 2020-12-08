@@ -359,14 +359,14 @@ Export your operator as an output like this:
 ### Step 3: Add your operator to a workflow 
 ***(Difficulty: 10 minutes)***
 
-*TL;DR - Edit `source/workflows/MieCompleteWorkflow.yaml` and add your operator under `Resources --> defaultVideoStage --> Operations`*
+*TL;DR - Edit `source/mie-workflows/MieCompleteWorkflow.yaml` and add your operator under `Resources --> defaultVideoStage --> Operations`*
 
 It's easiest to create a new workflow by copying end editing `MieCompleteWorkflow.yaml`. If you're creating a new workflow, you'll need to know that operators in the same stage will run at the same time (i.e. "in parallel") and stages run sequentially.
 
 ### Step 4: Add your operator to the Elasticsearch consumer
 ***(Difficulty: 30 minutes)***
 
-Edit `source/consumers/elastic/lambda_handler.py`. Add your operator name to the list of `supported_operators`. Define a processing method to create Elasticsearch records from metadata JSON objects. This method should concatenate pages, flatten JSON arrays, add the operator name, add the workflow name, and add any other fields that can be useful for analytics. Call this processing method alongside the other processing methods referenced in the `lambda_handler()` entrypoint.
+Edit `source/mie-consumers/elastic/lambda_handler.py`. Add your operator name to the list of `supported_operators`. Define a processing method to create Elasticsearch records from metadata JSON objects. This method should concatenate pages, flatten JSON arrays, add the operator name, add the workflow name, and add any other fields that can be useful for analytics. Call this processing method alongside the other processing methods referenced in the `lambda_handler()` entrypoint.
 
 ### Step 5: Update the build script to deploy your operator to AWS Lambda
 ***(Difficulty: 5 minutes)***

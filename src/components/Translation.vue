@@ -1049,7 +1049,7 @@ export default {
       // This function disables all the operators in stages above TranslateStage2,
       // so all that's left are the operators that update vtt and srt files.
       let data = {
-        "Name": "MieCompleteWorkflow2",
+        "Name": "VODSubtitlesVideoWorkflow",
         "Configuration": this.workflow_config
       }
       data["Input"] = {

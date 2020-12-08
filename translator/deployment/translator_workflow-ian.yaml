@@ -125,7 +125,7 @@ Resources:
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:Polly"
 
-  MieCompleteWorkflow2:
+  VODSubtitlesVideoWorkflow:
     DependsOn:
       - PreliminaryStage
       - defaultVideoStage
@@ -140,7 +140,7 @@ Resources:
     Properties:
       ServiceToken: !Ref WorkflowCustomResourceArn
       ResourceType: "Workflow"
-      Name: "MieCompleteWorkflow2"
+      Name: "VODSubtitlesVideoWorkflow"
       StartAt: !GetAtt PreliminaryStage.Name
       Stages: !Sub
         - |-

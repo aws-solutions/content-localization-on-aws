@@ -490,7 +490,7 @@
       },
       kitchenSinkWorkflowConfig() {
         return {
-          "Name": "MieCompleteWorkflow2",
+          "Name": "VODSubtitlesVideoWorkflow",
           "Configuration": {
             "defaultPrelimVideoStage2": {
               "Thumbnail": {

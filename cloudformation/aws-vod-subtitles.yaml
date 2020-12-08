@@ -25,9 +25,9 @@ Mappings:
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
-      CodeKeyPrefix: "content-analysis-solution/%%VERSION%%/code"
-      TemplateKeyPrefix: "content-analysis-solution/%%VERSION%%/cf"
-      WebsitePrefix: "content-analysis-solution/%%VERSION%%/code/website"
+      CodeKeyPrefix: "vod-subtitles-solution/%%VERSION%%/code"
+      TemplateKeyPrefix: "vod-subtitles-solution/%%VERSION%%/cf"
+      WebsitePrefix: "vod-subtitles-solution/%%VERSION%%/code/website"
 
 Resources:
   # Deploy Elasticsearch
@@ -143,7 +143,7 @@ Resources:
             - ContentAnalysisApp
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-video-workflow.template"
+          - "/aws-vod-subtitles-video-workflow.template"
       Parameters:
         WorkflowCustomResourceArn:
           Fn::ImportValue:
@@ -152,34 +152,7 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:OperatorLibraryStack"
 
-  # Deploy image workflow
-
-  CompleteImageWorkflow:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - TemplateKeyPrefix
-          - "/aws-content-analysis-image-workflow.template"
-      Parameters:
-        WorkflowCustomResourceArn:
-          Fn::ImportValue:
-            !Sub "${MieStackName}:WorkflowCustomResourceArn"
-        OperatorLibraryStack:
-          Fn::ImportValue:
-            !Sub "${MieStackName}:OperatorLibraryStack"
 
 Outputs:
-  ContentAnalyisSolution:
+  VODSubtitlesSolution:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl

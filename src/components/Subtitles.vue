@@ -870,7 +870,7 @@ export default {
     disableUpstreamStages()  {
       // This function disables all the operators in stages above TranslateStage2
       let data = {
-        "Name": "MieCompleteWorkflow2",
+        "Name": "VODSubtitlesVideoWorkflow",
         "Configuration": this.workflow_config
       }
       data["Input"] = {

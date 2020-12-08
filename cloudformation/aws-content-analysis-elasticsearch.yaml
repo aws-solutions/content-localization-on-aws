@@ -2,16 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "Media Insights Engine - Elasticsearch Consumer stack"
 
 Parameters:
-  DeployElasticsearch:
-    Type: String
-    Description: "Would you like to deploy an Elasticsearch cluster?"
-    Default: Yes
-    AllowedValues:
-      - Yes
-      - No
-#  ESEndpoint:
-#    Type: String
-#    Description: "Enter your existing elastic endpoint if you choose not to have a cluster deployed for you"
   NodeType:
     Description: "The node type to be provisioned for the Elasticsearch cluster"
     Type: String
@@ -24,7 +14,7 @@ Parameters:
       - "c4.xlarge.elasticsearch"
       - "r4.large.elasticsearch"
       - "r4.xlarge.elasticsearch"
-    ConstraintDescription: "must be a valid Elasticsearch node type."
+    ConstraintDescription: "Must be a valid Elasticsearch node type."
   NodeCount:
     Description: "The number of nodes in the Elasticsearch cluster."
     Type: Number
@@ -32,25 +22,15 @@ Parameters:
   MieDataplaneBucket:
     Type: String
     Description: "Name of the dataplane bucket"
-  ESConsumerCode:
-    Type: String
-    Default: "esconsumer.zip"
-    Description: "S3 Key of the elasticsearch consumer code"
   AnalyticsStreamArn:
     Description: "Arn of the MIE kinesis data stream"
     Type: String
-  MIEAdminRoleArn:
-    Type: String
-
-
-Conditions:
-  DeployESCluster: !Equals [!Ref DeployElasticsearch, Yes]
 
 Mappings:
   SourceCode:
         General:
-            S3Bucket: '%%BUCKET_NAME%%'
-            KeyPrefix: "media-insights-solution/%%VERSION%%/code"
+            S3Bucket: "%%BUCKET_NAME%%"
+            KeyPrefix: "vod-subtitles-solution/%%VERSION%%/code"
 
 Resources:
   # elastic search cluster
@@ -59,29 +39,7 @@ Resources:
 
   ESDomain:
     Type: "AWS::Elasticsearch::Domain"
-    Condition: DeployESCluster
     Properties:
-      AccessPolicies:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Ref MIEAdminRoleArn
-            Action:
-              - "es:ESHttpGet"
-              - "es:ESHttpPost"
-            Resource:
-              - !Join ["", ["arn:aws:es:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":domain/", "mie-es/_search"]]
-          - Effect: Allow
-            Principal:
-              AWS:
-                - !Sub "${AWS::AccountId}"
-            Action:
-              - es:*
-            Resource:
-              - !Join ["", ["arn:aws:es:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":domain/", "mie-es/*"]]
-      DomainName: "mie-es"
       EBSOptions:
         EBSEnabled: true
         Iops: 0
@@ -185,3 +143,5 @@ Resources:
 Outputs:
   ElasticEndpoint:
     Value: !GetAtt ESDomain.DomainEndpoint
+  DomainArn:
+    Value: !GetAtt ESDomain.DomainArn

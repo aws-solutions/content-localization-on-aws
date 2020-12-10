@@ -3,7 +3,6 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import 'dropzone/dist/min/dropzone.min.css'
 
 import App from './App.vue'
 import store from './store'
@@ -24,12 +23,30 @@ getRuntimeConfig().then(function(json) {
       userPoolWebClientId: json.USER_POOL_CLIENT_ID,
       identityPoolId: json.IDENTITY_POOL_ID
     },
+    Storage: {
+      AWSS3: {
+        bucket: json.DATAPLANE_BUCKET,
+        region: json.AWS_REGION
+      }
+    },
     API: {
       endpoints: [
         {
-          name: "mieElasticsearch",
+          name: "contentAnalysisElasticsearch",
           endpoint: json.ELASTICSEARCH_ENDPOINT,
           service: "es",
+          region: json.AWS_REGION
+        },
+        {
+          name: "mieWorkflowApi",
+          endpoint: json.WORKFLOW_API_ENDPOINT,
+          service: "execute-api",
+          region: json.AWS_REGION
+        },
+        {
+          name: "mieDataplaneApi",
+          endpoint: json.DATAPLANE_API_ENDPOINT,
+          service: "execute-api",
           region: json.AWS_REGION
         }
       ]

@@ -83,7 +83,7 @@ export default {
     },
     async fetchAssetData () {
       let query = 'AssetId:'+this.$route.params.asset_id+' Confidence:>'+this.Confidence+' _index:mieentities';
-      let apiName = 'mieElasticsearch';
+      let apiName = 'ContentAnalysisElasticsearch';
       let path = '/_search';
       let apiParams = {
         headers: {'Content-Type': 'application/json'},

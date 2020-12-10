@@ -115,7 +115,7 @@
       async fetchAssetData () {
         this.isBusy = true;
         let query = 'AssetId:'+this.$route.params.asset_id+' Operator:mediainfo';
-        let apiName = 'mieElasticsearch';
+        let apiName = 'ContentAnalysisElasticsearch';
         let path = '/_search';
         let apiParams = {
           headers: {'Content-Type': 'application/json'},

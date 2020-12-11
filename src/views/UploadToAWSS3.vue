@@ -690,7 +690,6 @@ export default {
       this.uploadErrorMessage = error;
       this.dismissCountDown = this.dismissSecs;
     },
-    
 
     
     runWorkflow: async function (location) {
@@ -711,7 +710,7 @@ export default {
           data["Input"] = { AssetId: this.assetIdParam, Media: { Video: {} } };
         } else if (media_type === "image") {
 
-        data = {
+          data = {
             Input: {
               AssetId: this.assetIdParam,
               Media: {
@@ -762,7 +761,7 @@ export default {
         if (media_type.match(/video/g) || 
             this.valid_media_types.includes(location.s3ObjectLocation.fields.key.split('.').pop().toLowerCase())) {
           // Create workflow config from user-specified options:
-          data = vm.kitchenSinkWorkflowConfig;
+          data = vm.workflowConfig;
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
             data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = JSON.stringify({"JsonList":this.customTerminology})
@@ -782,55 +781,62 @@ export default {
           }
           // Add input parameter to workflow config:
           data["Input"] = {
-            "Media": {
-              "Video": {
-                "S3Bucket": this.DATAPLANE_BUCKET,
-                "S3Key": location.s3ObjectLocation.fields.key
+            Media: {
+              Video: {
+                S3Bucket: this.DATAPLANE_BUCKET,
+                S3Key: s3Key
               }
             }
           };
-        } else if (media_type === 'application/json') {
+        } else if (media_type === "application/json") {
           // JSON files may be uploaded for the genericDataLookup operator, but
           // we won't run a workflow for json file types.
-          console.log("Data file has been uploaded to s3://" + location.s3ObjectLocation.fields.key);
+          console.log("Data file has been uploaded to s3://" + s3key);
           return;
-        } else if (media_type === '' && (location.s3ObjectLocation.fields.key.split('.').pop().toLowerCase() == 'vtt')) {
+        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() == 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.
-          console.log("VTT file has been uploaded to s3://" + location.s3ObjectLocation.fields.key);
+          console.log("VTT file has been uploaded to s3://" + s3Key);
           return;
         } else {
-          vm.s3UploadError("Unsupported media type: " + media_type + ".")
+          vm.s3UploadError("Unsupported media type: " + media_type + ".");
         }
-        console.log(JSON.stringify(data));
-        fetch(this.WORKFLOW_API_ENDPOINT + 'workflow/execution', {
-          method: 'post',
-          body: JSON.stringify(data),
-          headers: {'Content-Type': 'application/json', 'Authorization': token}
-        }).then(response =>
-          response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-          ).then(res => {
-            if (res.status !== 200) {
-              console.log("ERROR: Failed to start workflow.");
-              console.log(res.data.Code);
-              console.log(res.data.Message);
-              console.log("URL: " + this.WORKFLOW_API_ENDPOINT + 'workflow/execution');
-              console.log("Data:");
-              console.log(JSON.stringify(data));
-              console.log((data));
-              console.log("Response: " + response.status);
-            } else {
-              const asset_id = res.data.AssetId;
-              const s3key = location.s3ObjectLocation.fields.key;
-              console.log("Media assigned asset id: " + asset_id);
-              vm.executed_assets.push({asset_id: asset_id, file_name: s3key, workflow_status: "", state_machine_console_link: ""});
-              vm.getWorkflowStatus(asset_id);
-            }
-          })
-        )
+      
+      console.log(JSON.stringify(data));
+      // TODO: Should this be its own function?
+
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: data,
+          queryStringParameters: {} // optional
+      };
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        let asset_id = response.data.AssetId;
+        let wf_id = response.data.Id;
+        //console.log("Media assigned asset id: " + asset_id);
+        let executed_asset = {
+            asset_id: asset_id,
+            file_name: s3Key,
+            workflow_status: "",
+            state_machine_console_link: "",
+            wf_id: wf_id
+          };
+        vm.executed_assets.push(executed_asset);
+        vm.getWorkflowStatus(wf_id);
+        this.hasAssetParam = false;
+        this.assetIdParam = "";
+      } catch (error) {
+        alert(
+          "ERROR: Failed to start workflow. Check Workflow API logs."
+        );
+        console.log(error)
+      }
     },
     async getWorkflowStatus(wf_id) {
       const vm = this;

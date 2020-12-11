@@ -250,6 +250,7 @@
         showElasticSearchAlert: false,
         mlTabs: 0,
         speechTabs: 0,
+        videoLoaded: false,
         supportedImageFormats: ["jpg", "jpeg", "tif", "tiff", "png", "gif"],
         mediaType: "",
         num_caption_tracks: 0,
@@ -281,64 +282,65 @@
       },
     methods: {
       async getAssetMetadata () {
-          const token = await this.$Amplify.Auth.currentSession().then(data =>{
-            return data.getIdToken().getJwtToken();
-          });
-          const asset_id = this.$route.params.asset_id;
-          fetch(this.DATAPLANE_API_ENDPOINT+'/metadata/'+asset_id, {
-            method: 'get',
-            headers: {
-              'Authorization': token
-            }
-          }).then(response => {
-            response.json().then(data => ({
-                data: data,
-              })
-            ).then(res => {
-              this.s3_uri = 's3://'+res.data.results.S3Bucket+'/'+res.data.results.S3Key;
-              let filename = this.s3_uri.split("/").pop();
-              let fileType = filename.split('.').slice(-1)[0]
-              if (this.supportedImageFormats.includes(fileType.toLowerCase()) ) {
-                this.mediaType = "image"
-              } else {
-                this.mediaType = "video"
-              }
-              this.filename = filename;
-              this.getVideoUrl(token);
-              this.getVttCaptions(token);
-            })
-          });
-          this.updateAssetId();
+        let asset_id = this.$route.params.asset_id;
+        let apiName = 'mieDataplaneApi';
+        let path = 'metadata/' + asset_id;
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          this.s3_uri = 's3://'+response.data.results.S3Bucket+'/'+response.data.results.S3Key;
+          let filename = this.s3_uri.split("/").pop();
+          let fileType = filename.split('.').slice(-1)[0]
+          if (this.supportedImageFormats.includes(fileType.toLowerCase()) ) {
+            this.mediaType = "image"
+          } else {
+            this.mediaType = "video"
+          }
+          this.filename = filename;
+          this.getVideoUrl()
+        } catch (error) {
+          alert(error)
+          console.log(error)
+        }
+        this.updateAssetId();
       },
-      async getVideoUrl(token) {
+      async getVideoUrl() {
         // This function gets the video URL then initializes the video player
         const bucket = this.s3_uri.split("/")[2];
-        // TODO: Get the path to the proxy mp4 from the mediaconvert operator
+        // TODO: Get the path to the proxy mp4 from the mediaconvert operator - clarifying this comment, this should just be a from the dataplane results of the mediaconvert operator
         // Our mediaconvert operator sets proxy encode filename to [key]_proxy.mp4
         let key="";
         if (this.mediaType === "image") {
           key = this.s3_uri.split(this.s3_uri.split("/")[2] + '/')[1];
         }
         if (this.mediaType === "video") {
-          const media_key = (this.s3_uri.split(this.s3_uri.split("/")[2] + '/')[1].replace('input/', ''))
+          const media_key = (this.s3_uri.split(this.s3_uri.split("/")[2])[1].replace('/input/public/upload', ''))
           const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp4";
-          key = proxy_encode_key
+          key = proxy_encode_key.replace("/", "")
         }
-        // get URL to video file in S3
-        fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-          method: 'POST',
-          mode: 'cors',
+        const data = { "S3Bucket": bucket, "S3Key": key };
+
+        // get presigned URL to video file in S3
+
+        let apiName = 'mieDataplaneApi'
+        let path = 'download'
+        let requestOpts = {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
           },
-          body: JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-        }).then(data => {
-            data.text().then((data) => {
-            this.videoOptions.sources[0].src = data
-        }).catch(err => console.error(err));
-        })
-        console.log("getVideoUrl done")
+          body: data,
+          response: true,
+          queryStringParameters: {}, // optional,
+          responseType: 'text'
+        };
+        try {
+          let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+          this.videoOptions.sources[0].src = response.data
+          this.videoLoaded = true
+        } catch (error) {
+          alert(error)
+        }
       },
       getVttCaptions: async function (token) {
         if (this.mediaType !== "video") {
@@ -384,8 +386,8 @@
           })
         });
       },
-      updateAssetId () {
-        this.$store.commit('updateAssetId', this.$route.params.asset_id);
+    updateAssetId () {
+      this.$store.commit('updateAssetId', this.$route.params.asset_id);
       }
     }
   }

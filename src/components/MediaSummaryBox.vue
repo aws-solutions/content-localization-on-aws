@@ -5,6 +5,10 @@
       class="my-1"
     >
       <b-col>
+        <label>
+          <router-link :to="{ name: 'upload', query: { asset: this.$route.params.asset_id, mediaType: mediaType, s3key: s3Uri}}">Perform Additional Analysis</router-link>
+        </label>
+        <br>
         <label>Asset ID:</label>
         {{ this.$route.params.asset_id }}
         <br>
@@ -36,11 +40,11 @@
               </div>
               <div v-if="overall_bit_rate !== 'undefined'">
                 <label>Video bit rate:</label>
-                {{ Math.round(overall_bit_rate/1000) }} kbps
+                {{ overall_bit_rate }} Mbps
               </div>
               <div v-if="frame_rate !== 'undefined'">
                 <label>Video frame rate:</label>
-                {{ Math.round(frame_rate) }} fps
+                {{ frame_rate }} fps
               </div>
               <div v-if="width !== 'undefined' && height !== 'undefined' ">
                 <label>Video resolution:</label>
@@ -81,7 +85,7 @@
 
   export default {
     name: 'MediaSummary',
-    props: ['s3Uri','filename','videoUrl'],
+    props: ['s3Uri','filename','videoUrl', 'mediaType'],
     data () {
       return {
         duration: "undefined",
@@ -115,7 +119,7 @@
       async fetchAssetData () {
         this.isBusy = true;
         let query = 'AssetId:'+this.$route.params.asset_id+' Operator:mediainfo';
-        let apiName = 'mieElasticsearch';
+        let apiName = 'contentAnalysisElasticsearch';
         let path = '/_search';
         let apiParams = {
           headers: {'Content-Type': 'application/json'},
@@ -163,11 +167,29 @@
           if ("height" in track_data["Video"][0]) {
             this.height = track_data["Video"][0].height;
           }
+          
+          if (track_data["Audio"].length > 0) {
+            if ("other_bit_rate" in track_data["Audio"][0]) {
+              this.other_bit_rate = track_data["Audio"][0].other_bit_rate[0];
+            }
+            if ("other_sampling_rate" in track_data["Audio"][0]) {
+              this.other_sampling_rate = track_data["Audio"][0].other_sampling_rate[0];
+            }
+            if ("other_language" in track_data["Audio"][0]) {
+              this.other_language = track_data["Audio"][0].other_language[0];
+            }
+            if ("encoded_date" in track_data["Audio"][0]) {
+              this.encoded_date = track_data["Audio"][0].encoded_date;
+            }
+          } 
           if ("other_bit_rate" in track_data["Audio"][0]) {
             this.other_bit_rate = track_data["Audio"][0].other_bit_rate[0];
           }
           if ("other_sampling_rate" in track_data["Audio"][0]) {
             this.other_sampling_rate = track_data["Audio"][0].other_sampling_rate[0];
+          }
+          if ("other_language" in track_data["Audio"][0]) {
+            this.other_language = track_data["Audio"][0].other_language[0];
           }
           if ("encoded_date" in track_data["Audio"][0]) {
             this.encoded_date = track_data["Audio"][0].encoded_date;

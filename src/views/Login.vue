@@ -31,6 +31,7 @@ patchSignIn();
 //-----------------------------------------------------------//
 
 import { AmplifyEventBus } from "aws-amplify-vue";
+
 export default {
   name: "Login",
   data() {

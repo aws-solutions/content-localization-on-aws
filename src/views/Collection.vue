@@ -97,7 +97,8 @@
                     </template>
                     <template v-slot:cell(status)="data">
                       <!-- open link in new tab -->
-                      <a href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
+                      <a v-if="data.item.status !== 'Queued'"  href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
+                      <div v-if="data.item.status === 'Queued'">{{ data.item.status }}</div>
                     </template>
                     <template v-slot:cell(Actions)="data">
                       <b-button
@@ -110,7 +111,7 @@
                       <b-button
                         :pressed="false"
                         variant="red"
-                        @click="deleteConfirm(`${data.item.asset_id}`)"
+                        @click="deleteAsset(`${data.item.asset_id}`)"
                       >
                         Delete
                       </b-button>
@@ -233,30 +234,24 @@
       openWindow: function (url) {
         window.open(url);
       },
-      async deleteConfirm(asset_id) {
-        this.$refs['delete-confirmation-modal'].show()
-        this.delete_asset_id = asset_id
-      },
-      async deleteAsset() {
-        const asset_id = this.delete_asset_id
-        let token = await this.getAccessToken();
-        let response = await fetch(this.DATAPLANE_API_ENDPOINT+'/metadata/'+asset_id, {
-          method: 'delete',
-          headers: {
-            'Authorization': token
-          }
-        });
-        if (response.status === 200) {
-            this.showDeletedAlert = 5;
-            this.asset_list = [];
-            this.retrieveAndFormatAsssets()
-        }
-        else {
-            this.showDataplaneAlert = true
+      async deleteAsset(assetId) {
+        let apiName = 'mieDataplaneApi'
+        let path = 'metadata/' + assetId
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          await this.$Amplify.API.del(apiName, path, requestOpts);
+          this.showDeletedAlert = 5;
+          this.asset_list = [];
+          this.retrieveAndFormatAsssets()
+        } catch (error) {
+          this.showDataplaneAlert = true
+          console.log(error)
         }
       },
       async elasticsearchQuery (query) {
-            let apiName = 'mieElasticsearch';
+            let apiName = 'contentAnalysisElasticsearch';
             let path = '/_search';
             let apiParams = {
               headers: {'Content-Type': 'application/json'},
@@ -302,11 +297,10 @@
               let assets = [];
               this.asset_list = [];
               this.noSearchResults = false;
-              let token = await this.getAccessToken();
               let buckets = elasticData.aggregations.distinct_assets.buckets;
               for (var i = 0, len = buckets.length; i < len; i++) {
                 let assetId = buckets[i].key;
-                let assetInfo = await this.getAssetInformation(token, assetId);
+                let assetInfo = await this.getAssetInformation(assetId);
                 if (assetInfo !== null) {
                   assets.push(assetInfo)
                 }
@@ -322,67 +316,65 @@
           }
         }
       },
-      async getAssetWorkflowStatus (token, assetId) {
-        let response = await fetch(this.WORKFLOW_API_ENDPOINT+'workflow/execution/asset/'+assetId, {
-            method: 'get',
-            headers: {
-              'Authorization': token
-          }
-        });
-        return await response.json();
+      async getAssetWorkflowStatus (assetId) {
+        let apiName = 'mieWorkflowApi'
+        let path = 'workflow/execution/asset/' + assetId
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          return response.data
+        } catch (error) {
+          console.log(error)
+        }
       },
-      async getAssetThumbnail (token, bucket, s3Key) {
+      async getAssetThumbnail (bucket, s3Key) {
         const data = { "S3Bucket": bucket, "S3Key": s3Key };
-        let response = await fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token
-            },
-            body: JSON.stringify(data)
-          });
-        if (response.status === 200) {
-          return await response.text();
-        }
-        else {
+        let apiName = 'mieDataplaneApi'
+        let path = 'download'
+        let requestOpts = {
+          body: data,
+          response: true,
+          responseType: 'text'
+        };
+        try {
+          let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+          return response.data
+        } catch (error) {
           this.showDataplaneAlert = true
+          console.log(error)
         }
       },
-      async getAssetInformation (token, assetId) {
-        let response = await fetch(this.DATAPLANE_API_ENDPOINT+'/metadata/'+assetId, {
-            method: 'get',
-            headers: {
-              'Authorization': token
-          }
-        });
-        if (response.status === 200) {
-          return await response.json();
-        }
-        else {
+      async getAssetInformation (assetId) {
+        let apiName = 'mieDataplaneApi'
+        let path = 'metadata/' + assetId
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          return response.data
+        } catch (error) {
           this.showDataplaneAlert = true
+          console.log(error)
         }
       },
-      async fetchAssets (token) {
-        let response = await fetch(this.DATAPLANE_API_ENDPOINT+'/metadata', {
-            method: 'get',
-            headers: {
-              'Authorization': token
-          }
-        });
-        if (response.status === 200) {
-          return await response.json();
-        }
-        else {
+      async fetchAssets () {
+        let apiName = 'mieDataplaneApi'
+        let path = 'metadata'
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          return response.data
+        } catch (error) {
           this.showDataplaneAlert = true
+          console.log(error)
         }
-      },
-      async getAccessToken () {
-          let response = await this.$Amplify.Auth.currentSession();
-          return await response.getIdToken().getJwtToken();
       },
       async pushAssetsToTable(assets) {
-        let token = await this.getAccessToken();
         for (var i = 0, len = assets.length; i < len; i++) {
           var assetId;
           if (typeof assets[i] === 'object') {
@@ -394,11 +386,11 @@
           }
           // Invoke an asynchronous task to add assets to the table in parallel so the table updates
           // as fast as possible. For large media collections this may take several seconds.
-          this.pushAssetToTable(assetId, token)
+          this.pushAssetToTable(assetId)
         }
       },
-      async pushAssetToTable (assetId, token) {
-        let assetInfo = await this.getAssetInformation(token, assetId);
+      async pushAssetToTable (assetId) {
+        let assetInfo = await this.getAssetInformation(assetId);
         let created = new Date(0);
         created.setUTCSeconds(assetInfo.results.Created);
         let bucket = assetInfo.results.S3Bucket;
@@ -414,9 +406,9 @@
         let media_type = filename.substring(filename.lastIndexOf(".")).toLowerCase();
         if (supported_image_types.includes(media_type)) {
           // use the uploaded image as a thumbnail
-          thumbnailS3Key = 'private/assets/' + assetId + '/input/' + filename;
+          thumbnailS3Key = 'private/assets/' + assetId + '/input/public/upload/' + filename;
         }
-        let [thumbnail, workflowStatus] = await Promise.all([this.getAssetThumbnail(token, bucket, thumbnailS3Key), this.getAssetWorkflowStatus(token, assetId)]);
+        let [thumbnail, workflowStatus] = await Promise.all([this.getAssetThumbnail(bucket, thumbnailS3Key), this.getAssetWorkflowStatus(assetId)]);
         if (workflowStatus[0] && thumbnail)
         {
           this.asset_list.push({
@@ -435,8 +427,7 @@
       },
 
       async retrieveAndFormatAsssets () {
-        let token = await this.getAccessToken();
-        let data = await this.fetchAssets(token);
+        let data = await this.fetchAssets();
         let assets = data.assets;
         if (assets.length === 0) {
           this.noAssets = true;

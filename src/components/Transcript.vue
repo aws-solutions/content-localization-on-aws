@@ -58,7 +58,7 @@ export default {
   methods: {
     async fetchAssetData () {
       let query = 'AssetId:'+this.$route.params.asset_id+ ' _index:mietranscript';
-      let apiName = 'mieElasticsearch';
+      let apiName = 'contentAnalysisElasticsearch';
       let path = '/_search';
       let apiParams = {
         headers: {'Content-Type': 'application/json'},

@@ -22,7 +22,6 @@
         >
           {{ invalidFileMessages[invalidFileMessages.length-1] }}
         </b-alert>
-        <h1>Upload Videos</h1>
         <h1>Upload Content</h1>
         <b-form-file
           v-model="file"
@@ -918,32 +917,32 @@ export default {
       }, poll_frequency)
     },
     listTerminologiesRequest: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      console.log("List terminologies request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.DATAPLANE_API_ENDPOINT+'translate/list_terminologies')
-      fetch(this.DATAPLANE_API_ENDPOINT + 'translate/list_terminologies', {
-        method: 'get',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-            })
-        ).then(res => {
-          this.customTerminologyList = res.data['TerminologyPropertiesList'].map( terminology => {
+      
+      let apiName = 'mieWorkflowApi'
+      let path = 'translate/list_terminologies'
+      const vm = this;
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.customTerminologyList  = response.data['TerminologyPropertiesList'].map(terminology => {
             return {
               'Name': terminology.Name,
               'SourceLanguageCode': terminology.SourceLanguageCode,
               'TargetLanguageCodes': terminology.TargetLanguageCodes
             }
           })
-        })
-      )
+        
+      } catch (error) {
+        alert(
+          "ERROR: Failed to start workflow. Check Workflow API logs."
+        );
+        console.log(error)
+      }
     },
     fileAdded: function( file )
     {
@@ -989,24 +988,19 @@ export default {
       }
     },
     listVocabulariesRequest: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      console.log("List vocabularies request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.DATAPLANE_API_ENDPOINT+'/transcribe/list_vocabularies')
-      fetch(this.DATAPLANE_API_ENDPOINT + '/transcribe/list_vocabularies', {
-        method: 'get',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-            })
-        ).then(res => {
-          this.customVocabularyList = res.data["Vocabularies"].map(({VocabularyName, VocabularyState, LanguageCode}) => ({
+      
+      let apiName = 'mieWorkflowApi'
+      let path = 'transcribe/list_vocabularies'
+      const vm = this;
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.customVocabularyList = response.data["Vocabularies"].map(({VocabularyName, VocabularyState, LanguageCode}) => ({
             name: VocabularyName,
             status: VocabularyState,
             language_code: LanguageCode,
@@ -1026,8 +1020,14 @@ export default {
               this.vocab_status_polling = null
             }
           }
-        })
-      )
+
+        
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
   }
 };

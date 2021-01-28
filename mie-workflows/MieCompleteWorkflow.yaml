@@ -59,7 +59,7 @@ Resources:
       Name: "defaultAudioStage"
       Operations:
         - Fn::ImportValue:
-            Fn::Sub: "${OperatorLibraryStack}:Transcribe"
+            Fn::Sub: "${OperatorLibraryStack}:TranscribeVideo"
 
   defaultTextStage:
     Type: Custom::CustomResource

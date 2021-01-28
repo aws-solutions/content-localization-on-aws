@@ -14,7 +14,7 @@ dataplane_bucket = os.environ['DataplaneBucket']
 s3 = boto3.client('s3')
 
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
-supported_operators = ["textdetection", "mediainfo", "transcribe", "translate", "webcaptions","genericdatalookup", "labeldetection", "celebrityrecognition", "facesearch", "contentmoderation", "facedetection", "key_phrases", "entities", "key_phrases"]
+supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo",  "translate", "webcaptions","genericdatalookup", "labeldetection", "celebrityrecognition", "facesearch", "contentmoderation", "facedetection", "key_phrases", "entities", "key_phrases"]
 
 
 def normalize_confidence(confidence_value):
@@ -518,15 +518,17 @@ def process_webcaptions(asset, workflow, results, language_code):
     es = connect_es(es_endpoint)
     index_document(es, asset, metadata_type, webcaptions)
 
-def process_transcribe(asset, workflow, results):
+def process_transcribe(asset, workflow, results, type):
     metadata = json.loads(results)
 
     transcript = metadata["results"]["transcripts"][0]
     transcript["workflow"] = workflow
     transcript_time = metadata["results"]["items"]
 
+    index_name = type+"transcript"
     es = connect_es(es_endpoint)
-    index_document(es, asset, "transcript", transcript)
+    index_document(es, asset, index_name, transcript)
+
 
     transcribe_items = []
 
@@ -547,7 +549,7 @@ def process_transcribe(asset, workflow, results):
 
         transcribe_items.append(item)
 
-    bulk_index(es, asset, "transcriptiontime", transcribe_items)
+    bulk_index(es, asset, index_name, transcribe_items)
 
 
 def process_entities(asset, workflow, results):
@@ -787,8 +789,10 @@ def lambda_handler(event, context):
                     # Route event to process method based on the operator type in the event.
                     # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
                     if operator in supported_operators:
-                        if operator == "transcribe":
-                            process_transcribe(asset_id, workflow, metadata["Results"])
+                        if operator == "transcribevideo":
+                            process_transcribe(asset_id, workflow, metadata["Results"], "video")
+                        if operator == "transcribeaudio":
+                            process_transcribe(asset_id, workflow, metadata["Results"], "audio")
                         if operator == "translate":
                             process_translate(asset_id, workflow, metadata["Results"])
                         if operator == "webcaptions":

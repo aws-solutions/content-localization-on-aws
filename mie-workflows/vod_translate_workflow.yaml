@@ -30,7 +30,7 @@ Resources:
       Name: "TranscribeStageTT"
       Operations:
         - Fn::ImportValue:
-            Fn::Sub: "${OperatorLibraryStack}:Transcribe"
+            Fn::Sub: "${OperatorLibraryStack}:TranscribeVideo"
   WebCaptionsStageT:
     Type: Custom::CustomResource
     Properties:

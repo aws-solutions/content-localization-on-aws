@@ -577,7 +577,7 @@ export default {
       });
       console.log("List terminologies request:")
       console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.DATAPLANE_API_ENDPOINT+'translate/list_terminologies')
-      fetch(this.DATAPLANE_API_ENDPOINT + 'translate/list_terminologies', {
+      fetch(this.DATAPLANE_API_ENDPOINT + 'service/translate/list_terminologies', {
         method: 'get',
         mode: 'cors',
         headers: {
@@ -1190,8 +1190,8 @@ export default {
       });
       const csv = this.customTerminologyCSV
       console.log("Create terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name": "'+this.customTerminologyName+'", "terminology_csv": '+JSON.stringify(csv)+'}\' '+this.DATAPLANE_API_ENDPOINT+'translate/create_terminology')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'translate/create_terminology',{
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name": "'+this.customTerminologyName+'", "terminology_csv": '+JSON.stringify(csv)+'}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/create_terminology')
+      await fetch(this.DATAPLANE_API_ENDPOINT+'service/translate/create_terminology',{
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': token},
         body: JSON.stringify({"terminology_name": this.customTerminologyName, "terminology_csv": csv})
@@ -1229,8 +1229,8 @@ export default {
       this.$refs['delete-terminology-modal'].hide()
       this.$refs['terminology-modal'].hide()
       console.log("Delete terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"terminology_name":"'+customTerminologyName+'}\' '+this.DATAPLANE_API_ENDPOINT+'translate/delete_terminology')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'translate/delete_terminology',{
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"terminology_name":"'+customTerminologyName+'}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/delete_terminology')
+      await fetch(this.DATAPLANE_API_ENDPOINT+'service/translate/delete_terminology',{
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': token},
         body: JSON.stringify({"terminology_name":customTerminologyName})
@@ -1267,8 +1267,8 @@ export default {
         return data.getIdToken().getJwtToken();
       });
       console.log("Get terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name":"'+this.customTerminologySelected+'"}\' '+this.DATAPLANE_API_ENDPOINT+'translate/download_terminology')
-      fetch(this.DATAPLANE_API_ENDPOINT + 'translate/download_terminology', {
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name":"'+this.customTerminologySelected+'"}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/download_terminology')
+      fetch(this.DATAPLANE_API_ENDPOINT + 'service/translate/download_terminology', {
         method: 'post',
         body: JSON.stringify({"terminology_name":this.customTerminologySelected}),
         headers: {

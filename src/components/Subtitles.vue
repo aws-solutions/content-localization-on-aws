@@ -492,8 +492,8 @@ export default {
         });
         console.log("Getting failed vocabulary details for " + this.customVocabularySelected)
         console.log("Get vocabulary request:")
-        console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \'' + token + '\' --data \'{"vocabulary_name":"' + this.customVocabularySelected + '}\' ' + this.DATAPLANE_API_ENDPOINT + '/transcribe/get_vocabulary')
-        fetch(this.DATAPLANE_API_ENDPOINT + '/transcribe/get_vocabulary', {
+        console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \'' + token + '\' --data \'{"vocabulary_name":"' + this.customVocabularySelected + '}\' ' + this.WORKFLOW_API_ENDPOINT + '/service/transcribe/get_vocabulary')
+        fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/get_vocabulary', {
           method: 'POST',
           headers: {'Content-Type': 'application/json', 'Authorization': token},
           body: JSON.stringify({"vocabulary_name": this.customVocabularySelected})
@@ -795,8 +795,8 @@ export default {
       this.customVocabularySaved = []
       this.customVocabularyFailedReason = ""
       console.log("Get vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"vocabulary_name":"'+this.customVocabularySelected+'"}\' '+this.DATAPLANE_API_ENDPOINT+'/transcribe/download_vocabulary')
-      fetch(this.DATAPLANE_API_ENDPOINT + '/transcribe/download_vocabulary', {
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"vocabulary_name":"'+this.customVocabularySelected+'"}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/download_vocabulary')
+      fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/download_vocabulary', {
         method: 'post',
         mode: 'cors',
         body: JSON.stringify({"vocabulary_name":this.customVocabularySelected}),
@@ -947,8 +947,8 @@ export default {
         return data.getIdToken().getJwtToken();
       });
       console.log("List vocabularies request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.DATAPLANE_API_ENDPOINT+'/transcribe/list_vocabularies')
-      fetch(this.DATAPLANE_API_ENDPOINT + '/transcribe/list_vocabularies', {
+      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.WORKFLOW_API_ENDPOINT+'/transcribe/list_vocabularies')
+      fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/list_vocabularies', {
         method: 'get',
         mode: 'cors',
         headers: {
@@ -992,8 +992,8 @@ export default {
       }
       this.$refs['delete-vocab-modal'].hide()
       console.log("Delete vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"vocabulary_name":"'+customVocabularyName+'}\' '+this.DATAPLANE_API_ENDPOINT+'/transcribe/delete_vocabulary')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'/transcribe/delete_vocabulary',{
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"vocabulary_name":"'+customVocabularyName+'}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/delete_vocabulary')
+      await fetch(this.WORKFLOW_API_ENDPOINT+'/service/transcribe/delete_vocabulary',{
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': token},
         body: JSON.stringify({"vocabulary_name":customVocabularyName})
@@ -1039,8 +1039,8 @@ export default {
       }
       const s3uri = "s3://"+this.DATAPLANE_BUCKET+"/"+customVocabularyName
       console.log("Create vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"s3uri":'+s3uri+', "vocabulary_name":'+customVocabularyName+', "language_code": '+this.transcribe_language_code+'}\' '+this.DATAPLANE_API_ENDPOINT+'/transcribe/create_vocabulary')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'/transcribe/create_vocabulary',{
+      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"s3uri":'+s3uri+', "vocabulary_name":'+customVocabularyName+', "language_code": '+this.transcribe_language_code+'}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/create_vocabulary')
+      await fetch(this.WORKFLOW_API_ENDPOINT+'/service/transcribe/create_vocabulary',{
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Authorization': token},
         body: JSON.stringify({"s3uri": s3uri, "vocabulary_name":customVocabularyName, "language_code": this.vocabulary_language_code})

@@ -281,6 +281,72 @@
           this.getAssetMetadata();
       },
     methods: {
+      async getVttCaptions(token) {
+
+        let asset_id = this.$route.params.asset_id;
+        let apiName = 'mieDataplaneApi';
+        let path = 'metadata/' + asset_id + '/WebToVTTCaptions';
+        let requestOpts = {
+          response: true,
+        };
+
+        if (this.mediaType !== "video") {
+          return;
+        }
+
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+          let captions_collection = [];
+
+          if (response.data.results) {
+            this.num_caption_tracks = res.data.results.CaptionsCollection.length;
+
+            for (const item of response.data.results.CaptionsCollection) {
+    
+              // TODO: map the language code to a language label
+
+              const bucket = item.Results.S3Bucket;
+              const key = item.Results.S3Key;
+              // get URL to captions file in S3
+
+              let apiName = 'mieDataplaneApi';
+              let path = 'metadata/' + asset_id + '/download';
+              let requestOpts = {
+                response: true,
+              };
+              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
+              let apiParams = {
+                headers: {'Content-Type': 'application/json'},
+                body: body_string,
+                queryStringParameters: {'q': query, '_source': 'AssetId'}
+              };
+
+              try {
+                let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+                
+              } catch (error) {
+                alert(error)
+                console.log(error)
+              }
+
+              if (response.data) {
+                captions_collection.push({'src': response.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+              }
+            };
+
+            this.videoOptions.captions = captions_collection;
+          } else {
+            this.videoOptions.captions = []
+          }
+          
+        } catch (error) {
+          alert(error)
+          console.log(error)
+        }
+
+        this.updateAssetId();
+      },
       async getAssetMetadata () {
         let asset_id = this.$route.params.asset_id;
         let apiName = 'mieDataplaneApi';
@@ -342,52 +408,8 @@
           alert(error)
         }
       },
-      getVttCaptions: async function (token) {
-        if (this.mediaType !== "video") {
-          return;
-        }
-        const asset_id = this.$route.params.asset_id;
-        fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/WebToVTTCaptions', {
-          method: 'get',
-          headers: {
-            'Authorization': token
-          }
-        }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-            let captions_collection = [];
-            if (res.data.results) {
-              this.num_caption_tracks = res.data.results.CaptionsCollection.length;
-              res.data.results.CaptionsCollection.forEach(item => {
-                // TODO: map the language code to a language label
-                const bucket = item.Results.S3Bucket;
-                const key = item.Results.S3Key;
-                // get URL to captions file in S3
-                fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-                  method: 'POST',
-                  mode: 'cors',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token
-                  },
-                  body: JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-                }).then(data => {
-                  data.text().then((data) => {
-                    captions_collection.push({'src': data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-                  }).catch(err => console.error(err));
-                })
-              });
-              this.videoOptions.captions = captions_collection
-            } else {
-              this.videoOptions.captions = []
-            }
-          })
-        });
-      },
-    updateAssetId () {
-      this.$store.commit('updateAssetId', this.$route.params.asset_id);
+      updateAssetId () {
+        this.$store.commit('updateAssetId', this.$route.params.asset_id);
       }
     }
   }

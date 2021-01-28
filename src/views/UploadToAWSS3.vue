@@ -597,7 +597,7 @@ export default {
             }
           },
           "defaultAudioStage2": {
-            "Transcribe": {
+            "TranscribeVideo": {
               "MediaType": "Audio",
               "Enabled": this.enabledOperators.includes("Transcribe"),
               "TranscribeLanguage": this.transcribeLanguage,
@@ -919,7 +919,7 @@ export default {
     listTerminologiesRequest: async function () {
       
       let apiName = 'mieWorkflowApi'
-      let path = 'translate/list_terminologies'
+      let path = 'service/translate/list_terminologies'
       const vm = this;
       let requestOpts = {
           headers: {
@@ -990,7 +990,7 @@ export default {
     listVocabulariesRequest: async function () {
       
       let apiName = 'mieWorkflowApi'
-      let path = 'transcribe/list_vocabularies'
+      let path = 'service/transcribe/list_vocabularies'
       const vm = this;
       let requestOpts = {
           headers: {

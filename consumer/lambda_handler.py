@@ -14,10 +14,9 @@ dataplane_bucket = os.environ['DataplaneBucket']
 s3 = boto3.client('s3')
 
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
-supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo",  "translate", "webcaptions","genericdatalookup", "labeldetection", "celebrityrecognition", "facesearch", "contentmoderation", "facedetection", "key_phrases", "entities", "key_phrases"]
+supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "face_search", "contentmoderation", "facedetection", "key_phrases", "entities", "webcaptions", "shotdetection", "technicalcuedetection"]
 
-
-def normalize_confidence(confidence_value):
+def normalize_confidence(confidence_value):  
     converted = float(confidence_value) * 100
     return str(converted)
 
@@ -36,16 +35,24 @@ def process_text_detection(asset, workflow, results):
         for page in metadata:
             if len(page["TextDetections"]) > 0:
                 for item in page["TextDetections"]:
-                    try:
-                        text_detection = item["TextDetection"]
-                        text_detection["Timestamp"] = item["Timestamp"]
-                        text_detection["Operator"] = "textDetection"
-                        text_detection["Workflow"] = workflow
-                        # Flatten the bbox Label array
-                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
-                        del text_detection["Geometry"]
-                        print(text_detection)
-                        extracted_items.append(text_detection)
+                    try:# Handle text detection schema for videos
+                        text_detection["Timestamp"] = item["Timestamp"]	                        if "TextDetection" in item:
+                        text_detection["Operator"] = "textDetection"	                            text_detection = item["TextDetection"]
+                        text_detection["Workflow"] = workflow	                            text_detection["Timestamp"] = item["Timestamp"]
+                        # Flatten the bbox Label array	                            text_detection["Operator"] = "textDetection"
+                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]	                            text_detection["Workflow"] = workflow
+                        del text_detection["Geometry"]	                            # Flatten the bbox Label array
+                        print(text_detection)	                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
+                        extracted_items.append(text_detection)	                            del text_detection["Geometry"]
+                            print(text_detection)
+                            extracted_items.append(text_detection)
+                        # Handle text detection schema for images
+                        else:
+                            text_detection = item
+                            text_detection["Operator"] = "textDetection"
+                            text_detection["Workflow"] = workflow
+                            print(text_detection)
+                            extracted_items.append(text_detection)
                     except KeyError as e:
                         print("KeyError: " + str(e))
                         print("Item: " + json.dumps(item))
@@ -54,14 +61,24 @@ def process_text_detection(asset, workflow, results):
         if len(metadata["TextDetections"]) > 0:
                 for item in metadata["TextDetections"]:
                     try:
-                        text_detection = item["TextDetection"]
-                        text_detection["Timestamp"] = item["Timestamp"]
-                        text_detection["Operator"] = "textDetection"
-                        text_detection["Workflow"] = workflow
-                        # Flatten the bbox Label array
-                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
-                        del text_detection["Geometry"]
-                        extracted_items.append(text_detection)
+                        # Handle text detection schema for videos
+                        text_detection["Timestamp"] = item["Timestamp"]	                        if "TextDetection" in item:
+                        text_detection["Operator"] = "textDetection"	                            text_detection = item["TextDetection"]
+                        text_detection["Workflow"] = workflow	                            text_detection["Timestamp"] = item["Timestamp"]
+                        # Flatten the bbox Label array	                            text_detection["Operator"] = "textDetection"
+                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]	                            text_detection["Workflow"] = workflow
+                        del text_detection["Geometry"]	                            # Flatten the bbox Label array
+                        extracted_items.append(text_detection)	                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
+                            del text_detection["Geometry"]
+                            print(text_detection)
+                            extracted_items.append(text_detection)
+                        # Handle text detection schema for images
+                        else:
+                            text_detection = item
+                            text_detection["Operator"] = "textDetection"
+                            text_detection["Workflow"] = workflow
+                            print(text_detection)
+                            extracted_items.append(text_detection)
                     except KeyError as e:
                         print("KeyError: " + str(e))
                         print("Item: " + json.dumps(item))
@@ -226,7 +243,7 @@ def process_face_search(asset, workflow, results):
         for page in metadata:
             if "Persons" in page:
                 for item in page["Persons"]:
-                    item["Operator"] = "faceSearch"
+                    item["Operator"] = "face_search"
                     item["Workflow"] = workflow
                     # flatten person key
                     item["PersonIndex"] = item["Person"]["Index"]
@@ -259,7 +276,7 @@ def process_face_search(asset, workflow, results):
     else:
         if "Persons" in metadata:
             for item in metadata["Persons"]:
-                item["Operator"] = "faceSearch"
+                item["Operator"] = "face_search"
                 item["Workflow"] = workflow
                 # flatten person key
                 item["PersonIndex"] = item["Person"]["Index"]
@@ -500,6 +517,111 @@ def process_label_detection(asset, workflow, results):
                     print("Item: " + json.dumps(item))
     bulk_index(es, asset, "labels", extracted_items)
 
+def process_technical_cue_detection(asset, workflow, results):
+    metadata = json.loads(results)
+    es = connect_es(es_endpoint)
+    extracted_items = []
+    # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
+    if isinstance(metadata, list):
+        # handle paged results
+        for page in metadata:
+            if "Segments" in page:
+                for item in page["Segments"]:
+                    try:
+                        item["Operator"] = "technical_cue_detection"
+                        item["Workflow"] = workflow
+                        if "TechnicalCueSegment" in item:
+                            item["Confidence"] = item["TechnicalCueSegment"]["Confidence"]
+                            item["Type"] = item["TechnicalCueSegment"]["Type"]
+
+                            del item["TechnicalCueSegment"]
+
+                            item["StartTimestamp"] = item["StartTimestampMillis"]
+                            item["EndTimestamp"] = item["EndTimestampMillis"]
+
+                            del item["StartTimestampMillis"]
+                            del item["EndTimestampMillis"]
+                        extracted_items.append(item)
+                    except KeyError as e:
+                        print("KeyError: " + str(e))
+                        print("Item: " + json.dumps(item))
+    else:
+        # these results are not paged
+        if "Segments" in metadata:
+            for item in metadata["Segments"]:
+                try:
+                    item["Operator"] = "technical_cue_detection"
+                    item["Workflow"] = workflow
+                    if "TechnicalCueSegment" in item:
+                        item["Confidence"] = item["TechnicalCueSegment"]["Confidence"]
+                        item["Type"] = item["TechnicalCueSegment"]["Type"]
+
+                        del item["TechnicalCueSegment"]
+
+                        item["StartTimestamp"] = item["StartTimestampMillis"]
+                        item["EndTimestamp"] = item["EndTimestampMillis"]
+
+                        del item["StartTimestampMillis"]
+                        del item["EndTimestampMillis"]
+                    extracted_items.append(item)
+                except KeyError as e:
+                    print("KeyError: " + str(e))
+                    print("Item: " + json.dumps(item))
+    bulk_index(es, asset, "technical_cues", extracted_items)
+
+
+def process_shot_detection(asset, workflow, results):
+    metadata = json.loads(results)
+    es = connect_es(es_endpoint)
+    extracted_items = []
+    # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
+    if isinstance(metadata, list):
+        # handle paged results
+        for page in metadata:
+            if "Segments" in page:
+                for item in page["Segments"]:
+                    try:
+                        item["Operator"] = "shot_detection"
+                        item["Workflow"] = workflow
+                        if "ShotSegment" in item:
+                            item["Confidence"] = item["ShotSegment"]["Confidence"]
+                            item["Index"] = item["ShotSegment"]["Index"]
+
+                            del item["ShotSegment"]
+
+                            item["StartTimestamp"] = item["StartTimestampMillis"]
+                            item["EndTimestamp"] = item["EndTimestampMillis"]
+
+                            del item["StartTimestampMillis"]
+                            del item["EndTimestampMillis"]
+                        extracted_items.append(item)
+                    except KeyError as e:
+                        print("KeyError: " + str(e))
+                        print("Item: " + json.dumps(item))
+    else:
+        # these results are not paged
+        if "Segments" in metadata:
+            for item in metadata["Segments"]:
+                try:
+                    item["Operator"] = "shot_detection"
+                    item["Workflow"] = workflow
+                    if "ShotSegment" in item:
+                        item["Confidence"] = item["ShotSegment"]["Confidence"]
+                        item["Index"] = item["ShotSegment"]["Index"]
+
+                        del item["ShotSegment"]
+
+                        item["StartTimestamp"] = item["StartTimestampMillis"]
+                        item["EndTimestamp"] = item["EndTimestampMillis"]
+
+                        del item["StartTimestampMillis"]
+                        del item["EndTimestampMillis"]
+                    extracted_items.append(item)
+                except KeyError as e:
+                    print("KeyError: " + str(e))
+                    print("Item: " + json.dumps(item))
+    bulk_index(es, asset, "shots", extracted_items)
+
 
 def process_translate(asset, workflow, results):
     metadata = json.loads(results)
@@ -569,7 +691,8 @@ def process_entities(asset, workflow, results):
         entity["Confidence"] = confidence
 
         entity["Workflow"] = workflow
-
+        entity["Operator"] = "entities"
+        
         del entity["Type"]
         del entity["Text"]
         del entity["Score"]
@@ -595,6 +718,7 @@ def process_keyphrases(asset, workflow, results):
         phrase["Confidence"] = confidence
 
         phrase["Workflow"] = workflow
+        phrase["Operator"] = "key_phrases"
 
         del phrase["Text"]
         del phrase["Score"]
@@ -809,7 +933,7 @@ def lambda_handler(event, context):
                             process_content_moderation(asset_id, workflow, metadata["Results"])
                         if operator == "facedetection":
                             process_face_detection(asset_id, workflow, metadata["Results"])
-                        if operator == "facesearch":
+                        if operator == "face_search":
                             process_face_search(asset_id, workflow, metadata["Results"])
                         if operator == "entities":
                             process_entities(asset_id, workflow, metadata["Results"])
@@ -817,6 +941,10 @@ def lambda_handler(event, context):
                             process_keyphrases(asset_id, workflow, metadata["Results"])
                         if operator == "textdetection":
                             process_text_detection(asset_id, workflow, metadata["Results"])
+                        if operator == "shotdetection":
+                            process_shot_detection(asset_id, workflow, metadata["Results"])
+                        if operator == "technicalcuedetection":
+                            process_technical_cue_detection(asset_id, workflow, metadata["Results"])
                     else:
                         print("We do not store {operator} results".format(operator=operator))
                 else:

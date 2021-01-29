@@ -50,6 +50,14 @@
                             title="Words"
                             @click="currentView = 'TextDetection'"
                           />
+                          <b-tab
+                            title="Cues"
+                            @click="currentView = 'TechnicalCues'"
+                          />
+                          <b-tab
+                            title="Shots"
+                            @click="currentView = 'ShotDetection'"
+                          />
                         </b-tabs>
                       </div>
                     </b-row>
@@ -114,12 +122,18 @@
             </div>
             <div v-else>
               <VideoPlayer :options="videoOptions" />
-            </div>
-            <div v-if="currentView === 'Transcript' || currentView === 'Subtitles' || currentView === 'Translation' || currentView === 'KeyPhrases' || currentView === 'Entities'">
-              <Waveform />
-            </div>
-            <div v-else>
-              <LineChart />
+              <div v-if="currentView === 'Transcript' || currentView === 'Subtitles' || currentView === 'Translation' || currentView === 'KeyPhrases' || currentView === 'Entities'">
+                <Waveform />
+              </div>
+              <div v-else-if="currentView === 'ShotDetection'">
+                <br>
+              </div>
+              <div v-else-if="currentView === 'TechnicalCues'">
+                <br>
+              </div>
+              <div v-else>
+                <LineChart />
+              </div>
             </div>
           </div>
           <div>
@@ -128,6 +142,7 @@
                 :s3Uri="s3_uri"
                 :filename="filename"
                 :videoUrl="videoOptions.sources[0].src"
+                :mediaType="mediaType"
               />
             </b-row>
           </div>
@@ -180,6 +195,22 @@
         component: new Promise(function(resolve) {
           setTimeout(function() {
             resolve(import('@/components/TextDetection.vue'));
+        }, 1000);
+        }),
+        loading: Loading,
+      }),
+      TechnicalCues: () => ({
+        component: new Promise(function(resolve) {
+          setTimeout(function() {
+            resolve(import('@/components/TechnicalCues.vue'));
+        }, 1000);
+        }),
+        loading: Loading,
+      }),
+      ShotDetection: () => ({
+        component: new Promise(function(resolve) {
+          setTimeout(function() {
+            resolve(import('@/components/ShotDetection.vue'));
         }, 1000);
         }),
         loading: Loading,
@@ -384,7 +415,7 @@
         }
         if (this.mediaType === "video") {
           const media_key = (this.s3_uri.split(this.s3_uri.split("/")[2])[1].replace('/input/public/upload', ''))
-          const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp45";
+          const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp4";
           key = proxy_encode_key.replace("/", "")
         }
         const data = { "S3Bucket": bucket, "S3Key": key };

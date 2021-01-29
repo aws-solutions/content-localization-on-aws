@@ -5,8 +5,8 @@
     </div>
     <div v-if="isBusy">
       <b-spinner
-          variant="secondary"
-          label="Loading..."
+        variant="secondary"
+        label="Loading..."
       />
       <p class="text-muted">
         (Loading...)

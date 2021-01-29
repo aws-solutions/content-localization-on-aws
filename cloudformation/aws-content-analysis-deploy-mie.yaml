@@ -2,11 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: AWS Content Analysis - Deploys the AWS Content Analysis Application and the required Media Insights Engine Framework
 
 Parameters:
-  MieVersion:
-    Type: String
-    Description: The version of the Media Insights Engine framework to deploy
-    Default: "v1.0.0"
-    AllowedValues: ["v1.0.0"]
   AdminEmail:
     Description: Email address of the Content Analysis Administrator
     Type: String
@@ -22,15 +17,11 @@ Parameters:
       - "c4.xlarge.elasticsearch"
       - "r4.large.elasticsearch"
       - "r4.xlarge.elasticsearch"
-  DeployTestWorkflow:
-    Description: Deploy test workflow which contains operator, stage, and workflow stubs for integration testing
-    Type: String
-    Default: No
-    AllowedValues:
-      - Yes
-      - No
 
 Mappings:
+  MediaInsightsEngine:
+  Release:
+    Version: "v2.0.2"
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
@@ -41,7 +32,7 @@ Mappings:
 Resources:
   # Deploy MIE Framework
 
-  MediaInsightsFrameworkStack:
+  MieStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
@@ -53,11 +44,17 @@ Resources:
           - !Ref AWS::Region
           - ".amazonaws.com/"
           - "media_insights_engine/"
-          - !Ref MieVersion
+          - !FindInMap
+            - MediaInsightsEngine
+            - Release
+            - Version
           - "/cf"
           - "/media-insights-stack.template"
       Parameters:
-        DeployTestWorkflow: !Ref DeployTestWorkflow
+        DeployAnalyticsPipeline: Yes
+        DeployTestResources: No
+        MaxConcurrentWorkflows: 5
+        EnableXrayTrace: Yes
 
   # Deploy Elasticsearch
 
@@ -80,8 +77,8 @@ Resources:
             - TemplateKeyPrefix
           - "/aws-content-analysis-elasticsearch.template"
       Parameters:
-        AnalyticsStreamArn: !GetAtt MediaInsightsFrameworkStack.Outputs.AnalyticsStreamArn
-        MieDataplaneBucket: !GetAtt MediaInsightsFrameworkStack.Outputs.DataplaneBucket
+        AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
+        MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
 
   # Deploy Auth stack
 
@@ -105,10 +102,10 @@ Resources:
           - "/aws-content-analysis-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
-        WorkflowAPIRestID: !GetAtt MediaInsightsFrameworkStack.Outputs.WorkflowApiRestID
-        DataplaneAPIRestID: !GetAtt MediaInsightsFrameworkStack.Outputs.DataplaneApiRestID
+        WorkflowAPIRestID: !GetAtt MieStack.Outputs.WorkflowApiRestID
+        DataplaneAPIRestID: !GetAtt MieStack.Outputs.DataplaneApiRestID
         ElasticDomainArn: !GetAtt ContentAnalysisElasticsearchStack.Outputs.DomainArn
-        DataplaneBucket: !GetAtt MediaInsightsFrameworkStack.Outputs.DataplaneBucket
+        DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
 
   ContentAnalysisWebStack:
     Type: "AWS::CloudFormation::Stack"
@@ -130,10 +127,10 @@ Resources:
             - TemplateKeyPrefix
           - "/aws-content-analysis-web.template"
       Parameters:
-        DataplaneEndpoint: !GetAtt MediaInsightsFrameworkStack.Outputs.DataplaneApiEndpoint
-        WorkflowEndpoint: !GetAtt MediaInsightsFrameworkStack.Outputs.WorkflowApiEndpoint
+        DataplaneEndpoint: !GetAtt MieStack.Outputs.DataplaneApiEndpoint
+        WorkflowEndpoint: !GetAtt MieStack.Outputs.WorkflowApiEndpoint
         ElasticEndpoint: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
-        DataplaneBucket: !GetAtt MediaInsightsFrameworkStack.Outputs.DataplaneBucket
+        DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         UserPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolId
         IdentityPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
         PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
@@ -161,11 +158,11 @@ Resources:
       Parameters:
         WorkflowCustomResourceArn:
           Fn::GetAtt:
-            - MediaInsightsFrameworkStack
+            - MieStack
             - Outputs.WorkflowCustomResourceArn
         OperatorLibraryStack:
           Fn::GetAtt:
-            - MediaInsightsFrameworkStack
+            - MieStack
             - Outputs.OperatorLibraryStack
 
   # Deploy image workflow
@@ -191,11 +188,11 @@ Resources:
       Parameters:
         WorkflowCustomResourceArn:
           Fn::GetAtt:
-            - MediaInsightsFrameworkStack
+            - MieStack
             - Outputs.WorkflowCustomResourceArn
         OperatorLibraryStack:
           Fn::GetAtt:
-            - MediaInsightsFrameworkStack
+            - MieStack
             - Outputs.OperatorLibraryStack
 
   # Custom resources

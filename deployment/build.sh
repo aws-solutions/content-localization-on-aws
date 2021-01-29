@@ -22,7 +22,7 @@
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     echo "Please provide the base source bucket name,  version where the lambda code will eventually reside and the region of the deploy."
     echo "USAGE: ./build.sh SOURCE-BUCKET VERSION REGION [PROFILE]"
-    echo "For example: ./build.sh mie01 v1.0.0 us-east-1 default"
+    echo "For example: ./build.sh mie01 2.0.0 us-east-1 default"
     exit 1
 fi
 
@@ -97,7 +97,7 @@ cp "$template_dir/aws-content-analysis-elasticsearch.yaml" "$dist_dir/aws-conten
 cp "$template_dir/aws-content-analysis-auth.yaml" "$dist_dir/aws-content-analysis-auth.template"
 cp "$template_dir/aws-content-analysis-web.yaml" "$dist_dir/aws-content-analysis-web.template"
 cp "$template_dir/aws-vod-subtitles-video-workflow.yaml" "$dist_dir/aws-vod-subtitles-video-workflow.template"
-
+cp "$template_dir/aws-content-analysis-image-workflow.yaml" "$dist_dir/aws-content-analysis-image-workflow.template"
 cp "$template_dir/string.yaml" "$dist_dir/string.template"
 
 

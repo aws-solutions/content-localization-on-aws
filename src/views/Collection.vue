@@ -2,10 +2,6 @@
   <div>
     <div class="headerTextBackground">
       <Header :is-collection-active="true" />
-      <b-modal ref="delete-confirmation-modal" ok-title="Confirm" ok-variant="danger" title="Delete Asset?" @ok="deleteAsset">
-        <p>Are you sure you want to permanently delete asset ID <b>{{ delete_asset_id }}</b>?</p>
-      </b-modal>
-
       <b-container fluid>
         <b-alert
           v-model="showElasticSearchAlert"
@@ -121,7 +117,7 @@
                     v-if="noAssets"
                   >
                     <p>
-                      Looks like no assets have been uploaded! Try uploading <a href="upload">here</a>
+                      Looks like no assets have been uploaded! Try uploading <a href="upload">here</a>.
                     </p>
                   </div>
                   <div
@@ -169,7 +165,6 @@
         showDataplaneAlert: false,
         showDeletedAlert: 0,
         noAssets: null,
-        delete_asset_id: "",
         currentPage: 1,
         perPage: 10,
         isBusy: false,

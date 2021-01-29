@@ -15,11 +15,9 @@
     "bad-words": "^3.0.3",
     "chart.js": "^2.9.3",
     "core-js": "^2.6.11",
-    "diff": "^4.0.2",
     "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
-    "number-to-words": "^1.2.4",
     "register-service-worker": "^1.6.2",
     "video.js": "^6.13.0",
     "videojs-flash": "2.1.0",
@@ -29,8 +27,7 @@
     "vue-router": "^2.8.1",
     "vue-video-player": "4.0.6",
     "vuex": "^3.1.2",
-    "vuex-persistedstate": "^2.7.1",
-    "wavesurfer.js": "^3.3.3"
+    "vuex-persistedstate": "^2.7.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.12.1",

@@ -22,7 +22,7 @@
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     echo "Please provide the base source bucket name,  version where the lambda code will eventually reside and the region of the deploy."
     echo "USAGE: ./build.sh SOURCE-BUCKET VERSION REGION [PROFILE]"
-    echo "For example: ./build.sh mie01 v1.0.0 us-east-1 default"
+    echo "For example: ./build.sh mie01 2.0.0 us-east-1 default"
     exit 1
 fi
 
@@ -48,7 +48,6 @@ if [ "$region" != "us-east-1" ] &&
    echo "ERROR. Rekognition operatorions are not supported in region $region"
    exit 1
 fi
-
 
 # Setup deployment variables
 template_dir="../cloudformation"
@@ -92,11 +91,12 @@ echo "--------------------------------------------------------------------------
 echo "Preparing template files:"
 
 cp "$template_dir/aws-content-analysis-deploy-mie.yaml" "$dist_dir/aws-content-analysis-deploy-mie.template"
-cp "$template_dir/aws-vod-subtitles.yaml" "$dist_dir/aws-vod-subtitles.template"
+cp "$template_dir/aws-content-analysis.yaml" "$dist_dir/aws-content-analysis.template"
 cp "$template_dir/aws-content-analysis-elasticsearch.yaml" "$dist_dir/aws-content-analysis-elasticsearch.template"
 cp "$template_dir/aws-content-analysis-auth.yaml" "$dist_dir/aws-content-analysis-auth.template"
 cp "$template_dir/aws-content-analysis-web.yaml" "$dist_dir/aws-content-analysis-web.template"
-cp "$template_dir/aws-vod-subtitles-video-workflow.yaml" "$dist_dir/aws-vod-subtitles-video-workflow.template"
+cp "$template_dir/aws-content-analysis-video-workflow.yaml" "$dist_dir/aws-content-analysis-video-workflow.template"
+cp "$template_dir/aws-content-analysis-image-workflow.yaml" "$dist_dir/aws-content-analysis-image-workflow.template"
 
 cp "$template_dir/string.yaml" "$dist_dir/string.template"
 
@@ -113,8 +113,8 @@ new_version="s/%%VERSION%%/$version/g"
 sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-analysis-deploy-mie.template"
 sed -i.orig -e "$new_version" "$dist_dir/aws-content-analysis-deploy-mie.template"
 
-sed -i.orig -e "$new_bucket" "$dist_dir/aws-vod-subtitles.template"
-sed -i.orig -e "$new_version" "$dist_dir/aws-vod-subtitles.template"
+sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-analysis.template"
+sed -i.orig -e "$new_version" "$dist_dir/aws-content-analysis.template"
 
 sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-analysis-elasticsearch.template"
 sed -i.orig -e "$new_version" "$dist_dir/aws-content-analysis-elasticsearch.template"
@@ -132,7 +132,7 @@ echo "--------------------------------------------------------------------------
 
 echo "Building Elasticsearch Consumer function"
 cd "$consumer_dir" || exit 1
-pwd
+
 [ -e dist ] && rm -r dist
 mkdir -p dist
 [ -e package ] && rm -r package
@@ -153,7 +153,6 @@ fi
 zip -q -r9 ../dist/esconsumer.zip .
 popd || exit 1
 
-
 zip -q -g dist/esconsumer.zip ./*.py
 cp "./dist/esconsumer.zip" "$dist_dir/esconsumer.zip"
 
@@ -167,7 +166,6 @@ cd "$helper_dir" || exit 1
 mkdir -p dist
 zip -q -g ./dist/websitehelper.zip ./website_helper.py
 cp "./dist/websitehelper.zip" "$dist_dir/websitehelper.zip"
-
 
 echo "------------------------------------------------------------------------------"
 echo "Website"
@@ -191,24 +189,24 @@ echo "Copying the prepared distribution to S3..."
 for file in "$dist_dir"/*.zip
 do
   if [ -n "$profile" ]; then
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/code/ --profile "$profile"
+    aws s3 cp "$file" s3://"$bucket"/content-analysis-solution/"$version"/code/ --profile "$profile"
   else
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/code/
+    aws s3 cp "$file" s3://"$bucket"/content-analysis-solution/"$version"/code/
   fi
 done
 for file in "$dist_dir"/*.template
 do
   if [ -n "$profile" ]; then
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/cf/ --profile "$profile"
+    aws s3 cp "$file" s3://"$bucket"/content-analysis-solution/"$version"/cf/ --profile "$profile"
   else
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/cf/
+    aws s3 cp "$file" s3://"$bucket"/content-analysis-solution/"$version"/cf/
   fi
 done
-echo "Uploading the vod subtitles web app..."
+echo "Uploading the content analysis web app..."
 if [ -n "$profile" ]; then
-  aws s3 cp "$website_dist_dir" s3://"$bucket"/vod-subtitles-solution/"$version"/code/website --recursive --profile "$profile"
+  aws s3 cp "$website_dist_dir" s3://"$bucket"/content-analysis-solution/"$version"/code/website --recursive --profile "$profile"
 else
-  aws s3 cp "$website_dist_dir" s3://"$bucket"/vod-subtitles-solution/"$version"/code/website --recursive
+  aws s3 cp "$website_dist_dir" s3://"$bucket"/content-analysis-solution/"$version"/code/website --recursive
 fi
 
 echo "------------------------------------------------------------------------------"
@@ -227,9 +225,9 @@ echo ""
 echo "Templates to deploy:"
 echo ""
 echo "With existing MIE deployment:"
-echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles.template"'"
+echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/content-analysis-solution/"$version"/cf/aws-content-analysis.template"'"
 echo "Without existing MIE deployment:"
-echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles-deploy-mie.template"'"
+echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/content-analysis-solution/"$version"/cf/aws-content-analysis-deploy-mie.template"'"
 
 echo "------------------------------------------------------------------------------"
 echo "Done"

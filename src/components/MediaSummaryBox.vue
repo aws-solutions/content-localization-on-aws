@@ -68,10 +68,6 @@
                 <label>Encoded date:</label>
                 {{ encoded_date }}
               </div>
-              <div v-for="property in operator_info" :key="property.name">
-                <label>{{ property.name }}:</label>
-                {{ property.value }}
-              </div>
             </b-col>
           </b-row>
         </div>
@@ -81,8 +77,6 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-
   export default {
     name: 'MediaSummary',
     props: ['s3Uri','filename','videoUrl', 'mediaType'],
@@ -103,9 +97,6 @@
         encoded_date: "undefined",
         isBusy: false,
       }
-    },
-    computed: {
-      ...mapState(['operator_info']),
     },
     deactivated: function () {
       this.lineChart = Object
@@ -167,7 +158,7 @@
           if ("height" in track_data["Video"][0]) {
             this.height = track_data["Video"][0].height;
           }
-          
+
           if (track_data["Audio"].length > 0) {
             if ("other_bit_rate" in track_data["Audio"][0]) {
               this.other_bit_rate = track_data["Audio"][0].other_bit_rate[0];

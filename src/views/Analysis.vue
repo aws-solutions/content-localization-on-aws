@@ -50,6 +50,14 @@
                             title="Words"
                             @click="currentView = 'TextDetection'"
                           />
+                          <b-tab
+                            title="Cues"
+                            @click="currentView = 'TechnicalCues'"
+                          />
+                          <b-tab
+                            title="Shots"
+                            @click="currentView = 'ShotDetection'"
+                          />
                         </b-tabs>
                       </div>
                     </b-row>
@@ -68,10 +76,6 @@
                     <b-tab
                       title="Transcript"
                       @click="currentView = 'Transcript'"
-                    />
-                    <b-tab
-                      title="Subtitles"
-                      @click="currentView = 'Subtitles'"
                     />
                     <b-tab
                       title="Translation"
@@ -109,17 +113,20 @@
             </div>
           </div>
           <div v-else>
-            <div v-if="videoOptions.sources[0].src === '' || (videoOptions.captions.length > 0 && videoOptions.captions.length !== num_caption_tracks)">
+            <div v-if="videoOptions.sources[0].src === ''">
               <Loading />
             </div>
             <div v-else>
               <VideoPlayer :options="videoOptions" />
-            </div>
-            <div v-if="currentView === 'Transcript' || currentView === 'Subtitles' || currentView === 'Translation' || currentView === 'KeyPhrases' || currentView === 'Entities'">
-              <Waveform />
-            </div>
-            <div v-else>
-              <LineChart />
+              <div v-if="currentView === 'ShotDetection'">
+                <br>
+              </div>
+              <div v-else-if="currentView === 'TechnicalCues'">
+                <br>
+              </div>
+              <div v-else>
+                <LineChart />
+              </div>
             </div>
           </div>
           <div>
@@ -128,6 +135,7 @@
                 :s3Uri="s3_uri"
                 :filename="filename"
                 :videoUrl="videoOptions.sources[0].src"
+                :mediaType="mediaType"
               />
             </b-row>
           </div>
@@ -146,12 +154,10 @@
   import MediaSummaryBox from '@/components/MediaSummaryBox.vue'
   import LineChart from '@/components/LineChart.vue'
   import { mapState } from 'vuex'
-  import Waveform from "../components/Waveform";
 
   export default {
     name: 'Home',
     components: {
-      Waveform,
       Header,
       ComponentLoadingError,
       MediaSummaryBox,
@@ -184,6 +190,22 @@
         }),
         loading: Loading,
       }),
+      TechnicalCues: () => ({
+        component: new Promise(function(resolve) {
+          setTimeout(function() {
+            resolve(import('@/components/TechnicalCues.vue'));
+        }, 1000);
+        }),
+        loading: Loading,
+      }),
+      ShotDetection: () => ({
+        component: new Promise(function(resolve) {
+          setTimeout(function() {
+            resolve(import('@/components/ShotDetection.vue'));
+        }, 1000);
+        }),
+        loading: Loading,
+      }),
       ContentModeration: () => ({
         component: new Promise(function(resolve) {
           setTimeout(function() {
@@ -196,14 +218,6 @@
         component: new Promise(function(resolve) {
           setTimeout(function() {
             resolve(import('@/components/Transcript.vue'));
-        }, 1000);
-        }),
-        loading: Loading,
-      }),
-      Subtitles: () => ({
-        component: new Promise(function(resolve) {
-          setTimeout(function() {
-            resolve(import('@/components/Subtitles.vue'));
         }, 1000);
         }),
         loading: Loading,
@@ -253,7 +267,6 @@
         videoLoaded: false,
         supportedImageFormats: ["jpg", "jpeg", "tif", "tiff", "png", "gif"],
         mediaType: "",
-        num_caption_tracks: 0,
         videoOptions: {
           preload: 'auto',
           loop: true,
@@ -262,13 +275,6 @@
             {
               src: "",
               type: "video/mp4"
-            }
-          ],
-          captions: [
-            {
-              src: "",
-              lang: "",
-              label: ""
             }
           ]
         }
@@ -281,78 +287,11 @@
           this.getAssetMetadata();
       },
     methods: {
-      async getVttCaptions(token) {
-
-        let asset_id = this.$route.params.asset_id;
-        let apiName = 'mieDataplaneApi';
-        let path = 'metadata/' + asset_id + '/WebToVTTCaptions';
-        let requestOpts = {
-          response: true,
-        };
-
-        if (this.mediaType !== "video") {
-          return;
-        }
-
-        try {
-          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-
-          let captions_collection = [];
-
-          if (response.data.results) {
-            this.num_caption_tracks = res.data.results.CaptionsCollection.length;
-
-            for (const item of response.data.results.CaptionsCollection) {
-    
-              // TODO: map the language code to a language label
-
-              const bucket = item.Results.S3Bucket;
-              const key = item.Results.S3Key;
-              // get URL to captions file in S3
-
-              let apiName = 'mieDataplaneApi';
-              let path = 'metadata/' + asset_id + '/download';
-              let requestOpts = {
-                response: true,
-              };
-              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-              let apiParams = {
-                headers: {'Content-Type': 'application/json'},
-                body: body_string,
-                queryStringParameters: {'q': query, '_source': 'AssetId'}
-              };
-
-              try {
-                let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-                
-              } catch (error) {
-                alert(error)
-                console.log(error)
-              }
-
-              if (response.data) {
-                captions_collection.push({'src': response.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-              }
-            };
-
-            this.videoOptions.captions = captions_collection;
-          } else {
-            this.videoOptions.captions = []
-          }
-          
-        } catch (error) {
-          alert(error)
-          console.log(error)
-        }
-
-        this.updateAssetId();
-      },
       async getAssetMetadata () {
         let asset_id = this.$route.params.asset_id;
         let apiName = 'mieDataplaneApi';
         let path = 'metadata/' + asset_id;
         let requestOpts = {
-          headers: {'Content-Type': 'application/json'},
           response: true,
         };
         try {
@@ -384,7 +323,7 @@
         }
         if (this.mediaType === "video") {
           const media_key = (this.s3_uri.split(this.s3_uri.split("/")[2])[1].replace('/input/public/upload', ''))
-          const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp45";
+          const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp4";
           key = proxy_encode_key.replace("/", "")
         }
         const data = { "S3Bucket": bucket, "S3Key": key };
@@ -395,7 +334,6 @@
         let path = 'download'
         let requestOpts = {
           headers: {
-            'Content-Type': 'application/json'
           },
           body: data,
           response: true,
@@ -410,8 +348,8 @@
           alert(error)
         }
       },
-      updateAssetId () {
-        this.$store.commit('updateAssetId', this.$route.params.asset_id);
+    updateAssetId () {
+      this.$store.commit('updateAssetId', this.$route.params.asset_id);
       }
     }
   }

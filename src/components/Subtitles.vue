@@ -181,7 +181,7 @@ to highlight the fields in the custom vocab schema. -->
     <b-modal ref="save-modal" ok-title="Confirm" title="Save Captions?" @ok="saveCaptions()">
       <p>Saving captions will restart a workflow that can take several minutes. You will not be able to edit captions until it has finished. Are you ready to proceed?</p>
     </b-modal>
-    <b-modal ref="delete-vocab-modal" ok-title="Confirm" ok-variant="danger" title="Delete Vocabulary?" @ok="deleteVocabularyRequest(token=null, customVocabularyName=customVocabularySelected)">
+    <b-modal ref="delete-vocab-modal" ok-title="Confirm" ok-variant="danger" title="Delete Vocabulary?" @ok="deleteVocabularyRequest(customVocabularyName=customVocabularySelected)">
       <p>Are you sure you want to permanently delete the custom vocabulary <b>{{ customVocabularySelected }}</b>?</p>
     </b-modal>
 
@@ -716,17 +716,17 @@ export default {
     },
     getWorkflowId: async function() {
 
-      const asset_id = this.asset_id
+      let asset_id = this.asset_id
       let apiName = 'mieWorkflowApi'
-      let path = 'workflow/execution/asset/' + assetId
+      let path = 'workflow/execution/asset/' + asset_id
       let requestOpts = {
         response: true,
       };
+
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-
         const workflow_id = response.data[0].Id
-        let path = 'workflow/execution/asset/' + workflow_id
+        path = 'workflow/execution/asset/' + workflow_id
 
         let res = await this.$Amplify.API.get(apiName, path, requestOpts);
         
@@ -760,7 +760,7 @@ export default {
         console.log(error)
       }
     },
-    getTranscribeLanguage: async function(token) {
+    getTranscribeLanguage: async function() {
       let apiName = 'mieWorkflowApi'
       let path =  "workflow/execution/" + this.workflow_id
       let requestOpts = {
@@ -853,14 +853,14 @@ export default {
 
       try {
         let response = await this.$Amplify.API.put(apiName, path, requestOpts);
-        if (respose.status === 200) {
+        if (response.status === 200) {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
           }      
       } catch (error) {
         alert(
-          "ERROR: Failed to get vocabularies."
+          "ERROR: Failed to restart workflow."
         );
         console.log(error)
       }
@@ -905,9 +905,12 @@ export default {
       return data
 
     },
-    rerunWorkflow: async function (token) {
+    rerunWorkflow: async function () {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
+      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
+      data["Configuration"]["defaultPrelimVideoStage2"]["Thumbnail"].Enabled = true;
+
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'
       let requestOpts = {
@@ -918,14 +921,9 @@ export default {
           body: data,
           queryStringParameters: {} // optional
       };
-
-      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-      data["Configuration"]["defaultPrelimVideoStage2"]["Thumbnail"].Enabled = true;
       
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-        let asset_id = response.data.AssetId;
-        let wf_id = response.data.Id;
         //console.log("Media assigned asset id: " + asset_id);
         if (response.status !== 200) {
           console.log("ERROR: Failed to start workflow.");
@@ -987,7 +985,7 @@ export default {
     deleteVocabulary: async function () {
       this.$refs['delete-vocab-modal'].show()
     },
-    deleteVocabularyRequest: async function (token, customVocabularyName) {
+    deleteVocabularyRequest: async function (customVocabularyName) {
       let apiName = 'mieWorkflowApi'
       let path = 'service/transcribe/delete_vocabulary'
       let requestOpts = {
@@ -1021,17 +1019,12 @@ export default {
         console.log(error)
       }
     },
-    overwriteVocabularyRequest: async function (token, customVocabularyName) {
-      if (token === null) {
-        token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
-      }
-      await this.deleteVocabularyRequest(token, customVocabularyName).then(() => {
-        this.saveVocabularyRequest(token, customVocabularyName)
+    overwriteVocabularyRequest: async function (customVocabularyName) {
+      await this.deleteVocabularyRequest(customVocabularyName).then(() => {
+        this.saveVocabularyRequest(customVocabularyName)
       })
     },
-    saveVocabularyRequest: async function (token, customVocabularyName) {
+    saveVocabularyRequest: async function (customVocabularyName) {
       let apiName = 'mieWorkflowApi'
       let path = 'service/transcribe/create_vocabulary'
       const s3uri = "s3://"+this.DATAPLANE_BUCKET+"/"+customVocabularyName
@@ -1071,10 +1064,6 @@ export default {
       }
     },
     saveVocabulary: async function () {
-      const signedUrl = this.DATAPLANE_API_ENDPOINT + '/upload';
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
 
       let apiName = 'mieWorkflowApi'
       let path = 'upload'
@@ -1111,9 +1100,9 @@ export default {
             const customVocabularyName = this.customVocabularyName
             if (this.customVocabularyList.some(item => item.name === this.customVocabularyName)) {
               console.log("Overwriting custom vocabulary: " + customVocabularyName)
-              this.overwriteVocabularyRequest(token, customVocabularyName)
+              this.overwriteVocabularyRequest(customVocabularyName)
             } else {
-              this.saveVocabularyRequest(token, customVocabularyName)
+              this.saveVocabularyRequest(customVocabularyName)
             }
             // Save custom vocabulary to vuex state so we can reload it
             // if Transcribe failed to save it.
@@ -1165,7 +1154,7 @@ export default {
             this.workflow_status = "Started";
           } else if (this.workflow_status === "Complete" ||
             this.workflow_status === "Error") {
-            this.rerunWorkflow(token);
+            this.rerunWorkflow();
           }
           this.showSaveNotification = 5;
         }
@@ -1264,7 +1253,7 @@ export default {
             this.sortWebCaptions()
             this.isBusy = false
             if (cursor)
-              this.getWebCaptionPages(token,url,cursor)
+              this.getWebCaptionPages(url,cursor)
           } else {
             this.videoOptions.captions = []
           }

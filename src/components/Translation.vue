@@ -402,15 +402,16 @@ export default {
   },
   computed: {
     customTerminologyFields: function () {
-      [this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value))
+      return [this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value))
     },
     customTerminologyLastTableField: function() {
       // if there's no custom terminology selected, then the terminology table only include 2 columns, the source language and the language selected in the web captions table, so we can just return selected_lang_code as the name of the last column.
       if (this.customTerminologySelected === '') {
         return this.selected_lang_code
+      } else if (this.alphabetized_language_collection.length > 0) {
+        return this.alphabetized_language_collection[this.alphabetized_language_collection.length-1].value
       } else {
-        if (this.alphabetized_language_collection.length > 0)
-          return this.alphabetized_language_collection[this.alphabetized_language_collection.length-1].value
+        return ''
       }
     },
     customTerminologyUnion: function() {
@@ -594,9 +595,6 @@ export default {
       // This function gets the list of languages that we'll show as columns
       // in the terminology table before the user selects an existing custom
       // terminology.
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       this.translationsCollection = [];
       const asset_id = this.$route.params.asset_id;
 
@@ -633,36 +631,41 @@ export default {
         );
         console.log(error)
       }
+
+
       // Get the all the output for the TranslateWebCaptions operator.
       // We do this simply so we can get the list of languages that have been translated.
-      fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/TranslateWebCaptions', {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-          })
-        ).then(async (res) => {
-          // get the list of available languages
-          response.data.results.CaptionsCollection.forEach( (item) => {
-            let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
-            // save the language code to the translationsCollection
-            this.translationsCollection.push(
-              {text: languageLabel, value: item.TargetLanguageCode}
-            );
-          })
-          // Got all the languages now.
-          // Set the default language to the first one in the alphabetized list.
-          if (this.alphabetized_language_collection.length > 0) {
-            this.selected_lang = this.alphabetized_language_collection[0].text
-            this.selected_lang_code = this.alphabetized_language_collection[0].value
-            await this.getWebCaptions()
-          }
-          this.isBusy = false
+      path = 'metadata' + asset_id + '/TranslateWebCaptions'
+      requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        
+        response.data.results.CaptionsCollection.forEach( (item) => {
+          let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
+          // save the language code to the translationsCollection
+          this.translationsCollection.push(
+            {text: languageLabel, value: item.TargetLanguageCode}
+          );
         })
-      });
+        // Got all the languages now.
+        // Set the default language to the first one in the alphabetized list.
+        if (this.alphabetized_language_collection.length > 0) {
+          this.selected_lang = this.alphabetized_language_collection[0].text
+          this.selected_lang_code = this.alphabetized_language_collection[0].value
+          await this.getWebCaptions()
+        }
+        this.isBusy = false
+        
+      } catch (error) {
+        this.customVocabularyFailedReason = ""
+        console.log(error)
+      }
     },
     asyncForEach: async function(array, callback) {
       // This async function allows us to wait for all vtt files to be
@@ -672,170 +675,187 @@ export default {
       }
     },
     getVttCaptions: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      const asset_id = this.$route.params.asset_id;
-      // get the WebToVTTCaptions metadata json file that
-      // contains the list of paths to vtt files in s3
-      fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/WebToVTTCaptions', {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status !== 200) {
+      
+      let asset_id = this.$route.params.asset_id;
+
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata' + asset_id + '/WebToVTTCaptions'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        
+        if (response.status !== 200) {
             this.isBusy = false
             this.noTranslation = true
             console.log("ERROR: Could not retrieve Translation data.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
+            console.log(response.data.Code);
+            console.log(response.data.Message);
             console.log("URL: " + this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/WebToVTTCaptions');
             console.log("Data:");
-            console.log((data));
-            console.log("Response: " + res.status);
+            console.log((response.data));
+            console.log("Response: " + response.status);
           }
-          this.vttcaptions = [];
-          this.num_caption_tracks = res.data.results.CaptionsCollection.length;
-          // now get signed urls that can be used to download the vtt files from s3
-          this.asyncForEach(res.data.results.CaptionsCollection, async(item) => {
-            const bucket = item.Results.S3Bucket;
-            const key = item.Results.S3Key;
-            // get the signed url
-            await fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-              method: 'POST',
-              mode: 'cors',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-              },
-              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-            }).then(data => {
-              data.text().then((data) => {
-                // record the signed urls in an array
-                this.vttcaptions.push({'src': data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-              }).catch(err => console.error(err));
-            })
-          }).then(() => {
-            // now that we have all the signed urls to download vtt files,
-            // update the captions in the video player for the currently selected
-            // language. This will make sure the video player reflects any edits
-            // that the user may have saved by clicking the Save Edits button.
-            if (this.selected_lang_code !== "") {
-              // hide all the captions in the video player
-              for (let i = 0; i < this.player.textTracks().length; i++) {
-                let track = this.player.textTracks()[i];
-                track.mode = "disabled";
-              }
-              // get the src for that language's vtt file
-              let old_track = this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0]
-              // create properties for a new track
-              let new_track = {}
-              new_track.label = old_track.label
-              new_track.language = old_track.language
-              new_track.kind = old_track.kind
-              new_track.src = this.vtt_url
-              // show the new caption in the video player
-              new_track.mode = "showing"
-              // remove the old track for that vtt
-              this.player.removeRemoteTextTrack(old_track)
-              // add a new text track for that vtt
-              const manualCleanup = false
-              // manualCleanup is needed in order to avoid a warning
-              this.player.addRemoteTextTrack(new_track, manualCleanup)
-            }
-          })
+      
+        this.vttcaptions = [];
+        this.num_caption_tracks = response.data.results.CaptionsCollection.length;
+        // now get signed urls that can be used to download the vtt files from s3
+        this.asyncForEach(response.data.results.CaptionsCollection, async(item) => {
+          const bucket = item.Results.S3Bucket;
+          const key = item.Results.S3Key;
+          // get the signed url
 
-        })
-      });
+          let apiName = 'mieDataplaneApi'
+          let path = 'download'
+          let requestOpts = {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
+              response: true
+          };
+
+          try {
+
+            let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+            // record the signed urls in an array
+            this.vttcaptions.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+          } catch  (error){
+            console.error(error)
+          }
+
+          // now that we have all the signed urls to download vtt files,
+          // update the captions in the video player for the currently selected
+          // language. This will make sure the video player reflects any edits
+          // that the user may have saved by clicking the Save Edits button.
+          if (this.selected_lang_code !== "") {
+            // hide all the captions in the video player
+            for (let i = 0; i < this.player.textTracks().length; i++) {
+              let track = this.player.textTracks()[i];
+              track.mode = "disabled";
+            }
+            // get the src for that language's vtt file
+            let old_track = this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0]
+            // create properties for a new track
+            let new_track = {}
+            new_track.label = old_track.label
+            new_track.language = old_track.language
+            new_track.kind = old_track.kind
+            new_track.src = this.vtt_url
+            // show the new caption in the video player
+            new_track.mode = "showing"
+            // remove the old track for that vtt
+            this.player.removeRemoteTextTrack(old_track)
+            // add a new text track for that vtt
+            const manualCleanup = false
+            // manualCleanup is needed in order to avoid a warning
+            this.player.addRemoteTextTrack(new_track, manualCleanup)
+          }
+        });
+        
+      } catch (error) {
+        console.log(error)
+      }
     },
     getSrtCaptions: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/WebToSRTCaptions'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        
+        let captions_collection = [];
+        this.num_caption_tracks = response.data.results.CaptionsCollection.length;
+      
+        response.data.results.CaptionsCollection.asyncForEach(async(item) => {
+          // TODO: map the language code to a language label
+          const bucket = item.Results.S3Bucket;
+          const key = item.Results.S3Key;
+          // get URL to captions file in S3
 
-      fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/WebToSRTCaptions', {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-          })
-        ).then(res => {
-          let captions_collection = [];
-          this.num_caption_tracks = res.data.results.CaptionsCollection.length;
-          res.data.results.CaptionsCollection.forEach(item => {
-            // TODO: map the language code to a language label
-            const bucket = item.Results.S3Bucket;
-            const key = item.Results.S3Key;
-            // get URL to captions file in S3
-            fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-              method: 'POST',
-              mode: 'cors',
+          let apiName = 'mieDataplaneApi'
+          let path = 'download'
+          let requestOpts = {
               headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
+                'Content-Type': 'application/json'
               },
-              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-            }).then(data => {
-              data.text().then((data) => {
-                captions_collection.push({'src': data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-              }).catch(err => console.error(err));
-            })
-          });
-          this.srtcaptions = captions_collection
-        })
-      });
+              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
+              response: true
+          };
+
+          try {
+
+            let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+            // record the signed urls in an array
+            captions_collection.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+          } catch  (error){
+            console.error(error)
+          }
+        });
+        this.srtcaptions = captions_collection
+
+      } catch (error) {
+        console.log(error)
+      }
     },
     getPollyAudioTranscripts: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      const asset_id = this.$route.params.asset_id;
 
-      fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/PollyWebCaptions', {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-          })
-        ).then(res => {
-          let captions_collection = [];
-          res.data.results.CaptionsCollection.forEach(item => {
-            // TODO: map the language code to a language label
-            if (item.PollyStatus != "not supported") {
-              const bucket = item.PollyAudio.S3Bucket;
-              const key = item.PollyAudio.S3Key;
-              // get URL to captions file in S3
-              fetch(this.DATAPLANE_API_ENDPOINT + '/download', {
-                method: 'POST',
-                mode: 'cors',
+      const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/PollyWebCaptions'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+        let captions_collection = [];
+        response.data.results.CaptionsCollection.asyncForEach(async(item) => {
+          // TODO: map the language code to a language label
+          if (item.PollyStatus != "not supported") {
+            const bucket = item.PollyAudio.S3Bucket;
+            const key = item.PollyAudio.S3Key;
+            // get URL to captions file in S3
+            let apiName = 'mieDataplaneApi'
+            let path = 'download'
+            let requestOpts = {
                 headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': token
+                  'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-              }).then(data => {
-                data.text().then((data) => {
-                  captions_collection.push({'src': data, 'lang': item.TargetLanguageCode, 'label': item.TargetLanguageCode});
-                }).catch(err => console.error(err));
-              });
+                body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
+                response: true
+            };
+
+            try {
+
+              let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+              captions_collection.push({'src': res.data, 'lang': item.TargetLanguageCode, 'label': item.TargetLanguageCode});
+        
             }
-          });
-          this.pollyaudiotranscripts = captions_collection
-        })
-      });
+            catch {
+              this.pollyaudiotranscripts = captions_collection
+            }
+          }
+        });
+        this.pollyaudiotranscripts = captions_collection
+      }
+      catch(error) {
+        console.log(error)
+      }
     },
     downloadAudioFile() {
       const blob = new Blob([this.pollyaudio_url], {type: 'audio/mpeg', autoplay:'0', autostart:'false', endings:'native'});
@@ -987,91 +1007,83 @@ export default {
       }.bind(this));
     },
     getWorkflowId: async function() {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/asset/' + this.asset_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-            this.workflow_id = res.data[0].Id
-            this.workflow_status = res.data[0].Status
-            if ("CurrentStage" in res.data[0])
-              this.waiting_stage = res.data[0].CurrentStage
-            // get the list of languages to show the user
-            this.getLanguageList();
-            // get workflow config, needed for edit captions button
-            this.getWorkflowConfig(token);
-          })
-        }
-      )
+
+      const asset_id = this.asset_id
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution/asset/' + asset_id
+      let requestOpts = {
+        response: true,
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+        this.workflow_id = response.data[0].Id
+        this.workflow_status = response.data[0].Status
+        if ("CurrentStage" in response.data[0])
+          this.waiting_stage = response.data[0].CurrentStage
+        // get the list of languages to show the user
+        this.getLanguageList();
+        // get workflow config, needed for edit captions button
+        this.getWorkflowConfig();
+      } catch (error) {
+        console.log(error)
+      }
     },
     getWorkflowStatus: async function() {
       // This function gets the workflow status. If its in a running state
       // then we temporarily disable the ability for users to edit
       // translations in the GUI.
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/asset/' + this.asset_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
+      let apiName = 'mieWorkflowApi'
+      let path =  "workflow/execution/asset" + this.asset_id
+      let requestOpts = {
+        headers: {},
+        response: true,
+        queryStringParameters: {} // optional
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        const new_workflow_status = response.data[0].Status
+        if (this.workflow_status !== 'Complete'
+          && new_workflow_status === 'Complete') {
+          this.getVttCaptions()
         }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-              const new_workflow_status = res.data[0].Status
-              if (this.workflow_status !== 'Complete'
-                && new_workflow_status === 'Complete') {
-                this.getVttCaptions()
-              }
-              this.workflow_status = new_workflow_status
-            }
-          )
-        }
-      )
+        this.workflow_status = new_workflow_status
+      } catch (error) {
+        alert("ERROR: Failed to get workflow status");
+        console.log(error)
+      }
     },
-    getWorkflowConfig: async function(token) {
+    getWorkflowConfig: async function() {
       // This function gets the workflow configuration that is used
       // to update the saved vtt and srt caption files after a user saves
       // translation edits.
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/' + this.workflow_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-            this.workflow_config = res.data.Configuration
-            this.sourceLanguageCode = res.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-            this.terminology_used = JSON.parse(res.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames).JsonList.map(x => x.Name)
-            this.workflow_definition = res.data.Workflow
-            const operator_info = []
-            const sourceLanguage = this.translateLanguages.filter(x => (x.value === this.sourceLanguageCode))[0].text;
-            operator_info.push({"name": "Source Language", "value": sourceLanguage})
-            if (this.terminology_used) {
-              if (this.terminology_used.length === 1)
-                operator_info.push({"name": "Custom Terminology", "value": this.terminology_used[0]})
-              else
-                operator_info.push({"name": "Custom Terminologies", "value": this.terminology_used.join().replace(/,/g, ', ')})
 
-            }
-            this.$store.commit('updateOperatorInfo', operator_info)
-          })
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution/' + this.workflow_id
+      let requestOpts = {
+        response: true,
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        
+        this.workflow_config = response.data.Configuration
+        this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
+        this.terminology_used = JSON.parse(response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames).JsonList.map(x => x.Name)
+        this.workflow_definition = response.data.Workflow
+        const operator_info = []
+        const sourceLanguage = this.translateLanguages.filter(x => (x.value === this.sourceLanguageCode))[0].text;
+        operator_info.push({"name": "Source Language", "value": sourceLanguage})
+        if (this.terminology_used) {
+          if (this.terminology_used.length === 1)
+            operator_info.push({"name": "Custom Terminology", "value": this.terminology_used[0]})
+          else
+            operator_info.push({"name": "Custom Terminologies", "value": this.terminology_used.join().replace(/,/g, ', ')})
+
         }
-      )
+        this.$store.commit('updateOperatorInfo', operator_info)
+      } catch (error) {
+        console.log(error)
+      }
     },
     disableUpstreamStages()  {
       // This function disables all the operators in stages above TranslateStage2,
@@ -1113,74 +1125,93 @@ export default {
       return data
 
     },
-    rerunWorkflow: async function (token) {
+    rerunWorkflow: async function () {
       // This function reruns CaptionFileStage2 in order to
       // regenerate VTT and SRT files.
       let data = this.disableUpstreamStages();
-
       data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-
-      // execute workflow to update VTT and SRT files
-      fetch(this.WORKFLOW_API_ENDPOINT + 'workflow/execution', {
-        method: 'post',
-        body: JSON.stringify(data),
-        headers: {'Content-Type': 'application/json', 'Authorization': token}
-      }).then(response =>
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          this.pollWorkflowStatus()
-          if (res.status !== 200) {
-            console.log("ERROR: Failed to start workflow.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
-            console.log("URL: " + this.WORKFLOW_API_ENDPOINT + 'workflow/execution');
-            console.log("Data:");
-            console.log(JSON.stringify(data));
-            console.log((data));
-            console.log("Response: " + response.status);
-          }
-        })
-      )
+      
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: data,
+          queryStringParameters: {} // optional
+      };
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        let asset_id = response.data.AssetId;
+        let wf_id = response.data.Id;
+        console.log("Media assigned asset id and workflow id: " + asset_id + "workflow id:" + wf_id);
+        this.pollWorkflowStatus()
+        if (response.status !== 200) {
+          console.log("ERROR: Failed to start workflow.");
+          console.log(response.data.Code);
+          console.log(response.data.Message);
+          console.log("URL: " + this.WORKFLOW_API_ENDPOINT + 'workflow/execution');
+          console.log("Data:");
+          console.log(JSON.stringify(data));
+          console.log((data));
+          console.log("Response: " + response.status);
+        } else {
+          this.saveNotificationMessage += " and workflow resumed"
+          console.log("workflow executing");
+          console.log(res);
+        }
+      } catch (error) {
+        alert(
+          "ERROR: Failed to start workflow. Check Workflow API logs."
+        );
+        console.log(error)
+      }
     },
-    saveCaptions: async function (token) {
+    saveCaptions: async function () {
       this.workflow_status = "Started"
       // This function saves translation edits to the dataplane
       this.$refs['save-modal'].hide()
       this.isSaving=true;
-      if (!token) {
-        token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
-      }
       const operator_name = "WebCaptions_"+this.selected_lang_code
       const web_captions = {"WebCaptions": this.webCaptions}
-      let data='{"OperatorName": "' + operator_name + '", "Results": ' + JSON.stringify(web_captions) + ', "WorkflowId": "' + this.workflow_id + '"}'
-      fetch(this.DATAPLANE_API_ENDPOINT + 'metadata/' + this.asset_id, {
-        method: 'post',
-        body: data,
-        headers: {'Content-Type': 'application/json', 'Authorization': token}
-      }).then(response =>
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status === 200) {
+      let body={
+        "OperatorName": operator_name ,
+        "Results": JSON.stringify(web_captions),
+        "WorkflowId": this.workflow_id
+      }
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + this.asset_id
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: body,
+          queryStringParameters: {} // optional
+      };
+
+      
+      
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
             this.isSaving=true;
             console.log("Saving translation for " + this.selected_lang_code)
-            this.rerunWorkflow(token);
+            this.rerunWorkflow();
           }
-          if (res.status !== 200) {
+         else {
             console.log("ERROR: Failed to upload captions.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
+            console.log(response.data.Code);
+            console.log(response.data.Message);
             console.log("Response: " + response.status);
           }
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to start workflow. Check Workflow API logs."
+        );
+        console.log(error)
+      }
     },
     showTerminologyConfirmation: async function() {
       // When we open the custom terminology modal, then we'll initialize the
@@ -1213,30 +1244,28 @@ export default {
       await this.saveTerminologyRequest()
     },
     saveTerminologyRequest: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       const csv = this.customTerminologyCSV
-      console.log("Create terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name": "'+this.customTerminologyName+'", "terminology_csv": '+JSON.stringify(csv)+'}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/create_terminology')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'service/translate/create_terminology',{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': token},
-        body: JSON.stringify({"terminology_name": this.customTerminologyName, "terminology_csv": csv})
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-        ).then(res => {
-          if (res.status === 200) {
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/translate/create_terminology'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: JSON.stringify({"terminology_name": this.customTerminologyName, "terminology_csv": csv}),
+          queryStringParameters: {} // optional
+      };
+      
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
             console.log("Success! Custom terminology saved.")
             this.terminologyNotificationMessage = "Saved terminology: " + this.customTerminologyName
             this.terminologyNotificationStatus = "success"
             this.showTerminologyNotification = 5
           } else {
             console.log("Failed to save vocabulary")
-            this.vocabularyNotificationMessage = "Failed to save vocabulary: " + this.customTerminologyName
+            this.vocabularyNotificationMessage = "Failed to save terminology: " + this.customTerminologyName
             this.terminologyNotificationStatus = "danger"
             this.showTerminologyNotification = 5
           }
@@ -1244,31 +1273,34 @@ export default {
           this.customTerminologyCreateNew = ""
           this.customTerminologySelected = ""
           this.customTerminologySaved = []
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to save terminology."
+        );
+        console.log(error)
+      }
     },
     deleteTerminology: async function () {
       this.$refs['delete-terminology-modal'].show()
     },
     deleteTerminologyRequest: async function (customTerminologyName) {
-      let token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       this.$refs['delete-terminology-modal'].hide()
       this.$refs['terminology-modal'].hide()
       console.log("Delete terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"terminology_name":"'+customTerminologyName+'}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/delete_terminology')
-      await fetch(this.DATAPLANE_API_ENDPOINT+'service/translate/delete_terminology',{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': token},
-        body: JSON.stringify({"terminology_name":customTerminologyName})
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-        ).then(res => {
-          if (res.status === 200) {
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/translate/delete_terminology'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: JSON.stringify({"terminology_name":customTerminologyName}),
+          queryStringParameters: {} // optional
+      };
+      
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
             console.log("Success! Terminology deleted.")
             this.terminologyNotificationMessage = "Deleted terminology: " + customTerminologyName
             this.terminologyNotificationStatus = "success"
@@ -1287,32 +1319,37 @@ export default {
           this.customTerminologyCreateNew = ""
           this.customTerminologySelected = ""
           this.customTerminologySaved = []
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to delete terminology."
+        );
+        console.log(error)
+      }
     },
     downloadTerminology: async function() {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       console.log("Get terminology request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"terminology_name":"'+this.customTerminologySelected+'"}\' '+this.DATAPLANE_API_ENDPOINT+'service/translate/download_terminology')
-      fetch(this.DATAPLANE_API_ENDPOINT + 'service/translate/download_terminology', {
-        method: 'post',
-        body: JSON.stringify({"terminology_name":this.customTerminologySelected}),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-            })
-        ).then(res => {
-          const csv = res.data.terminology.replace(/"/g, '')
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/translate/download_terminology'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: JSON.stringify({"terminology_name":this.customTerminologySelected}),
+          queryStringParameters: {} // optional
+      };
+      
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        const csv = response.data.terminology.replace(/"/g, '')
           const json = this.csvJSON(csv)
           this.customTerminologySaved = json
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to delete terminology."
+        );
+        console.log(error)
+      }
     },
     csvJSON: function(csv) {
       var lines=csv.split("\n");
@@ -1330,14 +1367,12 @@ export default {
     },
     getWebCaptions: async function () {
       // This functions gets paginated web caption data
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
+
       const operator_name = "WebCaptions_"+this.selected_lang_code
       let cursor=''
-      let url = this.DATAPLANE_API_ENDPOINT + '/metadata/' + this.asset_id + '/' + operator_name
       this.webCaptions = []
-      await this.getWebCaptionPages(token, url, cursor)
+      this.getWebCaptionPages(this.asset_id, operator_name, cursor)
+
       // switch the video player to show the selected language
       // by first disabling all the text tracks, like this:
       for (let i = 0; i < this.player.textTracks().length; i++) {
@@ -1347,36 +1382,43 @@ export default {
       // then showing the text track for the selected language
       this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0].mode = "showing"
     },
-    getWebCaptionPages: async function (token, url, cursor) {
-      fetch((cursor.length === 0) ? url : url + '?cursor=' + cursor, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        },
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status !== 200) {
-            console.log("ERROR: Failed to upload captions.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
-            console.log("Response: " + res.status);
+    getWebCaptionPages: async function (asset_id, operator_name, cursor) {
+
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + this.asset_id + '/' + operator_name
+      let requestOpts = {
+        response: true,
+        headers: {'Content-Type': 'application/json'}
+      };
+
+      if (cursor.length != 0) {
+        path = path + '?cursor=' + cursor
+      }
+
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        if (response.status !== 200) {
+            console.log("ERROR: Failed to download captions.");
+            console.log(response.data.Code);
+            console.log(response.data.Message);
+            console.log("Response: " + response.status);
+            this.isBusy = false
+            this.noTranscript = true
           }
-          if (res.data.results) {
-            cursor = res.data.cursor;
-            this.webCaptions = res.data.results["WebCaptions"]
+          if (response.data.results) {
+            cursor = response.data.cursor;
+            this.webCaptions = response.data.results["WebCaptions"]
             this.sortWebCaptions()
             this.isBusy = false
             if (cursor)
-              this.getWebCaptionPages(token,url,cursor)
+              this.getWebCaptionPages(url,cursor)
           } else {
             this.videoOptions.captions = []
           }
-        })
-      });
+      } catch (error) {
+        this.showDataplaneAlert = true
+        console.log(error)
+      }
     },
     add_row(index) {
       this.webCaptions.splice(index+1, 0, {"start":this.webCaptions[index].end,"caption":"","end":this.webCaptions[index+1].start})

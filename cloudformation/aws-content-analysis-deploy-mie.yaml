@@ -48,7 +48,6 @@ Resources:
             - MediaInsightsEngine
             - Release
             - Version
-          - "/cf"
           - "/media-insights-stack.template"
       Parameters:
         DeployAnalyticsPipeline: Yes

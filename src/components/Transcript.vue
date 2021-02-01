@@ -42,6 +42,7 @@ export default {
     },
   },
   deactivated: function () {
+    this.transcript = ""
     console.log('deactivated component:', this.operator)
   },
   activated: function () {
@@ -71,9 +72,11 @@ export default {
           this.noTranscript = true
         }
         else {
-          this.noTranscript = false;
           for (let i = 0, len = data.length; i < len; i++) {
-            this.transcript = data[i]._source.transcript
+            if ('transcript' in data[i]._source) {
+              this.transcript = this.transcript.concat(data[i]._source.transcript + " ")
+              this.noTranscript = false;
+            }
           }
         }
         this.isBusy = false

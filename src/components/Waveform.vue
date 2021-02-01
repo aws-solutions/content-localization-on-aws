@@ -32,62 +32,44 @@
     },
     methods: {
       async getAssetAudio(bucket, s3Key) {
-        const token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
-        const data = { "S3Bucket": bucket, "S3Key": s3Key };
-        let response = await fetch(this.DATAPLANE_API_ENDPOINT + '/download',   {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify(data)
-        });
-        if (response.status === 200) {
+        const body = { "S3Bucket": bucket, "S3Key": s3Key };
+
+        let apiName = 'mieDataplaneApi'
+        let path = 'download'
+        let requestOpts = {
+          body: JSON.stringify(body),
+          response: true,
+          responseType: 'text'
+        };
+        try {
+          let response = await this.$Amplify.API.post(apiName, path, requestOpts);
           await response.text().then(url => {
             this.renderWaveform(url)
-          });
+          });   
+        } catch (error) {
+          this.showDataplaneAlert = true
+          console.log(error)
         }
       },
       async getWorkflowId() {
-        const token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
         const asset_id = this.$route.params.asset_id
-        fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/asset/' + asset_id, {
-          method: 'get',
-          headers: {
-            'Authorization': token
-          }
-        }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-            const workflow_id = res.data[0].Id
-            fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/' + workflow_id, {
-              method: 'get',
-              headers: {
-                'Authorization': token
-              }
-            }).then(response => {
-                response.json().then(data => ({
-                    data: data,
-                  })
-                ).then(res => {
-                  const bucket = res.data.Globals.Media.Audio.S3Bucket;
-                  const s3Key = res.data.Globals.Media.Audio.S3Key;
-                  this.getAssetAudio(bucket, s3Key);
-                  }
-                )
-              }
-            )
-            }
-            )
-          }
-        )
+        let apiName = 'mieWorkflowApi'
+        let path = 'workflow/execution/asset/' + assetId
+        let requestOpts = {
+          response: true,
+        };
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          const workflow_id = response.data[0].Id
+          let path = 'workflow/execution/asset/' + workflow_id
+
+          let res = await this.$Amplify.API.get(apiName, path, requestOpts);
+          const bucket = res.data.Globals.Media.Audio.S3Bucket;
+          const s3Key = res.data.Globals.Media.Audio.S3Key;
+          this.getAssetAudio(bucket, s3Key);
+        } catch (error) {
+          console.log(error)
+        }
       },
       renderWaveform(url) {
         const vm = this;

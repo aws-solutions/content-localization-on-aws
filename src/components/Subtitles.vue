@@ -487,41 +487,44 @@ export default {
   methods: {
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
-        const token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
-        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)
-        console.log("Get vocabulary request:")
-        console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \'' + token + '\' --data \'{"vocabulary_name":"' + this.customVocabularySelected + '}\' ' + this.WORKFLOW_API_ENDPOINT + '/service/transcribe/get_vocabulary')
-        fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/get_vocabulary', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json', 'Authorization': token},
-          body: JSON.stringify({"vocabulary_name": this.customVocabularySelected})
-        }).then(response =>
-            response.json()
-                .then(data => ({
-                  data: data,
-                  status: response.status
-                })).then(res => {
-                  if (res.status === 200) {
-                    console.log("Failed vocabulary details:")
-                    console.log(res.data)
-                    console.log(res.data.FailureReason)
-                    if ("FailureReason" in res.data) {
-                      // Transcribe's failure reason will reference a line number that
-                      // is 1 too high. We decrement that line number by 1 here so it
-                      // lines up with the custom vocabulary table.
-                      let failure_reason = res.data["FailureReason"].split("error: ")[1]
-                      let error_text_part_1 = failure_reason.split("Error at line")[0]
-                      let error_text_part_2 = "Error at line " + failure_reason.split("Error at line")[1].replace(/[0-9]+(?!.*[0-9])/, function(line_number) { return line_number-1 })
-                      this.customVocabularyFailedReason = error_text_part_1 + error_text_part_2
-                    } else {
-                      this.customVocabularyFailedReason = ''
-                    }
-                  }
-                }
-            )
-        )
+        
+        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)  
+
+        let apiName = 'mieWorkflowApi'
+        let path = 'service/transcribe/get_vocabulary'
+        let body = JSON.stringify({"vocabulary_name": this.customVocabularySelected})
+        let requestOpts = {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: body,
+            response: true
+        };
+        
+        try {
+          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          
+          if (response.status === 200) {
+            console.log("Failed vocabulary details:")
+            console.log(response.data)
+            console.log(response.data.FailureReason)
+            if ("FailureReason" in response.data) {
+              // Transcribe's failure reason will reference a line number that
+              // is 1 too high. We decrement that line number by 1 here so it
+              // lines up with the custom vocabulary table.
+              let failure_reason = response.data["FailureReason"].split("error: ")[1]
+              let error_text_part_1 = failure_reason.split("Error at line")[0]
+              let error_text_part_2 = "Error at line " + failure_reason.split("Error at line")[1].replace(/[0-9]+(?!.*[0-9])/, function(line_number) { return line_number-1 })
+              this.customVocabularyFailedReason = error_text_part_1 + error_text_part_2
+            } else {
+              this.customVocabularyFailedReason = ''
+            }
+          }
+          
+        } catch (error) {
+          this.customVocabularyFailedReason = ""
+          console.log(error)
+        }
       } else {
         this.customVocabularyFailedReason = ""
       }
@@ -712,107 +715,97 @@ export default {
       }.bind(this));
     },
     getWorkflowId: async function() {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      console.log("workflow status request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.WORKFLOW_API_ENDPOINT+'/workflow/execution/asset/' + this.asset_id)
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/asset/' + this.asset_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-              this.workflow_id = res.data[0].Id
-              this.workflow_status = res.data[0].Status
-              if ("CurrentStage" in res.data[0])
-                this.waiting_stage = res.data[0].CurrentStage
-              this.getTranscribeLanguage(token)
-              // get workflow config, needed for edit captions button
-              this.getWorkflowConfig(token);
-            }
-          )
-        }
-      )
+
+      const asset_id = this.asset_id
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution/asset/' + assetId
+      let requestOpts = {
+        response: true,
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+        const workflow_id = response.data[0].Id
+        let path = 'workflow/execution/asset/' + workflow_id
+
+        let res = await this.$Amplify.API.get(apiName, path, requestOpts);
+        
+        const bucket = res.data.Globals.Media.Audio.S3Bucket;
+        const s3Key = res.data.Globals.Media.Audio.S3Key;
+        this.getAssetAudio(bucket, s3Key);
+        this.workflow_status = res.data[0].Status
+        if ("CurrentStage" in res.data[0])
+          this.waiting_stage = res.data[0].CurrentStage
+        this.getTranscribeLanguage()
+        // get workflow config, needed for edit captions button
+        this.getWorkflowConfig();
+      } catch (error) {
+        console.log(error)
+      }
+      
     },
-    getWorkflowStatus: async function() {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/asset/' + this.asset_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-              this.workflow_status = res.data[0].Status
-            }
-          )
-        }
-      )
+    getAssetWorkflowStatus: async function() {
+      let apiName = 'mieWorkflowApi'
+      let path =  "workflow/execution/asset" + this.asset_id
+      let requestOpts = {
+        headers: {},
+        response: true,
+        queryStringParameters: {} // optional
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.workflow_status = response.data[0].Status
+      } catch (error) {
+        alert("ERROR: Failed to get workflow status");
+        console.log(error)
+      }
     },
     getTranscribeLanguage: async function(token) {
-      // This function gets the source language from the workflow configuration
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/' + this.workflow_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
+      let apiName = 'mieWorkflowApi'
+      let path =  "workflow/execution/" + this.workflow_id
+      let requestOpts = {
+        headers: {},
+        response: true,
+        queryStringParameters: {} // optional
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
+        this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.Transcribe.TranscribeLanguage
+        this.vocabulary_language_code = this.transcribe_language_code
+        this.vocabulary_used = response.data.Configuration.defaultAudioStage2.Transcribe.VocabularyName
+        const operator_info = []
+        const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
+        operator_info.push({"name": "Source Language", "value": transcribe_language})
+        if (this.vocabulary_used) {
+          operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
         }
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-          })
-        ).then(res => {
-          this.sourceLanguageCode = res.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-          this.transcribe_language_code = res.data.Configuration.defaultAudioStage2.Transcribe.TranscribeLanguage
-          this.vocabulary_language_code = this.transcribe_language_code
-          this.vocabulary_used = res.data.Configuration.defaultAudioStage2.Transcribe.VocabularyName
-          const operator_info = []
-          const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
-          operator_info.push({"name": "Source Language", "value": transcribe_language})
-          if (this.vocabulary_used) {
-            operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
-          }
-          this.$store.commit('updateOperatorInfo', operator_info)
-          this.getWebCaptions()
-          }
-        )
-        }
-      )
+        this.$store.commit('updateOperatorInfo', operator_info)
+        this.getWebCaptions()
+      
+      } catch (error) {
+        alert("ERROR: Failed to get workflow status");
+        console.log(error)
+      }
     },
     downloadVocabulary: async function() {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/download_vocabulary'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+
       this.customVocabularySaved = []
       this.customVocabularyFailedReason = ""
-      console.log("Get vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"vocabulary_name":"'+this.customVocabularySelected+'"}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/download_vocabulary')
-      fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/download_vocabulary', {
-        method: 'post',
-        mode: 'cors',
-        body: JSON.stringify({"vocabulary_name":this.customVocabularySelected}),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-          data: data,
-          status: response.status
-          })
-        ).then(res => {
-          if(res.status == 200) {
+
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        if(response.status == 200) {
             // save phrases from the currently selected vocabulary
-            this.customVocabularySaved = res.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
+            this.customVocabularySaved = response.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
               original_phrase: "",
               new_phrase: Phrase,
               sounds_like: SoundsLike,
@@ -822,50 +815,55 @@ export default {
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
             this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
-          }
-        })
-      )
+          }       
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
-    getWorkflowConfig: async function(token) {
-      fetch(this.WORKFLOW_API_ENDPOINT + '/workflow/execution/' + this.workflow_id, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        }
-      }).then(response => {
-          response.json().then(data => ({
-              data: data,
-            })
-          ).then(res => {
-            this.workflow_config = res.data.Configuration
-            this.workflow_definition = res.data.Workflow
-          })
-        }
-      )
+    getWorkflowConfig: async function() {
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution/' + this.workflow_id
+      let requestOpts = {
+        response: true,
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.workflow_config = response.data.Configuration
+            this.workflow_definition = response.data.Workflow
+      } catch (error) {
+        console.log(error)
+      }
+
     },
     resumeWorkflow: async function() {
       // This function executes a paused workflow from the WaitingStageName stage.
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution/' + this.workflow_id
       const data = JSON.stringify({"WaitingStageName": this.waiting_stage});
-      fetch(this.WORKFLOW_API_ENDPOINT + 'workflow/execution/' + this.workflow_id, {
-        method: 'put',
-        body: data,
-        headers: {'Content-Type': 'application/json', 'Authorization': token}
-      }).then(response =>
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status === 200) {
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: data,
+          response: true
+      };
+
+      try {
+        let response = await this.$Amplify.API.put(apiName, path, requestOpts);
+        if (respose.status === 200) {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
-          }
-        })
-      )
+          }      
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
     disableUpstreamStages()  {
       // This function disables all the operators in stages above TranslateStage2
@@ -910,57 +908,58 @@ export default {
     rerunWorkflow: async function (token) {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
+      let apiName = 'mieWorkflowApi'
+      let path = 'workflow/execution'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true,
+          body: data,
+          queryStringParameters: {} // optional
+      };
 
       data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
       data["Configuration"]["defaultPrelimVideoStage2"]["Thumbnail"].Enabled = true;
-
-      // execute the workflow
-      fetch(this.WORKFLOW_API_ENDPOINT + 'workflow/execution', {
-        method: 'post',
-        body: JSON.stringify(data),
-        headers: {'Content-Type': 'application/json', 'Authorization': token}
-      }).then(response =>
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status !== 200) {
-            console.log("ERROR: Failed to start workflow.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
-            console.log("URL: " + this.WORKFLOW_API_ENDPOINT + 'workflow/execution');
-            console.log("Data:");
-            console.log(JSON.stringify(data));
-            console.log((data));
-            console.log("Response: " + response.status);
-          } else {
-            this.saveNotificationMessage += " and workflow resumed"
-            console.log("workflow executing");
-            console.log(res);
-          }
-        })
-      )
+      
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        let asset_id = response.data.AssetId;
+        let wf_id = response.data.Id;
+        //console.log("Media assigned asset id: " + asset_id);
+        if (response.status !== 200) {
+          console.log("ERROR: Failed to start workflow.");
+          console.log(response.data.Code);
+          console.log(response.data.Message);
+          console.log("URL: " + this.WORKFLOW_API_ENDPOINT + 'workflow/execution');
+          console.log("Data:");
+          console.log(JSON.stringify(data));
+          console.log((data));
+          console.log("Response: " + response.status);
+        } else {
+          this.saveNotificationMessage += " and workflow resumed"
+          console.log("workflow executing");
+          console.log(res);
+        }
+      } catch (error) {
+        alert(
+          "ERROR: Failed to start workflow. Check Workflow API logs."
+        );
+        console.log(error)
+      }
     },
     listVocabulariesRequest: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      console.log("List vocabularies request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.WORKFLOW_API_ENDPOINT+'/transcribe/list_vocabularies')
-      fetch(this.WORKFLOW_API_ENDPOINT + '/service/transcribe/list_vocabularies', {
-        method: 'get',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-            })
-        ).then(res => {
-          this.customVocabularyList = res.data["Vocabularies"].map(({VocabularyName, VocabularyState, LanguageCode}) => ({
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/list_vocabularies'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.customVocabularyList = response.data["Vocabularies"].map(({VocabularyName, VocabularyState, LanguageCode}) => ({
             name: VocabularyName,
             status: VocabularyState,
             language_code: LanguageCode,
@@ -978,48 +977,49 @@ export default {
               this.vocab_status_polling = null
             }
           }
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
     deleteVocabulary: async function () {
       this.$refs['delete-vocab-modal'].show()
     },
     deleteVocabularyRequest: async function (token, customVocabularyName) {
-      if (!token) {
-        token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/delete_vocabulary'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({"vocabulary_name":customVocabularyName}),
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
+          console.log("Success! Vocabulary deleted.")
+          this.vocabularyNotificationMessage = "Deleted vocabulary: " + customVocabularyName
+          this.vocabularyNotificationStatus = "success"
+          this.showVocabularyNotification = 5
+          // reset the radio button selection
+          this.customVocabularySelected = ""
+          this.customVocabularySaved = []
+          this.listVocabulariesRequest()
+        } else {
+          console.log("Failed to delete vocabulary")
+          this.vocabularyNotificationMessage = "Failed to delete vocabulary: " + customVocabularyName
+          this.vocabularyNotificationStatus = "danger"
+          this.showVocabularyNotification = 5
+        }
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
       }
-      this.$refs['delete-vocab-modal'].hide()
-      console.log("Delete vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+'\' --data \'{"vocabulary_name":"'+customVocabularyName+'}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/delete_vocabulary')
-      await fetch(this.WORKFLOW_API_ENDPOINT+'/service/transcribe/delete_vocabulary',{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': token},
-        body: JSON.stringify({"vocabulary_name":customVocabularyName})
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-        ).then(res => {
-          if (res.status === 200) {
-            console.log("Success! Vocabulary deleted.")
-            this.vocabularyNotificationMessage = "Deleted vocabulary: " + customVocabularyName
-            this.vocabularyNotificationStatus = "success"
-            this.showVocabularyNotification = 5
-            // reset the radio button selection
-            this.customVocabularySelected = ""
-            this.customVocabularySaved = []
-            this.listVocabulariesRequest()
-          } else {
-            console.log("Failed to delete vocabulary")
-            this.vocabularyNotificationMessage = "Failed to delete vocabulary: " + customVocabularyName
-            this.vocabularyNotificationStatus = "danger"
-            this.showVocabularyNotification = 5
-          }
-        })
-      )
     },
     overwriteVocabularyRequest: async function (token, customVocabularyName) {
       if (token === null) {
@@ -1032,146 +1032,153 @@ export default {
       })
     },
     saveVocabularyRequest: async function (token, customVocabularyName) {
-      if (token === null) {
-        token = await this.$Amplify.Auth.currentSession().then(data =>{
-          return data.getIdToken().getJwtToken();
-        });
-      }
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/create_vocabulary'
       const s3uri = "s3://"+this.DATAPLANE_BUCKET+"/"+customVocabularyName
-      console.log("Create vocabulary request:")
-      console.log('curl -L -k -X POST -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' --data \'{"s3uri":'+s3uri+', "vocabulary_name":'+customVocabularyName+', "language_code": '+this.transcribe_language_code+'}\' '+this.WORKFLOW_API_ENDPOINT+'/service/transcribe/create_vocabulary')
-      await fetch(this.WORKFLOW_API_ENDPOINT+'/service/transcribe/create_vocabulary',{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': token},
-        body: JSON.stringify({"s3uri": s3uri, "vocabulary_name":customVocabularyName, "language_code": this.vocabulary_language_code})
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-        ).then(res => {
-          if (res.status === 200) {
-            console.log("Saving custom vocabulary...")
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            "vocabulary_name":customVocabularyName,
+            "s3uri": s3uri,
+            "language_code": this.transcribe_language_code
+          },
+          response: true
+      };
+
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
+          cconsole.log("Saving custom vocabulary...")
             this.vocabularyNotificationMessage = "Saving custom vocabulary " + customVocabularyName + "..."
             this.vocabularyNotificationStatus = "success"
             this.showVocabularyNotification = 5
             this.customVocabularyUnsaved = []
-          } else {
-            console.log("Failed to save vocabulary")
+        } else {
+          console.log("Failed to save vocabulary")
             this.vocabularyNotificationMessage = "Failed to save vocabulary: " + customVocabularyName
             this.vocabularyNotificationStatus = "danger"
             this.showVocabularyNotification = 5
-          }
-          // clear the custom vocabulary name used in the save vocab modal form
+        }
+        // clear the custom vocabulary name used in the save vocab modal form
           this.customVocabularyCreateNew = ''
-        })
-      )
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
     saveVocabulary: async function () {
       const signedUrl = this.DATAPLANE_API_ENDPOINT + '/upload';
       const token = await this.$Amplify.Auth.currentSession().then(data =>{
         return data.getIdToken().getJwtToken();
       });
-      // Get presigned url to upload custom vocab file.
-      console.log("Pre-signed URL request:")
-      console.log("curl -L -k -X POST -H 'Content-Type: application/json' -H 'Authorization: "+token+"' --data '{\"S3Bucket\":\""+this.DATAPLANE_BUCKET+"\",\"S3Key\":\""+this.customVocabularyName+"\"}' "+this.DATAPLANE_API_ENDPOINT+'/upload')
-      fetch(signedUrl,{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': token},
-        body: JSON.stringify(
-            {"S3Bucket": this.DATAPLANE_BUCKET, "S3Key":this.customVocabularyName}
-        )
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-              status: response.status
-            })
-        ).then(res => {
-          if (res.status === 200) {
-            // Now that we have the presigned url, upload the custom vocab file.
-            res.data.fields["file"] = this.customVocabularyFile
-            console.log("Upload request:")
-            let curl_command = "curl --request POST"
-            for (let key in res.data.fields) {
-              curl_command += " -F " + key + "=\""+res.data.fields[key]+"\""
-            }
-            curl_command += " " + res.data.url
-            console.log(curl_command)
-            let formData  = new FormData();
-            for(const name in res.data.fields) {
-              formData.append(name, res.data.fields[name]);
-            }
-            fetch(res.data.url, {
-              method: 'POST',
-              body: formData
-            }).then(() => {
-              // Now that the custom vocab file is in s3, create the custom vocab in AWS Transcribe.
-              // If the custom vocab already exists then overwrite it.
-              const customVocabularyName = this.customVocabularyName
-              if (this.customVocabularyList.some(item => item.name === this.customVocabularyName)) {
-                console.log("Overwriting custom vocabulary: " + customVocabularyName)
-                this.overwriteVocabularyRequest(token, customVocabularyName)
-              } else {
-                this.saveVocabularyRequest(token, customVocabularyName)
-              }
-              // Save custom vocabulary to vuex state so we can reload it
-              // if Transcribe failed to save it.
-              let unsavedCustomVocabularies = this.unsaved_custom_vocabularies
-              // Delete any vocabs in vuex state with the same name
-              // as the current one being saved.
-              unsavedCustomVocabularies = this.unsaved_custom_vocabularies.filter(item => (item.Name !== customVocabularyName))
-              // Save the unsaved vocab in vuex state.
-              unsavedCustomVocabularies = unsavedCustomVocabularies.concat({"Name":customVocabularyName, "vocabulary":this.customVocabularyUnion})
-              this.$store.commit('updateUnsavedCustomVocabularies', unsavedCustomVocabularies);
-            })
+
+      let apiName = 'mieWorkflowApi'
+      let path = 'upload'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(
+            {"S3Bucket": this.DATAPLANE_BUCKET, "S3Key":this.customVocabularyName}),
+          response: true
+      };
+
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        // Now that we have the presigned url, upload the custom vocab file.
+          response.data.fields["file"] = this.customVocabularyFile
+          console.log("Upload request:")
+          let curl_command = "curl --request POST"
+          for (let key in response.data.fields) {
+            curl_command += " -F " + key + "=\""+response.data.fields[key]+"\""
           }
-        })
-        )
+          curl_command += " " + response.data.url
+          console.log(curl_command)
+          let formData  = new FormData();
+          for(const name in response.data.fields) {
+            formData.append(name, response.data.fields[name]);
+          }
+          fetch(response.data.url, {
+            method: 'POST',
+            body: formData
+          }).then(() => {
+            // Now that the custom vocab file is in s3, create the custom vocab in AWS Transcribe.
+            // If the custom vocab already exists then overwrite it.
+            const customVocabularyName = this.customVocabularyName
+            if (this.customVocabularyList.some(item => item.name === this.customVocabularyName)) {
+              console.log("Overwriting custom vocabulary: " + customVocabularyName)
+              this.overwriteVocabularyRequest(token, customVocabularyName)
+            } else {
+              this.saveVocabularyRequest(token, customVocabularyName)
+            }
+            // Save custom vocabulary to vuex state so we can reload it
+            // if Transcribe failed to save it.
+            let unsavedCustomVocabularies = this.unsaved_custom_vocabularies
+            // Delete any vocabs in vuex state with the same name
+            // as the current one being saved.
+            unsavedCustomVocabularies = this.unsaved_custom_vocabularies.filter(item => (item.Name !== customVocabularyName))
+            // Save the unsaved vocab in vuex state.
+            unsavedCustomVocabularies = unsavedCustomVocabularies.concat({"Name":customVocabularyName, "vocabulary":this.customVocabularyUnion})
+            this.$store.commit('updateUnsavedCustomVocabularies', unsavedCustomVocabularies);
+          })
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
     saveCaptions: async function () {
       // This function saves captions to the dataplane
       // and reruns or resumes the workflow.
       this.isSaving=true;
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
       const operator_name = "WebCaptions_"+this.sourceLanguageCode
       const webCaptions = {"WebCaptions": this.webCaptions}
       console.log("this.webCaptions")
       console.log(JSON.stringify(this.webCaptions))
-      let data='{"OperatorName": "' + operator_name + '", "Results": ' + JSON.stringify(webCaptions) + ', "WorkflowId": "' + this.workflow_id + '"}'
-      fetch(this.DATAPLANE_API_ENDPOINT + 'metadata/' + this.asset_id, {
-        method: 'post',
-        body: data,
-        headers: {'Content-Type': 'application/json', 'Authorization': token}
-      }).then(response =>
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status === 200) {
-            this.isSaving=true;
-            console.log("Captions saved")
-            clearInterval(this.workflow_status_polling)
-            this.saveNotificationMessage = "Captions saved"
-            if (this.workflow_status === "Waiting") {
-              this.resumeWorkflow();
-              this.workflow_status = "Started";
-            } else if (this.workflow_status === "Complete" ||
-              this.workflow_status === "Error") {
-              this.rerunWorkflow(token);
-            }
-            this.showSaveNotification = 5;
+      let data={
+        "OperatorName": operator_name, 
+        "Results": JSON.stringify(webCaptions), 
+        "WorkflowId": this.workflow_id
+      }
+      
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + this.asset_id
+      let requestOpts = {
+        response: true,
+        headers: {'Content-Type': 'application/json'},
+        body: data
+      };
+      try {
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+        if (response.status === 200) {
+          this.isSaving=true;
+          console.log("Captions saved")
+          clearInterval(this.workflow_status_polling)
+          this.saveNotificationMessage = "Captions saved"
+          if (this.workflow_status === "Waiting") {
+            this.resumeWorkflow();
+            this.workflow_status = "Started";
+          } else if (this.workflow_status === "Complete" ||
+            this.workflow_status === "Error") {
+            this.rerunWorkflow(token);
           }
-          if (res.status !== 200) {
-            console.log("ERROR: Failed to upload captions.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
-            console.log("Response: " + response.status);
-          }
-        })
-      )
+          this.showSaveNotification = 5;
+        }
+        else {
+          console.log("ERROR: Failed to upload captions.");
+          console.log(response.data.Code);
+          console.log(response.data.Message);
+          console.log("Response: " + response.status);
+        }
+      } catch (error) {
+        this.showDataplaneAlert = true
+        console.log(error)
+      }
     },
     downloadCaptionsVTT() {
       this.webToVtt()
@@ -1206,39 +1213,39 @@ export default {
       this.sortWebCaptions();
     },
     getWebCaptions: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
+
       // Get paginated web captions
       const operator_name = "WebCaptions_"+this.sourceLanguageCode
       let cursor=''
-      let url = this.DATAPLANE_API_ENDPOINT + '/metadata/' + this.asset_id + '/' + operator_name
       this.webCaptions = []
-      this.getWebCaptionPages(token, url, cursor)
+      this.getWebCaptionPages(this.asset_id, operator_name, cursor)
     },
-    getWebCaptionPages: async function (token, url, cursor) {
-      fetch((cursor.length === 0) ? url : url + '?cursor=' + cursor, {
-        method: 'get',
-        headers: {
-          'Authorization': token
-        },
-      }).then(response => {
-        response.json().then(data => ({
-            data: data,
-            status: response.status
-          })
-        ).then(res => {
-          if (res.status !== 200) {
+    getWebCaptionPages: async function (asset_id, operator_name, cursor) {
+
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + this.asset_id + '/' + operator_name
+      let requestOpts = {
+        response: true,
+        headers: {'Content-Type': 'application/json'}
+      };
+
+      if (cursor.length != 0) {
+        path = path + '?cursor=' + cursor
+      }
+
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        if (response.status !== 200) {
             console.log("ERROR: Failed to download captions.");
-            console.log(res.data.Code);
-            console.log(res.data.Message);
-            console.log("Response: " + res.status);
+            console.log(response.data.Code);
+            console.log(response.data.Message);
+            console.log("Response: " + response.status);
             this.isBusy = false
             this.noTranscript = true
           }
-          if (res.data.results) {
-            cursor = res.data.cursor;
-            this.webCaptions = res.data.results["WebCaptions"]
+          if (response.data.results) {
+            cursor = response.data.cursor;
+            this.webCaptions = response.data.results["WebCaptions"]
             console.log("low confidence words:")
             // TODO: highlight low confidence words in GUI
             const low_confidence_words = []
@@ -1261,8 +1268,10 @@ export default {
           } else {
             this.videoOptions.captions = []
           }
-        })
-      });
+      } catch (error) {
+        this.showDataplaneAlert = true
+        console.log(error)
+      }
     },
     add_row(index) {
       this.webCaptions.splice(index+1, 0, {"start":this.webCaptions[index].end,"caption":"","end":this.webCaptions[index+1].start})
@@ -1300,7 +1309,7 @@ export default {
       // Poll frequency in milliseconds
       const poll_frequency = 5000;
       this.workflow_status_polling = setInterval(() => {
-        this.getWorkflowStatus();
+        this.getAssetWorkflowStatus();
       }, poll_frequency)
     },
     pollVocabularyStatus() {

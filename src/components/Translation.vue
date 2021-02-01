@@ -572,29 +572,23 @@ export default {
       return emptyTerminologyRecord
     },
     listTerminologiesRequest: async function () {
-      const token = await this.$Amplify.Auth.currentSession().then(data =>{
-        return data.getIdToken().getJwtToken();
-      });
-      console.log("List terminologies request:")
-      console.log('curl -L -k -X GET -H \'Content-Type: application/json\' -H \'Authorization: \''+token+' '+this.DATAPLANE_API_ENDPOINT+'translate/list_terminologies')
-      fetch(this.DATAPLANE_API_ENDPOINT + 'service/translate/list_terminologies', {
-        method: 'get',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-      }).then(response =>
-        response.json().then(data => ({
-              data: data,
-            })
-        ).then(res => {
-          // Only show the terminologies defined for a single target language
-          // and that target language is the one the user selected in the webcaptions
-          // table:
-          this.customTerminologyList = res.data['TerminologyPropertiesList'].filter(x => x['TargetLanguageCodes'].length === 1).filter(x => x['TargetLanguageCodes'][0] === this.selected_lang_code).map(x => x.Name)
-        })
-      )
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/list_terminologies'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.customTerminologyList = response.data['TerminologyPropertiesList'].filter(x => x['TargetLanguageCodes'].length === 1).filter(x => x['TargetLanguageCodes'][0] === this.selected_lang_code).map(x => x.Name)
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
     },
     getLanguageList: async function () {
       // This function gets the list of languages that we'll show as columns
@@ -605,6 +599,40 @@ export default {
       });
       this.translationsCollection = [];
       const asset_id = this.$route.params.asset_id;
+
+      // Get the all the output for the TranslateWebCaptions operator.
+      // We do this simply so we can get the list of languages that have been translated.
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/TranslateWebCaptions'
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        response.data.results.CaptionsCollection.forEach( (item) => {
+            let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
+            // save the language code to the translationsCollection
+            this.translationsCollection.push(
+              {text: languageLabel, value: item.TargetLanguageCode}
+            );
+          })
+          // Got all the languages now.
+          // Set the default language to the first one in the alphabetized list.
+          if (this.alphabetized_language_collection.length > 0) {
+            this.selected_lang = this.alphabetized_language_collection[0].text
+            this.selected_lang_code = this.alphabetized_language_collection[0].value
+            await this.getWebCaptions()
+          }
+          this.isBusy = false
+      } catch (error) {
+        alert(
+          "ERROR: Failed to get vocabularies."
+        );
+        console.log(error)
+      }
       // Get the all the output for the TranslateWebCaptions operator.
       // We do this simply so we can get the list of languages that have been translated.
       fetch(this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/TranslateWebCaptions', {
@@ -618,7 +646,7 @@ export default {
           })
         ).then(async (res) => {
           // get the list of available languages
-          res.data.results.CaptionsCollection.forEach( (item) => {
+          response.data.results.CaptionsCollection.forEach( (item) => {
             let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
             // save the language code to the translationsCollection
             this.translationsCollection.push(

@@ -312,7 +312,7 @@
           this.getAssetMetadata();
       },
     methods: {
-      async getVttCaptions(token) {
+      async getVttCaptions() {
 
         let asset_id = this.$route.params.asset_id;
         let apiName = 'mieDataplaneApi';
@@ -345,26 +345,23 @@
               let path = 'metadata/' + asset_id + '/download';
               let requestOpts = {
                 response: true,
-              };
-              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-              let apiParams = {
                 headers: {'Content-Type': 'application/json'},
                 body: body_string,
                 queryStringParameters: {'q': query, '_source': 'AssetId'}
               };
+              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
 
               try {
-                let response = await this.$Amplify.API.post(apiName, path, requestOpts);
+                let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+                if (res.data) {
+                  captions_collection.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+              }
                 
               } catch (error) {
                 alert(error)
                 console.log(error)
-              }
-
-              if (response.data) {
-                captions_collection.push({'src': response.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-              }
-            };
+              }   
+            }
 
             this.videoOptions.captions = captions_collection;
           } else {
@@ -375,8 +372,6 @@
           alert(error)
           console.log(error)
         }
-
-        this.updateAssetId();
       },
       async getAssetMetadata () {
         let asset_id = this.$route.params.asset_id;

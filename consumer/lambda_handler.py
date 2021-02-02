@@ -35,15 +35,16 @@ def process_text_detection(asset, workflow, results):
         for page in metadata:
             if len(page["TextDetections"]) > 0:
                 for item in page["TextDetections"]:
-                    try:# Handle text detection schema for videos
-                        text_detection["Timestamp"] = item["Timestamp"]	                        if "TextDetection" in item:
-                        text_detection["Operator"] = "textDetection"	                            text_detection = item["TextDetection"]
-                        text_detection["Workflow"] = workflow	                            text_detection["Timestamp"] = item["Timestamp"]
-                        # Flatten the bbox Label array	                            text_detection["Operator"] = "textDetection"
-                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]	                            text_detection["Workflow"] = workflow
-                        del text_detection["Geometry"]	                            # Flatten the bbox Label array
-                        print(text_detection)	                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
-                        extracted_items.append(text_detection)	                            del text_detection["Geometry"]
+                    try:
+                        # Handle text detection schema for videos
+                        if "TextDetection" in item:
+                            text_detection = item["TextDetection"]
+                            text_detection["Timestamp"] = item["Timestamp"]
+                            text_detection["Operator"] = "textDetection"
+                            text_detection["Workflow"] = workflow
+                            # Flatten the bbox Label array
+                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
+                            del text_detection["Geometry"]
                             print(text_detection)
                             extracted_items.append(text_detection)
                         # Handle text detection schema for images
@@ -62,13 +63,13 @@ def process_text_detection(asset, workflow, results):
                 for item in metadata["TextDetections"]:
                     try:
                         # Handle text detection schema for videos
-                        text_detection["Timestamp"] = item["Timestamp"]	                        if "TextDetection" in item:
-                        text_detection["Operator"] = "textDetection"	                            text_detection = item["TextDetection"]
-                        text_detection["Workflow"] = workflow	                            text_detection["Timestamp"] = item["Timestamp"]
-                        # Flatten the bbox Label array	                            text_detection["Operator"] = "textDetection"
-                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]	                            text_detection["Workflow"] = workflow
-                        del text_detection["Geometry"]	                            # Flatten the bbox Label array
-                        extracted_items.append(text_detection)	                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
+                        if "TextDetection" in item:
+                            text_detection = item["TextDetection"]
+                            text_detection["Timestamp"] = item["Timestamp"]
+                            text_detection["Operator"] = "textDetection"
+                            text_detection["Workflow"] = workflow
+                            # Flatten the bbox Label array
+                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
                             del text_detection["Geometry"]
                             print(text_detection)
                             extracted_items.append(text_detection)

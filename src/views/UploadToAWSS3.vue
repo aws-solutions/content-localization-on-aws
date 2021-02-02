@@ -858,7 +858,7 @@ export default {
         }
       this.$store.commit("updateExecutedAssets", vm.executed_assets);
       } catch (error) {
-        alert("ERROR: Failed to get workflow status");
+        console.log ("ERROR: Failed to get workflow status");
         console.log(error)
       }
     },

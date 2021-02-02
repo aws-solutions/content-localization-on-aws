@@ -331,7 +331,7 @@
           let captions_collection = [];
 
           if (response.data.results) {
-            this.num_caption_tracks = res.data.results.CaptionsCollection.length;
+            this.num_caption_tracks = response.data.results.CaptionsCollection.length;
 
             for (const item of response.data.results.CaptionsCollection) {
     
@@ -339,17 +339,17 @@
 
               const bucket = item.Results.S3Bucket;
               const key = item.Results.S3Key;
+              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
+              let body = {"S3Bucket": bucket, "S3Key": key}
               // get URL to captions file in S3
 
-              let apiName = 'mieDataplaneApi';
-              let path = 'metadata/' + asset_id + '/download';
-              let requestOpts = {
+              apiName = 'mieDataplaneApi';
+              path = 'download';
+              requestOpts = {
                 response: true,
                 headers: {'Content-Type': 'application/json'},
-                body: body_string,
-                queryStringParameters: {'q': query, '_source': 'AssetId'}
+                body: body
               };
-              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
 
               try {
                 let res = await this.$Amplify.API.post(apiName, path, requestOpts);
@@ -393,6 +393,7 @@
           }
           this.filename = filename;
           this.getVideoUrl()
+          this.getVttCaptions()
         } catch (error) {
           alert(error)
           console.log(error)

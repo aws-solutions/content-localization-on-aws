@@ -585,7 +585,7 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.customTerminologyList = response.data['TerminologyPropertiesList'].filter(x => x['TargetLanguageCodes'].length === 1).filter(x => x['TargetLanguageCodes'][0] === this.selected_lang_code).map(x => x.Name)
       } catch (error) {
-        alert(
+        console.log(
           "ERROR: Failed to get vocabularies."
         );
         console.log(error)
@@ -626,8 +626,8 @@ export default {
           }
           this.isBusy = false
       } catch (error) {
-        alert(
-          "ERROR: Failed to get vocabularies."
+        console.log(
+          "ERROR: Failed to get languages."
         );
         console.log(error)
       }
@@ -635,7 +635,7 @@ export default {
 
       // Get the all the output for the TranslateWebCaptions operator.
       // We do this simply so we can get the list of languages that have been translated.
-      path = 'metadata' + asset_id + '/TranslateWebCaptions'
+      path = 'metadata/' + asset_id + '/TranslateWebCaptions'
       requestOpts = {
           headers: {
             'Content-Type': 'application/json'
@@ -679,7 +679,7 @@ export default {
       let asset_id = this.$route.params.asset_id;
 
       let apiName = 'mieDataplaneApi'
-      let path = 'metadata' + asset_id + '/WebToVTTCaptions'
+      let path = 'metadata/' + asset_id + '/WebToVTTCaptions'
       let requestOpts = {
           headers: {
             'Content-Type': 'application/json'
@@ -696,7 +696,6 @@ export default {
             console.log("ERROR: Could not retrieve Translation data.");
             console.log(response.data.Code);
             console.log(response.data.Message);
-            console.log("URL: " + this.DATAPLANE_API_ENDPOINT + '/metadata/' + asset_id + '/WebToVTTCaptions');
             console.log("Data:");
             console.log((response.data));
             console.log("Response: " + response.status);
@@ -716,7 +715,10 @@ export default {
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
+              body: {
+                "S3Bucket": bucket, 
+                "S3Key": key
+                },
               response: true
           };
 
@@ -777,8 +779,8 @@ export default {
         
         let captions_collection = [];
         this.num_caption_tracks = response.data.results.CaptionsCollection.length;
-      
-        response.data.results.CaptionsCollection.asyncForEach(async(item) => {
+        
+        this.asyncForEach(response.data.results.CaptionsCollection, async(item) => {
           // TODO: map the language code to a language label
           const bucket = item.Results.S3Bucket;
           const key = item.Results.S3Key;
@@ -790,7 +792,10 @@ export default {
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
+              body: {
+                "S3Bucket": bucket, 
+                "S3Key": key
+                },
               response: true
           };
 
@@ -824,7 +829,7 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
 
         let captions_collection = [];
-        response.data.results.CaptionsCollection.asyncForEach(async(item) => {
+        this.asyncForEach(response.data.results.CaptionsCollection, async(item) => {
           // TODO: map the language code to a language label
           if (item.PollyStatus != "not supported") {
             const bucket = item.PollyAudio.S3Bucket;
@@ -1034,7 +1039,7 @@ export default {
       // then we temporarily disable the ability for users to edit
       // translations in the GUI.
       let apiName = 'mieWorkflowApi'
-      let path =  "workflow/execution/asset" + this.asset_id
+      let path =  "workflow/execution/asset/" + this.asset_id
       let requestOpts = {
         headers: {},
         response: true,
@@ -1049,7 +1054,7 @@ export default {
         }
         this.workflow_status = new_workflow_status
       } catch (error) {
-        alert("ERROR: Failed to get workflow status");
+        console.log("ERROR: Failed to get workflow status");
         console.log(error)
       }
     },

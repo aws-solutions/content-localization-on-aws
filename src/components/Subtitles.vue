@@ -477,7 +477,7 @@ export default {
     this.handleVideoPlay();
     this.handleVideoSeek();
     this.getWorkflowId();
-    this.getWorkflowStatus();
+    this.getAssetWorkflowStatus();
   },
   beforeDestroy: function () {
     this.transcript = ''
@@ -715,27 +715,18 @@ export default {
       }.bind(this));
     },
     getWorkflowId: async function() {
-
-      let asset_id = this.asset_id
       let apiName = 'mieWorkflowApi'
-      let path = 'workflow/execution/asset/' + asset_id
+      let path = 'workflow/execution/asset/' + this.asset_id
       let requestOpts = {
         response: true,
       };
 
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        const workflow_id = response.data[0].Id
-        path = 'workflow/execution/asset/' + workflow_id
-
-        let res = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
-        const bucket = res.data.Globals.Media.Audio.S3Bucket;
-        const s3Key = res.data.Globals.Media.Audio.S3Key;
-        this.getAssetAudio(bucket, s3Key);
-        this.workflow_status = res.data[0].Status
-        if ("CurrentStage" in res.data[0])
-          this.waiting_stage = res.data[0].CurrentStage
+        this.workflow_id = response.data[0].Id
+        this.workflow_status = response.data[0].Status
+        if ("CurrentStage" in response.data[0])
+          this.waiting_stage = response.data[0].CurrentStage
         this.getTranscribeLanguage()
         // get workflow config, needed for edit captions button
         this.getWorkflowConfig();
@@ -746,7 +737,7 @@ export default {
     },
     getAssetWorkflowStatus: async function() {
       let apiName = 'mieWorkflowApi'
-      let path =  "workflow/execution/asset" + this.asset_id
+      let path =  "workflow/execution/asset/" + this.asset_id
       let requestOpts = {
         headers: {},
         response: true,
@@ -756,7 +747,7 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_status = response.data[0].Status
       } catch (error) {
-        alert("ERROR: Failed to get workflow status");
+        console.log("ERROR: Failed to get workflow status");
         console.log(error)
       }
     },
@@ -770,10 +761,11 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        console.log(response.data)
         this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-        this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.Transcribe.TranscribeLanguage
+        this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.TranscribeVideo.TranscribeLanguage
         this.vocabulary_language_code = this.transcribe_language_code
-        this.vocabulary_used = response.data.Configuration.defaultAudioStage2.Transcribe.VocabularyName
+        this.vocabulary_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName
         const operator_info = []
         const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
         operator_info.push({"name": "Source Language", "value": transcribe_language})
@@ -784,7 +776,7 @@ export default {
         this.getWebCaptions()
       
       } catch (error) {
-        alert("ERROR: Failed to get workflow status");
+        console.log("ERROR: Failed to get transcribe language");
         console.log(error)
       }
     },
@@ -1065,14 +1057,16 @@ export default {
     },
     saveVocabulary: async function () {
 
-      let apiName = 'mieWorkflowApi'
+      let apiName = 'mieDataplaneApi'
       let path = 'upload'
       let requestOpts = {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(
-            {"S3Bucket": this.DATAPLANE_BUCKET, "S3Key":this.customVocabularyName}),
+          body: {
+            "S3Bucket": this.DATAPLANE_BUCKET, 
+            "S3Key":this.customVocabularyName
+            },
           response: true
       };
 

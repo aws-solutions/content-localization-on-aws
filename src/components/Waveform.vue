@@ -54,7 +54,7 @@
       async getWorkflowId() {
         const asset_id = this.$route.params.asset_id
         let apiName = 'mieWorkflowApi'
-        let path = 'workflow/execution/asset/' + assetId
+        let path = 'workflow/execution/asset/' + asset_id
         let requestOpts = {
           response: true,
         };

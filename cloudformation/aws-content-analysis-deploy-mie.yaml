@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS Content Analysis - Deploys the AWS Content Analysis Application and the required Media Insights Engine Framework
+
+Parameters:
+  AdminEmail:
+    Description: Email address of the Content Analysis Administrator
+    Type: String
+  ElasticSearchNodeSize:
+    Description: "The node type to be provisioned for the Elasticsearch cluster"
+    Type: String
+    Default: "t2.small.elasticsearch"
+    AllowedValues:
+      - "t2.small.elasticsearch"
+      - "m4.large.elasticsearch"
+      - "m4.xlarge.elasticsearch"
+      - "c4.large.elasticsearch"
+      - "c4.xlarge.elasticsearch"
+      - "r4.large.elasticsearch"
+      - "r4.xlarge.elasticsearch"
+
+Mappings:
+  MediaInsightsEngine:
+  Release:
+    Version: "v2.0.2"
+  ContentAnalysisApp:
+    SourceCode:
+      S3Bucket: "%%BUCKET_NAME%%"
+      CodeKeyPrefix: "vod-subtitles-solution/%%VERSION%%/code"
+      TemplateKeyPrefix: "vod-subtitles-solution/%%VERSION%%/cf"
+      WebsitePrefix: "vod-subtitles-solution/%%VERSION%%/code/website"
+
+Resources:
+  # Deploy MIE Framework
+
+  MieStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - "rodeolabz-"
+          - !Ref AWS::Region
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - "media_insights_engine/"
+          - !FindInMap
+            - MediaInsightsEngine
+            - Release
+            - Version
+          - "/cf"
+          - "/media-insights-stack.template"
+      Parameters:
+        DeployAnalyticsPipeline: Yes
+        DeployTestResources: No
+        MaxConcurrentWorkflows: 5
+        EnableXrayTrace: Yes
+
+  # Deploy Elasticsearch
+
+  ContentAnalysisElasticsearchStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-content-analysis-elasticsearch.template"
+      Parameters:
+        AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
+        MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
+
+  # Deploy Auth stack
+
+  ContentAnalysisAuthStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-content-analysis-auth.template"
+      Parameters:
+        AdminEmail: !Ref AdminEmail
+        WorkflowAPIRestID: !GetAtt MieStack.Outputs.WorkflowApiRestID
+        DataplaneAPIRestID: !GetAtt MieStack.Outputs.DataplaneApiRestID
+        ElasticDomainArn: !GetAtt ContentAnalysisElasticsearchStack.Outputs.DomainArn
+        DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
+
+  ContentAnalysisWebStack:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: StringFunctions
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-content-analysis-web.template"
+      Parameters:
+        DataplaneEndpoint: !GetAtt MieStack.Outputs.DataplaneApiEndpoint
+        WorkflowEndpoint: !GetAtt MieStack.Outputs.WorkflowApiEndpoint
+        ElasticEndpoint: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
+        DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
+        UserPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolId
+        IdentityPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
+        PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
+
+  # Deploy video workflow
+
+  CompleteVideoWorkflow:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-content-analysis-video-workflow.template"
+      Parameters:
+        WorkflowCustomResourceArn:
+          Fn::GetAtt:
+            - MieStack
+            - Outputs.WorkflowCustomResourceArn
+        OperatorLibraryStack:
+          Fn::GetAtt:
+            - MieStack
+            - Outputs.OperatorLibraryStack
+
+  # Deploy image workflow
+
+  CompleteImageWorkflow:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-content-analysis-image-workflow.template"
+      Parameters:
+        WorkflowCustomResourceArn:
+          Fn::GetAtt:
+            - MieStack
+            - Outputs.WorkflowCustomResourceArn
+        OperatorLibraryStack:
+          Fn::GetAtt:
+            - MieStack
+            - Outputs.OperatorLibraryStack
+
+  # Custom resources
+
+  StringFunctions:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - ".s3."
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/string.template"
+
+Outputs:
+  ContentAnalyisSolution:
+    Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl

@@ -397,7 +397,7 @@
         let thumbnailS3Key = 'private/assets/' + assetId + '/' + filename.substring(0, filename.lastIndexOf(".")) + '_thumbnail.0000001.jpg';
         // If it's an image then Media Convert won't create a thumbnail.
         // In that case we use the uploaded image as the thumbnail.
-        let supported_image_types = [".jpg", ".jpeg", ".tif", ".tiff", ".png", ".apng", ".gif", ".bmp", ".svg"];
+        let supported_image_types = [".jpg", ".jpeg", ".tif", ".tiff", ".png", ".apng", ".gif", ".bmp", ".s gvg"];
         let media_type = filename.substring(filename.lastIndexOf(".")).toLowerCase();
         if (supported_image_types.includes(media_type)) {
           // use the uploaded image as a thumbnail

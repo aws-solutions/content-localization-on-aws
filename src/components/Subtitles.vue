@@ -492,7 +492,7 @@ export default {
 
         let apiName = 'mieWorkflowApi'
         let path = 'service/transcribe/get_vocabulary'
-        let body = JSON.stringify({"vocabulary_name": this.customVocabularySelected})
+        let body = {"vocabulary_name": this.customVocabularySelected}
         let requestOpts = {
             headers: {
               'Content-Type': 'application/json'
@@ -502,12 +502,11 @@ export default {
         };
         
         try {
-          let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          let response = await this.$Amplify.API.post(apiName, path, requestOpts);
           
           if (response.status === 200) {
             console.log("Failed vocabulary details:")
             console.log(response.data)
-            console.log(response.data.FailureReason)
             if ("FailureReason" in response.data) {
               // Transcribe's failure reason will reference a line number that
               // is 1 too high. We decrement that line number by 1 here so it
@@ -787,6 +786,7 @@ export default {
           headers: {
             'Content-Type': 'application/json'
           },
+          body: {"vocabulary_name":this.customVocabularySelected},
           response: true
       };
 
@@ -794,7 +794,7 @@ export default {
       this.customVocabularyFailedReason = ""
 
       try {
-        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if(response.status == 200) {
             // save phrases from the currently selected vocabulary
             this.customVocabularySaved = response.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
@@ -929,7 +929,7 @@ export default {
         } else {
           this.saveNotificationMessage += " and workflow resumed"
           console.log("workflow executing");
-          console.log(res);
+          console.log(response);
         }
       } catch (error) {
         alert(
@@ -969,7 +969,7 @@ export default {
           }
       } catch (error) {
         alert(
-          "ERROR: Failed to get vocabularies."
+          "ERROR: Failed to list vocabularies."
         );
         console.log(error)
       }
@@ -984,7 +984,9 @@ export default {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({"vocabulary_name":customVocabularyName}),
+          body: {
+            "vocabulary_name":customVocabularyName
+            },
           response: true
       };
       try {
@@ -1006,7 +1008,7 @@ export default {
         }
       } catch (error) {
         alert(
-          "ERROR: Failed to get vocabularies."
+          "ERROR: Failed to delete vocabularies."
         );
         console.log(error)
       }
@@ -1035,7 +1037,7 @@ export default {
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if (response.status === 200) {
-          cconsole.log("Saving custom vocabulary...")
+          console.log("Saving custom vocabulary...")
             this.vocabularyNotificationMessage = "Saving custom vocabulary " + customVocabularyName + "..."
             this.vocabularyNotificationStatus = "success"
             this.showVocabularyNotification = 5
@@ -1050,7 +1052,7 @@ export default {
           this.customVocabularyCreateNew = ''
       } catch (error) {
         alert(
-          "ERROR: Failed to get vocabularies."
+          "ERROR: Failed to save vocabularies."
         );
         console.log(error)
       }
@@ -1110,7 +1112,7 @@ export default {
           })
       } catch (error) {
         alert(
-          "ERROR: Failed to get vocabularies."
+          "ERROR: Failed to save vocabularies."
         );
         console.log(error)
       }
@@ -1125,7 +1127,7 @@ export default {
       console.log(JSON.stringify(this.webCaptions))
       let data={
         "OperatorName": operator_name, 
-        "Results": JSON.stringify(webCaptions), 
+        "Results": webCaptions, 
         "WorkflowId": this.workflow_id
       }
       

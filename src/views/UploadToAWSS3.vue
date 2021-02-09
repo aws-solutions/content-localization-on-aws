@@ -579,7 +579,7 @@ export default {
           },
           "WebCaptionsStage2": {
             "WebCaptions": {
-              "MediaType": "Text",
+              "MediaType": "MetadataOnly",
               "SourceLanguageCode": this.sourceLanguageCode,
               "Enabled": this.enabledOperators.includes("Transcribe"),
             }
@@ -590,7 +590,7 @@ export default {
               "Enabled": false,
             },
             "TranslateWebCaptions": {
-              "MediaType":"Text",
+              "MediaType":"MetadataOnly",
               "Enabled": this.enabledOperators.includes("Translate"),
               "TargetLanguageCodes": Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
               "SourceLanguageCode": this.sourceLanguageCode
@@ -920,7 +920,7 @@ export default {
       
       let apiName = 'mieWorkflowApi'
       let path = 'service/translate/list_terminologies'
-      const vm = this;
+      
       let requestOpts = {
           headers: {
             'Content-Type': 'application/json'
@@ -991,7 +991,7 @@ export default {
       
       let apiName = 'mieWorkflowApi'
       let path = 'service/transcribe/list_vocabularies'
-      const vm = this;
+      
       let requestOpts = {
           headers: {
             'Content-Type': 'application/json'

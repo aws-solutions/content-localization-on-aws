@@ -2,9 +2,9 @@
   <div>
     <Header />
     <b-container fluid>
-      <b-alert
-        v-model="showElasticSearchAlert"
-        variant="danger"
+      <b-alert 
+        v-model="showElasticSearchAlert" 
+        variant="danger" 
         dismissible
       >
         Elasticsearch server denied access. Please check its access policy.
@@ -13,21 +13,24 @@
         <b-col>
           <div>
             <b-row align-h="center">
-              <b-tabs
-                content-class="mt-3"
+              <b-tabs 
+                content-class="mt-3" 
                 fill
               >
                 <b-tab
                   title="ML Vision"
                   active
-                  @click="currentView = 'LabelObjects'; mlTabs = 0"
+                  @click="
+                    currentView = 'LabelObjects';
+                    mlTabs = 0;
+                  "
                 >
                   <b-container fluid>
                     <b-row>
                       <div>
-                        <b-tabs
-                          v-model="mlTabs"
-                          content-class="mt-3"
+                        <b-tabs 
+                          v-model="mlTabs" 
+                          content-class="mt-3" 
                           fill
                         >
                           <b-tab
@@ -66,13 +69,12 @@
                 <b-tab
                   v-if="mediaType !== 'image'"
                   title="Speech Recognition"
-                  @click="currentView = 'Transcript'; speechTabs = 0"
+                  @click="
+                    currentView = 'Transcript';
+                    speechTabs = 0;
+                  "
                 >
-                  <b-tabs
-                    v-model="speechTabs"
-                    content-class="mt-3"
-                    fill
-                  >
+                  <b-tabs v-model="speechTabs" content-class="mt-3" fill>
                     <b-tab
                       title="Transcript"
                       @click="currentView = 'Transcript'"
@@ -89,10 +91,7 @@
                       title="KeyPhrases"
                       @click="currentView = 'KeyPhrases'"
                     />
-                    <b-tab
-                      title="Entities"
-                      @click="currentView = 'Entities'"
-                    />
+                    <b-tab title="Entities" @click="currentView = 'Entities'" />
                   </b-tabs>
                 </b-tab>
               </b-tabs>
@@ -117,19 +116,34 @@
             </div>
           </div>
           <div v-else>
-            <div v-if="videoOptions.sources[0].src === '' || (videoOptions.captions.length > 0 && videoOptions.captions.length !== num_caption_tracks)">
+            <div
+              v-if="
+                videoOptions.sources[0].src === '' ||
+                (videoOptions.captions.length > 0 &&
+                  videoOptions.captions.length !== num_caption_tracks)
+              "
+            >
               <Loading />
             </div>
             <div v-else>
               <VideoPlayer :options="videoOptions" />
-              <div v-if="currentView === 'Transcript' || currentView === 'Subtitles' || currentView === 'Translation' || currentView === 'KeyPhrases' || currentView === 'Entities'">
-                <Waveform />
+              <div
+                v-if="
+                  currentView === 'Transcript' ||
+                  currentView === 'Subtitles' ||
+                  currentView === 'Translation' ||
+                  currentView === 'KeyPhrases' ||
+                  currentView === 'Entities'
+                "
+              >
+                <br />
+                <!-- <Waveform /> -->
               </div>
               <div v-else-if="currentView === 'ShotDetection'">
-                <br>
+                <br />
               </div>
               <div v-else-if="currentView === 'TechnicalCues'">
-                <br>
+                <br />
               </div>
               <div v-else>
                 <LineChart />
@@ -329,40 +343,38 @@
           let response = await this.$Amplify.API.get(apiName, path, requestOpts);
 
           let captions_collection = [];
-
           if (response.data.results) {
             this.num_caption_tracks = response.data.results.CaptionsCollection.length;
-
             for (const item of response.data.results.CaptionsCollection) {
     
               // TODO: map the language code to a language label
 
               const bucket = item.Results.S3Bucket;
               const key = item.Results.S3Key;
-              let body_string = JSON.stringify({"S3Bucket": bucket, "S3Key": key})
-              let body = {"S3Bucket": bucket, "S3Key": key}
-              // get URL to captions file in S3
 
               apiName = 'mieDataplaneApi';
               path = 'download';
               requestOpts = {
+                headers: {
+                },
+                body: {
+                  "S3Bucket": bucket, 
+                  "S3Key": key
+                  },
                 response: true,
-                headers: {'Content-Type': 'application/json'},
-                body: body
-              };
+                responseType: 'text'
+                }
 
               try {
                 let res = await this.$Amplify.API.post(apiName, path, requestOpts);
                 if (res.data) {
                   captions_collection.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
-              }
-                
+                }
               } catch (error) {
                 alert(error)
                 console.log(error)
               }   
             }
-
             this.videoOptions.captions = captions_collection;
           } else {
             this.videoOptions.captions = []
@@ -422,7 +434,6 @@
         let path = 'download'
         let requestOpts = {
           headers: {
-            'Content-Type': 'application/json'
           },
           body: data,
           response: true,
@@ -445,19 +456,18 @@
 </script>
 
 <style>
-  #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-  .mediaSummary {
-    text-align: left;
-  }
+.mediaSummary {
+  text-align: left;
+}
 
-  @media screen and (max-width: 800px) {
+@media screen and (max-width: 800px) {
   .dataColumns {
     flex-direction: column-reverse;
   }
 }
-
 </style>

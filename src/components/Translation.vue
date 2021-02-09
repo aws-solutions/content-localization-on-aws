@@ -574,7 +574,7 @@ export default {
     },
     listTerminologiesRequest: async function () {
       let apiName = 'mieWorkflowApi'
-      let path = 'service/transcribe/list_terminologies'
+      let path = 'service/translate/list_terminologies'
       let requestOpts = {
           headers: {
             'Content-Type': 'application/json'
@@ -610,19 +610,25 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+        let vm = this
         response.data.results.CaptionsCollection.forEach( (item) => {
-            let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
+            let languageLabel = vm.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
             // save the language code to the translationsCollection
             this.translationsCollection.push(
               {text: languageLabel, value: item.TargetLanguageCode}
             );
           })
+          console.log("got the collection")
+          console.log(this.translationsCollection)
           // Got all the languages now.
           // Set the default language to the first one in the alphabetized list.
           if (this.alphabetized_language_collection.length > 0) {
             this.selected_lang = this.alphabetized_language_collection[0].text
             this.selected_lang_code = this.alphabetized_language_collection[0].value
             await this.getWebCaptions()
+            console.log("got the captions")
+            console.log(this.translationsCollection)
           }
           this.isBusy = false
       } catch (error) {
@@ -632,40 +638,6 @@ export default {
         console.log(error)
       }
 
-
-      // Get the all the output for the TranslateWebCaptions operator.
-      // We do this simply so we can get the list of languages that have been translated.
-      path = 'metadata/' + asset_id + '/TranslateWebCaptions'
-      requestOpts = {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          response: true
-      };
-      
-      try {
-        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
-        response.data.results.CaptionsCollection.forEach( (item) => {
-          let languageLabel = this.translateLanguages.filter(x => (x.value === item.TargetLanguageCode))[0].text;
-          // save the language code to the translationsCollection
-          this.translationsCollection.push(
-            {text: languageLabel, value: item.TargetLanguageCode}
-          );
-        })
-        // Got all the languages now.
-        // Set the default language to the first one in the alphabetized list.
-        if (this.alphabetized_language_collection.length > 0) {
-          this.selected_lang = this.alphabetized_language_collection[0].text
-          this.selected_lang_code = this.alphabetized_language_collection[0].value
-          await this.getWebCaptions()
-        }
-        this.isBusy = false
-        
-      } catch (error) {
-        this.customVocabularyFailedReason = ""
-        console.log(error)
-      }
     },
     asyncForEach: async function(array, callback) {
       // This async function allows us to wait for all vtt files to be
@@ -686,6 +658,8 @@ export default {
           },
           response: true
       };
+
+      console.log("Getting VTT captions")
       
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
@@ -700,14 +674,17 @@ export default {
             console.log((response.data));
             console.log("Response: " + response.status);
           }
-      
+
+        console.log("Got VTT captions collection info")
         this.vttcaptions = [];
         this.num_caption_tracks = response.data.results.CaptionsCollection.length;
+        console.log(this.num_caption_tracks)
+        console.log("Got VTT captions files")
+        let vm = this;
         // now get signed urls that can be used to download the vtt files from s3
         this.asyncForEach(response.data.results.CaptionsCollection, async(item) => {
           const bucket = item.Results.S3Bucket;
           const key = item.Results.S3Key;
-          // get the signed url
 
           let apiName = 'mieDataplaneApi'
           let path = 'download'
@@ -719,44 +696,55 @@ export default {
                 "S3Bucket": bucket, 
                 "S3Key": key
                 },
-              response: true
-          };
+              response: true,
+              responseType: 'text'
+          }
 
           try {
 
-            let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+            let res = await vm.$Amplify.API.post(apiName, path, requestOpts);
             // record the signed urls in an array
-            this.vttcaptions.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+            
+            vm.vttcaptions.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
+            console.log("pushed vtt captions "+item.LanguageCode)
           } catch  (error){
             console.error(error)
           }
-
+          console.log("vm.vvtcaptions")
+          console.log(vm.vttcaptions)
           // now that we have all the signed urls to download vtt files,
           // update the captions in the video player for the currently selected
           // language. This will make sure the video player reflects any edits
           // that the user may have saved by clicking the Save Edits button.
-          if (this.selected_lang_code !== "") {
+          if (vm.selected_lang_code !== "") {
             // hide all the captions in the video player
-            for (let i = 0; i < this.player.textTracks().length; i++) {
-              let track = this.player.textTracks()[i];
+            for (let i = 0; i < vm.player.textTracks().length; i++) {
+              console.log("in the loop")
+              let track = vm.player.textTracks()[i];
               track.mode = "disabled";
             }
+            console.log("getting old tracks")
             // get the src for that language's vtt file
-            let old_track = this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0]
+            let old_track = vm.player.textTracks()["tracks_"].filter(x => (x.language == vm.selected_lang_code))[0]
             // create properties for a new track
             let new_track = {}
-            new_track.label = old_track.label
-            new_track.language = old_track.language
-            new_track.kind = old_track.kind
-            new_track.src = this.vtt_url
+            if (vm.player.textTracks().length > 0) {
+              new_track.label = old_track.label
+              new_track.language = old_track.language
+              new_track.kind = old_track.kind
+              // remove the old track for that vtt
+              console.log("remove old tracks")
+              vm.player.removeRemoteTextTrack(old_track)
+            }
+            new_track.src = vm.vtt_url
             // show the new caption in the video player
             new_track.mode = "showing"
-            // remove the old track for that vtt
-            this.player.removeRemoteTextTrack(old_track)
+            
             // add a new text track for that vtt
             const manualCleanup = false
             // manualCleanup is needed in order to avoid a warning
-            this.player.addRemoteTextTrack(new_track, manualCleanup)
+            console.log("add new tracks")
+            vm.player.addRemoteTextTrack(new_track, manualCleanup)
           }
         });
         
@@ -796,7 +784,8 @@ export default {
                 "S3Bucket": bucket, 
                 "S3Key": key
                 },
-              response: true
+              response: true,
+              responseType: 'text'
           };
 
           try {
@@ -839,10 +828,10 @@ export default {
             let path = 'download'
             let requestOpts = {
                 headers: {
-                  'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({"S3Bucket": bucket, "S3Key": key}),
-                response: true
+                body: {"S3Bucket": bucket, "S3Key": key},
+                response: true,
+                responseType: 'text'
             };
 
             try {
@@ -1164,7 +1153,7 @@ export default {
         } else {
           this.saveNotificationMessage += " and workflow resumed"
           console.log("workflow executing");
-          console.log(res);
+          console.log(response);
         }
       } catch (error) {
         alert(
@@ -1182,7 +1171,7 @@ export default {
       const web_captions = {"WebCaptions": this.webCaptions}
       let body={
         "OperatorName": operator_name ,
-        "Results": JSON.stringify(web_captions),
+        "Results": web_captions,
         "WorkflowId": this.workflow_id
       }
       let apiName = 'mieDataplaneApi'
@@ -1257,7 +1246,7 @@ export default {
             'Content-Type': 'application/json'
           },
           response: true,
-          body: JSON.stringify({"terminology_name": this.customTerminologyName, "terminology_csv": csv}),
+          body: {"terminology_name": this.customTerminologyName, "terminology_csv": csv},
           queryStringParameters: {} // optional
       };
       
@@ -1299,7 +1288,7 @@ export default {
             'Content-Type': 'application/json'
           },
           response: true,
-          body: JSON.stringify({"terminology_name":customTerminologyName}),
+          body: {"terminology_name":customTerminologyName},
           queryStringParameters: {} // optional
       };
       
@@ -1340,7 +1329,7 @@ export default {
             'Content-Type': 'application/json'
           },
           response: true,
-          body: JSON.stringify({"terminology_name":this.customTerminologySelected}),
+          body: {"terminology_name":this.customTerminologySelected},
           queryStringParameters: {} // optional
       };
       
@@ -1376,7 +1365,10 @@ export default {
       const operator_name = "WebCaptions_"+this.selected_lang_code
       let cursor=''
       this.webCaptions = []
+      console.log("call getWebCaptionPages")
       this.getWebCaptionPages(this.asset_id, operator_name, cursor)
+      console.log("after call getWebCaptionPages")
+      console.log(this.webCaptions)
 
       // switch the video player to show the selected language
       // by first disabling all the text tracks, like this:
@@ -1384,24 +1376,43 @@ export default {
         let track = this.player.textTracks()[i];
         track.mode = "disabled";
       }
+      console.log("before player")
       // then showing the text track for the selected language
-      this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0].mode = "showing"
+      if (this.player.textTracks().length > 0) {
+        this.player.textTracks()["tracks_"].filter(x => (x.language == this.selected_lang_code))[0].mode = "showing"
+      }
+      console.log("after player")
     },
     getWebCaptionPages: async function (asset_id, operator_name, cursor) {
-
+      
       let apiName = 'mieDataplaneApi'
+      console.log("getWebCaptionPages")
       let path = 'metadata/' + this.asset_id + '/' + operator_name
+      console.log("getWebCaptionPages asset__id "+this.asset_id)
+      console.log("path "+path)
+      let qs = {}
+      console.log("getWebCaptionPages")
+      if (cursor.length != 0) {
+        //path = path + '?cursor=' + cursor
+        qs = {"cursor":cursor}
+        console.log("cursr getWebCaptionPages")
+      }
+      console.log("getWebCaptionPages")
       let requestOpts = {
         response: true,
-        headers: {'Content-Type': 'application/json'}
+        headers: {'Content-Type': 'application/json'},
+        queryStringParameters: qs
       };
 
-      if (cursor.length != 0) {
-        path = path + '?cursor=' + cursor
-      }
+      console.log("before try getWebCaptionPages")
+      console.log(requestOpts)
 
       try {
+        console.log("try getWebCaptionPages")
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+
+        console.log("getWebCaptiosPages reponse")
+        console.log(response)
         if (response.status !== 200) {
             console.log("ERROR: Failed to download captions.");
             console.log(response.data.Code);
@@ -1416,7 +1427,7 @@ export default {
             this.sortWebCaptions()
             this.isBusy = false
             if (cursor)
-              this.getWebCaptionPages(url,cursor)
+              this.getWebCaptionPages(token,url,cursor)
           } else {
             this.videoOptions.captions = []
           }

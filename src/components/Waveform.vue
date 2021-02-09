@@ -37,7 +37,7 @@
         let apiName = 'mieDataplaneApi'
         let path = 'download'
         let requestOpts = {
-          body: JSON.stringify(body),
+          body: body,
           response: true,
           responseType: 'text'
         };
@@ -52,14 +52,18 @@
         }
       },
       async getWorkflowId() {
-        const asset_id = this.$route.params.asset_id
-        let apiName = 'mieWorkflowApi'
+        let asset_id = this.$route.params.asset_id
         let path = 'workflow/execution/asset/' + asset_id
+        let apiName = 'mieWorkflowApi'
         let requestOpts = {
-          response: true,
+          headers: {'Content-Type': 'application/json'},
+          response: true
         };
+        console.log(path)
         try {
           let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+          console.log("Waveform: getWorkflowId")
+          console.log(response)
           const workflow_id = response.data[0].Id
           let path = 'workflow/execution/asset/' + workflow_id
 

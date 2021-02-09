@@ -82,8 +82,8 @@ export default {
               this.transcript = this.transcript.concat(data[i]._source.transcript + " ")
               this.noTranscript = false;
             }
-            console.log("data")
-            console.log(data)
+            //console.log("data")
+            //console.log(data)
           }
         }
         this.isBusy = false

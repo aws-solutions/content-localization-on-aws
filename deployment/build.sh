@@ -91,7 +91,9 @@ echo "--------------------------------------------------------------------------
 
 echo "Preparing template files:"
 
-cp "$template_dir/aws-content-analysis-deploy-mie.yaml" "$dist_dir/aws-content-analysis-deploy-mie.template"
+cp "$template_dir/aws-vod-subtitles-deploy-mie
+.yaml" "$dist_dir/aws-vod-subtitles-deploy-mie
+.template"
 cp "$template_dir/aws-vod-subtitles.yaml" "$dist_dir/aws-vod-subtitles.template"
 cp "$template_dir/aws-content-analysis-elasticsearch.yaml" "$dist_dir/aws-content-analysis-elasticsearch.template"
 cp "$template_dir/aws-content-analysis-auth.yaml" "$dist_dir/aws-content-analysis-auth.template"
@@ -110,8 +112,10 @@ new_bucket="s/%%BUCKET_NAME%%/$bucket/g"
 new_version="s/%%VERSION%%/$version/g"
 
 # Update templates in place. Copy originals to [filename].orig
-sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-analysis-deploy-mie.template"
-sed -i.orig -e "$new_version" "$dist_dir/aws-content-analysis-deploy-mie.template"
+sed -i.orig -e "$new_bucket" "$dist_dir/aws-vod-subtitles-deploy-mie
+.template"
+sed -i.orig -e "$new_version" "$dist_dir/aws-vod-subtitles-deploy-mie
+.template"
 
 sed -i.orig -e "$new_bucket" "$dist_dir/aws-vod-subtitles.template"
 sed -i.orig -e "$new_version" "$dist_dir/aws-vod-subtitles.template"

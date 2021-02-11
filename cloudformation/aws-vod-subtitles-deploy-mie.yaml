@@ -21,7 +21,7 @@ Parameters:
 Mappings:
   MediaInsightsEngine:
   Release:
-    Version: "v2.0.2"
+    Version: "v2.0.3"
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"

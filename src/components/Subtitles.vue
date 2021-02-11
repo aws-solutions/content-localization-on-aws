@@ -900,7 +900,9 @@ export default {
     rerunWorkflow: async function () {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
+      console.log(data)
       data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
+      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].Enabled = true;
       data["Configuration"]["defaultPrelimVideoStage2"]["Thumbnail"].Enabled = true;
 
       let apiName = 'mieWorkflowApi'

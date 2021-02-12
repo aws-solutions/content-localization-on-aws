@@ -20,8 +20,8 @@ Parameters:
 
 Mappings:
   MediaInsightsEngine:
-  Release:
-    Version: "v2.0.3"
+    Release:
+      Version: "v2.0.3"
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
@@ -48,7 +48,6 @@ Resources:
             - MediaInsightsEngine
             - Release
             - Version
-          - "/cf"
           - "/media-insights-stack.template"
       Parameters:
         DeployAnalyticsPipeline: Yes

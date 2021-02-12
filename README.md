@@ -1,6 +1,16 @@
-# VOD Localization and Subtitles Application
+# Video Localization - built on Media Insights Engine
 
-This application uses AWS AI/ML services for transcribing and translating speech in videos (VOD content) that can be used to localize the content.  
+This application uses AWS AI/ML services to help localize video content.  With this application you can:
+
+1. Automatically generate subtitle tracks in multiple languages
+   
+2. Automatically generate audio transcriptions in multiple languages
+   
+3. Edit machine generated subtitles and automatically re-generate downstream outputs.  For example, if you edit and save the source language subtitles, you can automatically generate new translations and audio tracks based on your changes.
+   
+4. Human-in-the-loop customization of AWS AI/ML services to improve the accuracy of transcriptions and translations of your content using:
+   - Custom Vocabulary for Amazon Transcribe
+   - Custom Terminoligy for Amazon Translate
 
 The application is built on Media Insights Engine (MIE). MIE is a framework to accelerate the development of serverless applications that process video, images, audio, and text with artificial intelligence services and multimedia services on AWS. MIE is most often used to: 
 

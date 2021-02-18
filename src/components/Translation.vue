@@ -1059,11 +1059,10 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
         this.workflow_config = response.data.Configuration
         this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-        this.terminology_used = JSON.parse(response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames).JsonList.map(x => x.Name)
-        this.parallel_data_used = JSON.parse(response.data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames).JsonList.map(x => x.Name)
+        this.terminology_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
+        this.parallel_data_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow
         const operator_info = []
         const sourceLanguage = this.translateLanguages.filter(x => (x.value === this.sourceLanguageCode))[0].text;

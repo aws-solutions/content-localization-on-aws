@@ -157,9 +157,11 @@
                   :options="textOperators"
                   name="flavour-3"
                 ></b-form-checkbox-group>
-                <div v-if="enabledOperators.includes('Translate') && customTerminologyList.length > 0 && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
+                <div v-if="enabledOperators.includes('Translate')" >
+                   <!-- && customTerminologyList.length > 0"> -->
+                   <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
                   <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <div v-else><b>Custom Terminologies:</b></div>
+                  <div v-else><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
                   <b-form-select
                     v-model="customTerminology"
                     :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
@@ -174,7 +176,7 @@
                       </li>
                     </ul>
                   </div>
-                  <div v-if="parallelDataList.length > 0"><b>Parallel Data:</b> ({{ parallelData.length }} selected)</div>
+                  <div v-if="parallelDataList.length > 0"><b>Parallel Data:</b> ({{ parallelData.length }} selected) </div>
                   <div v-else><b>Parallel Data:</b></div>
                   <b-form-select
                     v-model="parallelData"
@@ -182,11 +184,11 @@
                     multiple
                   >
                   </b-form-select>
-                  <div v-if="overlappingTerminologies.length > 0" style="color:red">
-                    You must not select terminologies that define translations for the same language. The following terminologies overlap:
-                    <ul id="overlapping_terminologies">
-                      <li v-for="terminology in overlappingTerminologies">
-                        {{ terminology }}
+                  <div v-if="overlappingParallelData.length > 0" style="color:red">
+                    You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
+                    <ul id="overlapping_parallel_data">
+                      <li v-for="parallel_data in overlappingParallelData">
+                        {{ parallel_data }}
                       </li>
                     </ul>
                   </div>
@@ -511,7 +513,13 @@ export default {
     translateLanguageTags() {
       return this.translateLanguages
         .map(x => {return {"text": x.value, "value": x.text}})
-        .filter(x => x.text !== this.sourceLanguageCode)
+        //FIXME: filtering source languge from language tag list doesn't refresh 
+        // tag picker in UI.  So, if source language is English to start, English is 
+        // removed from the translation target languages.  When source language
+        // is changed to Spanish, Engish is added back to the tags on the Vue 
+        // Translation component but Engish tag is still missing on the tag
+        // picker.  For now, leave the source language in the list.
+        //.filter(x => x.text !== this.sourceLanguageCode)
     },
     ...mapState(['execution_history']),
     sourceLanguageCode() {
@@ -804,13 +812,13 @@ export default {
           data = vm.workflowConfig;
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
-            data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = JSON.stringify({"JsonList":this.customTerminology})
+            data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
           if (this.parallelData != null) {
-            data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = JSON.stringify({"JsonList":this.parallelData})
+            data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.customVocab !== null) {
-            data.Configuration.defaultAudioStage2.Transcribe.VocabularyName=this.customVocab
+            data.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in data.Configuration.WebCaptionsStage2.WebCaptions){
@@ -974,13 +982,14 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        this.customTerminologyList  = response.data['TerminologyPropertiesList'].map(terminology => {
-            return {
-              'Name': terminology.Name,
-              'SourceLanguageCode': terminology.SourceLanguageCode,
-              'TargetLanguageCodes': terminology.TargetLanguageCodes
-            }
-          })
+        this.customTerminologyList  = response.data['TerminologyPropertiesList']
+          // .map(terminology => {
+          //   return {
+          //     'Name': terminology.Name,
+          //     'SourceLanguageCode': terminology.SourceLanguageCode,
+          //     'TargetLanguageCodes': terminology.TargetLanguageCodes
+          //   }
+          // })
         
       } catch (error) {
         alert(

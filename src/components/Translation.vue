@@ -1059,10 +1059,10 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
         this.workflow_config = response.data.Configuration
         this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-        this.terminology_used = JSON.parse(response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames).JsonList.map(x => x.Name)
+        this.terminology_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
+        this.parallel_data_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow
         const operator_info = []
         const sourceLanguage = this.translateLanguages.filter(x => (x.value === this.sourceLanguageCode))[0].text;
@@ -1072,6 +1072,13 @@ export default {
             operator_info.push({"name": "Custom Terminology", "value": this.terminology_used[0]})
           else
             operator_info.push({"name": "Custom Terminologies", "value": this.terminology_used.join().replace(/,/g, ', ')})
+
+        }
+        if (this.parallel_data_used) {
+          if (this.parallel_data_used.length === 1)
+            operator_info.push({"name": "Parallel Data", "value": this.parallel_data_used[0]})
+          else
+            operator_info.push({"name": "Parallel Data", "value": this.parallel_data_used.join().replace(/,/g, ', ')})
 
         }
         this.$store.commit('updateOperatorInfo', operator_info)

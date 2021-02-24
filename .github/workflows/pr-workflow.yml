@@ -37,7 +37,7 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
-          read -r TEMPLATE < templateUrlMieRelease.txt
+          read -r TEMPLATE < ./src/templateUrlMieRelease.txt
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
 
 #./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION

@@ -34,7 +34,7 @@ jobs:
           EMAIL=micontentlocalization@gmail.com
           REGION=us-west-2
           VERSION="pr-${SHORT_SHA}"
-          DIST_OUTPUT_BUCKET=elementalrodeo99
+          DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
           read -r TEMPLATE < templateUrlMieRelease.txt

@@ -235,6 +235,11 @@ echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solu
 echo "Without existing MIE deployment:"
 echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles-deploy-mie.template"'"
 
+touch templateUrlMieDevelopment.txt
+echo "https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles.template" > templateUrlMieDevelopment.txt
+touch templateUrlMieRelease.txt
+echo "https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles-deploy-mie.template" > templateUrlMieRelease.txt
+
 echo "------------------------------------------------------------------------------"
 echo "Done"
 echo "------------------------------------------------------------------------------"

@@ -4,4 +4,4 @@ dist
 package-lock.json
 public/runtimeConfig.json
 src/templateUrlMieRelease.txt
-src/templateUrlMieStack.txt
+src/templateUrlMieDevelopment.txt

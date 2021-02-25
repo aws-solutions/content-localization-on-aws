@@ -41,7 +41,7 @@ jobs:
           read -r TEMPLATE < ../src/templateUrlMieRelease.txt
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
-          echo "wait for deploy to complete
+          echo "wait for deploy to complete"
           if [[ $? -eq 0 ]]; then
             # Wait for create-stack to finish
             echo  "Waiting for create-stack command to complete"
@@ -54,7 +54,6 @@ jobs:
                 fi
                 WAIT_TIME=$WAIT_TIME+30
                 echo "WAIT_TIME = $WAIT_TIME"
-                # Wait 30 seconds and then check stack status again
                 sleep 30
                 CREATE_STACK_STATUS=$(aws --region ${AWS_REGION} --profile ${AWS_PROFILE} cloudformation describe-stacks --stack-name ${STACK_NAME} --query 'Stacks[0].StackStatus' --output text)
                 echo "CREATE_STACK_STATUS is $CREATE_STACK_STATUS"

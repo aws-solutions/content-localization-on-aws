@@ -40,6 +40,7 @@ jobs:
           echo "read in the template"
           read -r TEMPLATE < ../src/templateUrlMieRelease.txt
           echo "CLOUDFORMATION_TEMPLATE=$TEMPLATE" >> $GITHUB_ENV
+          echo "::set-env name=CLOUDFORMATION_TEMPLATE::$TEMPLATE"
 
 
       # - name: Wait for deploy to complete before progressing

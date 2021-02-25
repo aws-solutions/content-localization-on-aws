@@ -47,19 +47,17 @@ jobs:
             echo  "Waiting for create-stack command to complete"
             CREATE_STACK_STATUS=$(aws --region ${AWS_REGION} cloudformation describe-stacks --stack-name ${STACK_NAME} --query 'Stacks[0].StackStatus' --output text)
             WAIT_TIME=0
-            echo "while [[ $CREATE_STACK_STATUS == "REVIEW_IN_PROGRESS" ]] || [[ $CREATE_STACK_STATUS == "CREATE_IN_PROGRESS" ]] && [[ $TIMEOUT == "REVIEW_IN_PROGRESS" ]]"
-            echo "do"
                 # Timeout check - 15 min
                 if [[ $WAIT_TIME -ge 900 ]]; then
                     echo "Deployment timed out after $WAIT_TIME seconds"
                     exit 1
+                fi
                 WAIT_TIME=$WAIT_TIME+30
                 echo "WAIT_TIME = $WAIT_TIME"
                 # Wait 30 seconds and then check stack status again
                 sleep 30
                 CREATE_STACK_STATUS=$(aws --region ${AWS_REGION} --profile ${AWS_PROFILE} cloudformation describe-stacks --stack-name ${STACK_NAME} --query 'Stacks[0].StackStatus' --output text)
                 echo "CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
-            echo "done"
           fi
           echo "check the status of the deployment"
 

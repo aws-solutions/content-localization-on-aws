@@ -53,7 +53,7 @@ jobs:
                     echo "Deployment timed out after $WAIT_TIME seconds"
                     exit 1
                 fi
-                WAIT_TIME=($WAIT_TIME+30)
+                ((WAIT_TIME=$WAIT_TIME+30))
                 echo "WAIT_TIME = $WAIT_TIME"
                 sleep 30
                 CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)

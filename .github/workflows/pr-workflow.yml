@@ -89,7 +89,7 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          CLOUDFORMATION_TEMPLATE=`cat src/templateUrlMieRelease.txt`
+          CLOUDFORMATION_TEMPLATE=`cat templateUrlMieRelease/templateUrlMieRelease.txt`
           echo "$CLOUDFORMATION_TEMPLATE"
           
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"

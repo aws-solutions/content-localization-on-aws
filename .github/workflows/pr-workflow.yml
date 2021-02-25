@@ -66,6 +66,7 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
+          echo "CONTENT_LOCALIZATION_STACK_NAME=pr`git rev-parse --short HEAD`" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Run build script
         run: |
@@ -75,10 +76,12 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
+          echo "$CLOUDFORMATION_TEMPLATE"
           CLOUDFORMATION_TEMPLATE=${{ env.CLOUDFORMATION_TEMPLATE }}
+          echo "$CLOUDFORMATION_TEMPLATE"
           
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           if [[ $? -eq 0 ]]; then
             echo  "Waiting for create-stack command to complete"
             CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)

@@ -81,7 +81,7 @@ jobs:
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
-      - name: Run build script
+      - name: Deploy
         run: |
           EMAIL=micontentlocalization@gmail.com
           REGION=us-west-2
@@ -89,11 +89,11 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrlMieRelease/templateUrlMieRelease.txt`
-          echo "$CLOUDFORMATION_TEMPLATE"
           
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           if [[ $? -eq 0 ]]; then
+            echo "$?"
             echo  "Waiting for create-stack command to complete"
             CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
             echo "Initial CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
@@ -115,6 +115,7 @@ jobs:
               echo "Stack creation FAILED with status $CREATE_STACK_STATUS"
               exit 1
           fi
+          echo "????"
           exit 0
       
 

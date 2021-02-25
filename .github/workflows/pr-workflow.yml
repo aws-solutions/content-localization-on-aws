@@ -37,6 +37,9 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
+          echo "read in the template"
+          read -r TEMPLATE < ../src/templateUrlMieRelease.txt
+          echo "CLOUDFORMATION_TEMPLATE=$TEMPLATE" >> $GITHUB_ENV
 
 
       # - name: Wait for deploy to complete before progressing
@@ -73,9 +76,8 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          echo "read in the template"
-          read -r TEMPLATE < ../src/templateUrlMieRelease.txt
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+          
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           if [[ $? -eq 0 ]]; then
             echo  "Waiting for create-stack command to complete"
@@ -102,7 +104,7 @@ jobs:
           exit 0
 
   test-us-west-2:
-    needs: deploy-us-west-2
+    needs: build-us-west-2
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'

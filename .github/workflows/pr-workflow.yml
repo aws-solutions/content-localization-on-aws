@@ -40,7 +40,6 @@ jobs:
           echo "read in the template"
           read -r TEMPLATE < ../src/templateUrlMieRelease.txt
           echo "CLOUDFORMATION_TEMPLATE=$TEMPLATE" >> $GITHUB_ENV
-          echo "::set-env name=CLOUDFORMATION_TEMPLATE::$TEMPLATE"
 
 
       # - name: Wait for deploy to complete before progressing
@@ -67,7 +66,6 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=pr`git rev-parse --short HEAD`" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Run build script
         run: |
@@ -77,6 +75,7 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
+          CLOUDFORMATION_TEMPLATE=${{ env.CLOUDFORMATION_TEMPLATE }}
           
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback

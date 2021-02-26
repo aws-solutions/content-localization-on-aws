@@ -98,7 +98,7 @@ jobs:
             WAIT_TIME=0
             while [[ $CREATE_STACK_STATUS == "REVIEW_IN_PROGRESS" ]] || [[ $CREATE_STACK_STATUS == "CREATE_IN_PROGRESS" ]] 
             do
-              if [[ $WAIT_TIME -ge 900 ]]; then
+              if [[ $WAIT_TIME -ge 1800 ]]; then
                   echo "Deployment timed out after $WAIT_TIME seconds"
                   exit 1
               fi

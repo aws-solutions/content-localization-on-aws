@@ -103,6 +103,10 @@ jobs:
             echo "wait time is '$WAIT_TIME'"
             ((WAIT_TIME=$WAIT_TIME+30))
             echo "wait time is '$WAIT_TIME'"
+            sleep 30
+            echo "slept"
+            CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
+            echo "At $WAIT_TIME seconds CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
           fi
           echo "????"
           exit 0

@@ -100,8 +100,9 @@ jobs:
                 echo "Deployment timed out after $WAIT_TIME seconds"
                 exit 1
             fi
-            echo "wait time is -gt 900"
-
+            echo "wait time is '$WAIT_TIME'"
+            ((WAIT_TIME=$WAIT_TIME+30))
+            echo "wait time is '$WAIT_TIME'"
           fi
           echo "????"
           exit 0

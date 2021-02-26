@@ -8,7 +8,7 @@ on:
 
 jobs:
   # Build and new deploy based on latest release of MIE
-  build-us-west-2:
+  build-content-localization-dev-us-west-2:
     runs-on: ubuntu-latest
     steps:
       - name: Check out pr branch
@@ -98,7 +98,7 @@ jobs:
   
 
   scan-3rd-party-data-us-west-2:
-    needs: build-us-west-2
+    needs: build-content-localization-dev-us-west-2
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'
@@ -128,7 +128,7 @@ jobs:
           echo "TBD - Scan for ensitive data"
 
   scan-us-west-2:
-    needs: build-us-west-2
+    needs: build-content-localization-dev-us-west-2
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'
@@ -217,7 +217,7 @@ jobs:
   deploy-content-localization-dev-us-west-2:
     needs: 
       - deploy-mie-dev-us-west-2
-      - build-us-west-2
+      - build-content-localization-dev-us-west-2
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'

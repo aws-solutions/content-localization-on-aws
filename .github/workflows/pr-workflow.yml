@@ -96,11 +96,16 @@ jobs:
             CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
             echo "Initial CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
             ((WAIT_TIME=0))
+            echo "wait time is set to $WAIT_TIME"
             # Timeout check - 15 min
             if [[ $WAIT_TIME -ge 900 ]]; then
                 echo "Deployment timed out after $WAIT_TIME seconds"
                 exit 1
             fi
+            ((WAIT_TIME=$WAIT_TIME+30))
+            sleep 30
+            CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
+            echo "At $WAIT_TIME seconds CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
           fi
           echo "????"
           exit 0

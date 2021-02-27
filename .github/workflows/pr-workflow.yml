@@ -126,6 +126,12 @@ jobs:
       - name: Scan for sensitive data
         run: |
           echo "TBD - Scan for ensitive data"
+      
+      # scan for various types of keys and tokens
+      - name: Trufflehog Scan
+        uses: edplato/trufflehog-actions-scan@master
+        with:
+          scanArguments: '--regex --entropy=False'   
 
   scan-us-west-2:
     needs: build-content-localization-dev-us-west-2
@@ -154,6 +160,10 @@ jobs:
         continue-on-error: true
         with:
             input_path: deployment
+
+      # check it with Hawkeye
+      - name: Hawkeye Scanner
+        uses: ./.github/actions/hawkeye-scan
 
   deploy-mie-dev-us-west-2:
     needs: build-mie-dev-us-west-2

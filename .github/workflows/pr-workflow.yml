@@ -250,30 +250,31 @@ jobs:
           
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
-          if [[ $? -eq 0 ]]; then
-            CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${MIE_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
-            echo "Initial CREATE_STACK_STATUS is '$CREATE_STACK_STATUS'"
-            WAIT_TIME=0
-            while [[ $CREATE_STACK_STATUS == "REVIEW_IN_PROGRESS" ]] || [[ $CREATE_STACK_STATUS == "CREATE_IN_PROGRESS" ]] 
-            do
-              if [[ $WAIT_TIME -ge 1800 ]]; then
-                  echo "Deployment timed out after $WAIT_TIME seconds"
-                  exit 1
-              fi
-              echo "wait time is '$WAIT_TIME'"
-              ((WAIT_TIME=$WAIT_TIME+30))
-              sleep 30
-              CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CMIE_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
-              echo "At $WAIT_TIME seconds CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
-            done
-            echo "Stack creation stopped after $WAIT_TIME seconds"
-            if [[ $CREATE_STACK_STATUS != "CREATE_COMPLETE" ]]; then 
-              echo "Stack creation FAILED with status $CREATE_STACK_STATUS"
-              exit 1
-            fi
-            echo "Everything is awesome"
-          fi
-          echo "Everything is still awesome"
+          aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          # if [[ $? -eq 0 ]]; then
+          #   CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${MIE_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
+          #   echo "Initial CREATE_STACK_STATUS is '$CREATE_STACK_STATUS'"
+          #   WAIT_TIME=0
+          #   while [[ $CREATE_STACK_STATUS == "REVIEW_IN_PROGRESS" ]] || [[ $CREATE_STACK_STATUS == "CREATE_IN_PROGRESS" ]] 
+          #   do
+          #     if [[ $WAIT_TIME -ge 1800 ]]; then
+          #         echo "Deployment timed out after $WAIT_TIME seconds"
+          #         exit 1
+          #     fi
+          #     echo "wait time is '$WAIT_TIME'"
+          #     ((WAIT_TIME=$WAIT_TIME+30))
+          #     sleep 30
+          #     CREATE_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name ${CMIE_STACK_NAME} --region ${AWS_REGION} --query 'Stacks[0].StackStatus' --output text)
+          #     echo "At $WAIT_TIME seconds CREATE_STACK_STATUS is $CREATE_STACK_STATUS"
+          #   done
+          #   echo "Stack creation stopped after $WAIT_TIME seconds"
+          #   if [[ $CREATE_STACK_STATUS != "CREATE_COMPLETE" ]]; then 
+          #     echo "Stack creation FAILED with status $CREATE_STACK_STATUS"
+          #     exit 1
+          #   fi
+          #   echo "Everything is awesome"
+          # fi
+          # echo "Everything is still awesome"
           exit 0
 
   test-content-localization-dev-us-west-2:

@@ -160,30 +160,11 @@ jobs:
         continue-on-error: true
         with:
             input_path: deployment
-
-      - name: ENV check 2
-        run: |
-          echo "ENV check 2"
-          echo "working dir"
-          pwd 
-          ls 
-          echo ".. dir"
-          ls ..
   
+      # check it with Hawkeye
+      - name: Hawkeye Scanner
+        uses: ./.github/actions/hawkeye-scan
 
-      # # check it with Hawkeye
-      # - name: Hawkeye Scanner
-      #   uses: ./.github/actions/hawkeye-scan
-
-      # environment
-      - name: ENV  3
-        run: |
-          echo "ENV check"
-          echo "working dir"
-          pwd 
-          ls 
-          echo ".. dir"
-          ls ..
 
 
   deploy-mie-dev-us-west-2:

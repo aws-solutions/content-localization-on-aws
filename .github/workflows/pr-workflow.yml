@@ -155,15 +155,6 @@ jobs:
         run: |
           echo "CONTENT_LOCALIZATION_STACK_NAME=pr`git rev-parse --short HEAD`" >> $GITHUB_ENV
 
-      - name: ENV check 1
-        run: |
-          echo "ENV check"
-          echo "working dir"
-          pwd 
-          ls 
-          echo ".. dir"
-          ls ..
-
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master
         continue-on-error: true
@@ -184,7 +175,6 @@ jobs:
         uses: ../.github/actions/hawkeye-scan
 
       # environment
-      
       - name: ENV  3
         run: |
           echo "ENV check"

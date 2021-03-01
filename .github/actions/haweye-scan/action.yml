@@ -1,0 +1,6 @@
+# action.yml
+name: 'Hawkeye CLI Scanner'
+description: Runs the Hawkeye CLI scanner
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

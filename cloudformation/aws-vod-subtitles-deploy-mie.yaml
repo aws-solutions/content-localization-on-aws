@@ -153,7 +153,7 @@ Resources:
             - ContentAnalysisApp
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-video-workflow.template"
+          - "/aws-vod-subtitles-video-workflow.template"
       Parameters:
         WorkflowCustomResourceArn:
           Fn::GetAtt:
@@ -164,35 +164,6 @@ Resources:
             - MieStack
             - Outputs.OperatorLibraryStack
 
-  # Deploy image workflow
-
-  CompleteImageWorkflow:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - S3Bucket
-          - ".s3."
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - TemplateKeyPrefix
-          - "/aws-content-analysis-image-workflow.template"
-      Parameters:
-        WorkflowCustomResourceArn:
-          Fn::GetAtt:
-            - MieStack
-            - Outputs.WorkflowCustomResourceArn
-        OperatorLibraryStack:
-          Fn::GetAtt:
-            - MieStack
-            - Outputs.OperatorLibraryStack
 
   # Custom resources
 

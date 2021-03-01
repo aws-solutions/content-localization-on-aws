@@ -163,12 +163,13 @@ jobs:
 
       - name: ENV check 2
         run: |
-          echo "ENV check"
+          echo "ENV check 2"
           echo "working dir"
           pwd 
           ls 
           echo ".. dir"
           ls ..
+  
 
       # check it with Hawkeye
       - name: Hawkeye Scanner

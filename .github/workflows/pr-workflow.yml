@@ -76,7 +76,7 @@ jobs:
       - name: Run build script
         run: |
           cd deployment
-          MIE_STACK_NAME="prmie${SHORT_SHA}"
+          MIE_STACK_NAME="prm${SHORT_SHA}"
           REGION=us-west-2
           VERSION="pr${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
@@ -186,7 +186,7 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "MIE_STACK_NAME=prmie`git rev-parse --short HEAD`" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=prm`git rev-parse --short HEAD`" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -225,7 +225,7 @@ jobs:
       - name: Generate short sha
         run: |
           echo "CONTENT_LOCALIZATION_STACK_NAME=pr`git rev-parse --short HEAD`" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=prmie`git rev-parse --short HEAD`" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=prm`git rev-parse --short HEAD`" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -264,7 +264,7 @@ jobs:
       - name: Generate short sha
         run: |
           echo "CONTENT_LOCALIZATION_STACK_NAME=pr`git rev-parse --short HEAD`" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=prmie`git rev-parse --short HEAD`" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=prm`git rev-parse --short HEAD`" >> $GITHUB_ENV
 
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master

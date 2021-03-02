@@ -1,3 +1,6 @@
+[scheduled-workflow](https://github.com/awslabs/aws-media-insights-content-localization/workflows/scheduled-workflow/badge.svg) ![release-workflow](https://github.com/awslabs/aws-media-insights-content-localization/workflows/release-workflow/badge.svg)
+![mie-scheduled-workflow](https://github.com/awslabs/aws-media-insights-engine/workflows/scheduled-workflow/badge.svg) ![mie-release-workflow](https://github.com/awslabs/aws-media-insights-engine/workflows/release-workflow/badge.svg)
+
 # Video Localization - built on Media Insights Engine
 
 This application uses AWS AI/ML services to help localize video content.  With this application you can:

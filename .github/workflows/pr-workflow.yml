@@ -163,10 +163,8 @@ jobs:
   
       # FIXME - This is not working.  Need to test more
       # check it with Hawkeye
-      # - name: Hawkeye Scanner
-      #   uses: ./.github/actions/hawkeye-scan
-
-
+      - name: Hawkeye Scanner
+        uses: ./.github/actions/hawkeye-scan
 
   deploy-mie-dev-us-west-2:
     needs: build-mie-dev-us-west-2

@@ -203,6 +203,8 @@ jobs:
     needs: 
       - deploy-mie-dev-us-west-2
       - build-content-localization-dev-us-west-2
+      - scan-us-west-2
+      - scan-3rd-party-data-us-west-2
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'

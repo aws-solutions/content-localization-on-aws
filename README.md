@@ -1,6 +1,6 @@
-![scheduled-workflow](https://github.com/awslabs/aws-media-insights-content-localization/workflows/scheduled-workflow/badge.svg) ![release-workflow](https://github.com/awslabs/aws-media-insights-content-localization/workflows/release-workflow/badge.svg)
+[![scheduled-workflow](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml) [![release-workflow](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/release-workflow.yml/badge.svg)](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/release-workflow.yml)
 
-# Video Localization - built on Media Insights Engine
+# Content Localization - built on Media Insights Engine
 
 This application uses AWS AI/ML services to help localize video content.  With this application you can:
 

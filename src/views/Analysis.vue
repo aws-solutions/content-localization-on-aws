@@ -371,7 +371,6 @@
                   captions_collection.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
                 }
               } catch (error) {
-                alert(error)
                 console.log(error)
               }   
             }
@@ -381,7 +380,6 @@
           }
           
         } catch (error) {
-          alert(error)
           console.log(error)
         }
       },

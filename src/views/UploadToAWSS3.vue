@@ -157,9 +157,11 @@
                   :options="textOperators"
                   name="flavour-3"
                 ></b-form-checkbox-group>
-                <div v-if="enabledOperators.includes('Translate') && customTerminologyList.length > 0 && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
+                <div v-if="enabledOperators.includes('Translate')" >
+                   <!-- && customTerminologyList.length > 0"> -->
+                   <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
                   <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <div v-else><b>Custom Terminologies:</b></div>
+                  <div v-else><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
                   <b-form-select
                     v-model="customTerminology"
                     :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
@@ -171,6 +173,22 @@
                     <ul id="overlapping_terminologies">
                       <li v-for="terminology in overlappingTerminologies">
                         {{ terminology }}
+                      </li>
+                    </ul>
+                  </div>
+                  <div v-if="parallelDataList.length > 0"><b>Parallel Data:</b> ({{ parallelData.length }} selected) </div>
+                  <div v-else><b>Parallel Data:</b></div>
+                  <b-form-select
+                    v-model="parallelData"
+                    :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                    multiple
+                  >
+                  </b-form-select>
+                  <div v-if="overlappingParallelData.length > 0" style="color:red">
+                    You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
+                    <ul id="overlapping_parallel_data">
+                      <li v-for="parallel_data in overlappingParallelData">
+                        {{ parallel_data }}
                       </li>
                     </ul>
                   </div>
@@ -335,6 +353,8 @@ export default {
       customVocab: null,
       customTerminology: [],
       customTerminologyList: [],
+      parallelData: [],
+      parallelDataList: [],
       existingSubtitlesFilename: "",
       transcribeLanguage: "en-US",
       transcribeLanguages: [
@@ -465,6 +485,27 @@ export default {
       })
       return overlapping_terminologies
     },
+    overlappingParallelData() {
+      // This function returns a list of parallel data sets that contain the translations for the same language.
+      // flatten the array of TargetLanguageCodes arrays
+      const language_codes = [].concat.apply([], this.parallelData.map(x => x.TargetLanguageCodes))
+      // get duplicate language codes in list
+      let duplicate_language_codes = language_codes.sort().filter(function(item, pos, ary) {
+        return item == ary[pos - 1];
+      }).filter(function(item, pos, ary) {
+        return !pos || item != ary[pos - 1];
+      })
+      // get the parallel data sets which contain duplicate language codes
+      let overlapping_language_codes = []
+      for (const i in duplicate_language_codes) {
+        overlapping_language_codes = overlapping_parallel_data.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
+      }
+      // remove duplicate parallel data from the overlapping_parallel_data list
+      overlapping_language_codes = overlapping_language_codes.sort().filter(function(item, pos, ary) {
+        return !pos || item != ary[pos - 1];
+      })
+      return overlapping_language_codes
+    },
 
     // translateLanguageTags is the same as translateLanguages except
     // with keys and values flipped around. We need this field ordering
@@ -472,7 +513,13 @@ export default {
     translateLanguageTags() {
       return this.translateLanguages
         .map(x => {return {"text": x.value, "value": x.text}})
-        .filter(x => x.text !== this.sourceLanguageCode)
+        //FIXME: filtering source languge from language tag list doesn't refresh 
+        // tag picker in UI.  So, if source language is English to start, English is 
+        // removed from the translation target languages.  When source language
+        // is changed to Spanish, Engish is added back to the tags on the Vue 
+        // Translation component but Engish tag is still missing on the tag
+        // picker.  For now, leave the source language in the list.
+        //.filter(x => x.text !== this.sourceLanguageCode)
     },
     ...mapState(['execution_history']),
     sourceLanguageCode() {
@@ -536,7 +583,8 @@ export default {
         this.textFormError ||
         this.audioFormError ||
         this.videoFormError ||
-        this.overlappingTerminologies.length > 0
+        this.overlappingTerminologies.length > 0 ||
+        this.overlappingParallelData > 0
       ) 
         validStatus = false;
       return validStatus;
@@ -649,6 +697,7 @@ export default {
     this.pollWorkflowStatus();
     this.listVocabulariesRequest()
     this.listTerminologiesRequest()
+    this.listParallelDataRequest()
   },
   beforeDestroy() {
     clearInterval(this.workflow_status_polling);
@@ -763,10 +812,13 @@ export default {
           data = vm.workflowConfig;
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
-            data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = JSON.stringify({"JsonList":this.customTerminology})
+            data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
+          }
+          if (this.parallelData != null) {
+            data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.customVocab !== null) {
-            data.Configuration.defaultAudioStage2.Transcribe.VocabularyName=this.customVocab
+            data.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in data.Configuration.WebCaptionsStage2.WebCaptions){
@@ -776,7 +828,8 @@ export default {
           else {
             data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
             data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.customTerminology
+            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.customTerminology,
+            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.parallelData
           }
           // Add input parameter to workflow config:
           data["Input"] = {
@@ -929,13 +982,14 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        this.customTerminologyList  = response.data['TerminologyPropertiesList'].map(terminology => {
-            return {
-              'Name': terminology.Name,
-              'SourceLanguageCode': terminology.SourceLanguageCode,
-              'TargetLanguageCodes': terminology.TargetLanguageCodes
-            }
-          })
+        this.customTerminologyList  = response.data['TerminologyPropertiesList']
+          // .map(terminology => {
+          //   return {
+          //     'Name': terminology.Name,
+          //     'SourceLanguageCode': terminology.SourceLanguageCode,
+          //     'TargetLanguageCodes': terminology.TargetLanguageCodes
+          //   }
+          // })
         
       } catch (error) {
         alert(
@@ -1029,7 +1083,35 @@ export default {
         console.log(error)
       }
     },
+    listParallelDataRequest: async function () {
+      
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/translate/list_parallel_data'
+      
+      let requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        console.log(response)
+        this.parallelDataList  = response.data['ParallelDataPropertiesList'].map(parallel_data => {
+            return {
+              'Name': parallel_data.Name,
+              'SourceLanguageCode': parallel_data.SourceLanguageCode,
+              'TargetLanguageCodes': parallel_data.TargetLanguageCodes
+            }
+          })
+        
+      } catch (error) {
+        console.log("ERROR: Failed to get parallel data. Check Workflow API logs.");
+        console.log(error)
+      }
+    }
   }
+  
 };
 </script>
 <style>

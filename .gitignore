@@ -3,3 +3,5 @@ package
 dist
 package-lock.json
 public/runtimeConfig.json
+src/templateUrlMieRelease.txt
+src/templateUrlMieDevelopment.txt

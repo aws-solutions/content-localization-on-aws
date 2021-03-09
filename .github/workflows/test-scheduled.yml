@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
         note:
-          description: 'write a note'
-          required: true
+          description: 'Note'
+          required: false
 
 jobs:
   # Build and new deploy based on latest release of MIE

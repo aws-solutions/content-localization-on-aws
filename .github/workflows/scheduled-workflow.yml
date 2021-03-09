@@ -3,6 +3,11 @@ name: scheduled-workflow
 on:
   schedule:
     - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+        note:
+          description: 'write a note'
+          required: true
 
 jobs:
   # Build and new deploy based on latest release of MIE

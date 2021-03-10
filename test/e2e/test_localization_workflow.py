@@ -107,4 +107,10 @@ def test_workflow_execution(workflow_api, dataplane_api, stack_resources, testin
     asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "Mediainfo")
     assert asset_mediainfo_request.status_code == 200
 
+    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_en")
+    assert asset_mediainfo_request.status_code == 200
+
+    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_es")
+    assert asset_mediainfo_request.status_code == 200
+
     print(asset_mediainfo_request.json())

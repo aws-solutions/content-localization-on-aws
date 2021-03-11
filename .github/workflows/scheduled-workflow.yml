@@ -3,11 +3,6 @@ name: scheduled-workflow
 on:
   schedule:
     - cron: '0 4 * * *'
-  workflow_dispatch:
-    inputs:
-        note:
-          description: 'write a note'
-          required: true
 
 jobs:
   # Build and new deploy based on latest release of MIE
@@ -295,6 +290,12 @@ jobs:
       #     cd $GITHUB_WORKSPACE
       #     cd test/integ
       #     ./run_integ.sh
+
+      - name: Run e2e tests
+        run: |
+          cd $GITHUB_WORKSPACE
+          cd test/e2e
+          ./run_e2e.sh
 
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

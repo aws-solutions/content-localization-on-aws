@@ -14,6 +14,15 @@ Parameters:
     Type: String
 
 Resources:
+  MediaconvertStage:
+    Type: Custom::CustomResource
+    Properties:
+      ServiceToken: !Ref WorkflowCustomResourceArn
+      ResourceType: "Stage"
+      Name: "MediaconvertStage2"
+      Operations:
+        - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:Mediaconvert"
   WebCaptionsStage:
     Type: Custom::CustomResource
     Properties:
@@ -23,6 +32,15 @@ Resources:
       Operations:
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:WebCaptions"
+  CaptionEditingWaitStage:
+    Type: Custom::CustomResource
+    Properties:
+      ServiceToken: !Ref WorkflowCustomResourceArn
+      ResourceType: "Stage"
+      Name: "CaptionEditingWaitStage"
+      Operations:
+        - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:Wait"
   TranslateStage:
     Type: Custom::CustomResource
     Properties:
@@ -70,6 +88,8 @@ Resources:
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:CelebRecognition"
         - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:ContentModeration"
+        - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:FaceDetection"
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:FaceSearch"
@@ -89,7 +109,7 @@ Resources:
       Name: "defaultAudioStage2"
       Operations:
         - Fn::ImportValue:
-            Fn::Sub: "${OperatorLibraryStack}:TranscribeVideo"
+            Fn::Sub: "${OperatorLibraryStack}:Transcribe"
   defaultTextStage:
     Type: Custom::CustomResource
     Properties:
@@ -101,6 +121,15 @@ Resources:
             Fn::Sub: "${OperatorLibraryStack}:ComprehendPhrases"
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:ComprehendEntities"
+  defaultTextSynthesisStage:
+    Type: Custom::CustomResource
+    Properties:
+      ServiceToken: !Ref WorkflowCustomResourceArn
+      ResourceType: "Stage"
+      Name: "defaultTextSynthesisStage2"
+      Operations:
+        - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:Polly"
 
   VODSubtitlesVideoWorkflow:
     DependsOn:
@@ -108,7 +137,10 @@ Resources:
       - defaultVideoStage
       - defaultAudioStage
       - defaultTextStage
+      - defaultTextSynthesisStage
+      - MediaconvertStage
       - WebCaptionsStage
+      - CaptionEditingWaitStage
       - TranslateStage
       - CaptionFileStage
     Type: Custom::CustomResource
@@ -130,9 +162,18 @@ Resources:
               "Next": "${defaultTextStage}"
               },
             "${defaultTextStage}":{
+              "Next": "${defaultTextSynthesisStage}"
+              },
+            "${defaultTextSynthesisStage}":{
+              "Next": "${MediaconvertStage}"
+              },
+            "${MediaconvertStage}":{
               "Next": "${WebCaptionsStage}"
               },
             "${WebCaptionsStage}":{
+              "Next": "${CaptionEditingWaitStage}"
+              },
+            "${CaptionEditingWaitStage}":{
               "Next": "${TranslateStage}"
               },
             "${TranslateStage}":{
@@ -147,7 +188,10 @@ Resources:
           defaultVideoStage: !GetAtt defaultVideoStage.Name,
           defaultAudioStage: !GetAtt defaultAudioStage.Name,
           defaultTextStage: !GetAtt defaultTextStage.Name,
+          defaultTextSynthesisStage: !GetAtt defaultTextSynthesisStage.Name,
+          MediaconvertStage: !GetAtt MediaconvertStage.Name,
           WebCaptionsStage: !GetAtt WebCaptionsStage.Name,
+          CaptionEditingWaitStage: !GetAtt CaptionEditingWaitStage.Name,
           TranslateStage: !GetAtt TranslateStage.Name,
           CaptionFileStage: !GetAtt CaptionFileStage.Name
         }

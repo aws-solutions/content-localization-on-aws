@@ -333,7 +333,6 @@ export default {
       videoOperators: [
         { text: "Object Detection", value: "labelDetection" },
         { text: "Celebrity Recognition", value: "celebrityRecognition" },
-        { text: "Content Moderation", value: "contentModeration" },
         { text: "Face Detection", value: "faceDetection" },
         { text: "Word Detection", value: "textDetection" },
         { text: "Face Search", value: "faceSearch" },
@@ -601,13 +600,6 @@ export default {
             },
             "Mediainfo": {"MediaType": "Video", "Enabled": true}
           },
-          "MediaconvertStage2": {"Mediaconvert": {"MediaType": "Video", "Enabled": true}},
-          "CaptionEditingWaitStage": {
-            "Wait": {
-              "MediaType": "MetadataOnly",
-              "Enabled": this.enable_caption_editing
-            }
-          },
           "CaptionFileStage2": {
             "WebToSRTCaptions": {
               "MediaType": "MetadataOnly",
@@ -651,7 +643,6 @@ export default {
               "TranscribeLanguage": this.transcribeLanguage,
             }
           },
-          "defaultTextSynthesisStage2": {"Polly": {"MediaType": "Text", "Enabled": false}},
           "defaultVideoStage2": {
             "faceDetection": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("faceDetection")},
             "textDetection": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("textDetection")},
@@ -660,7 +651,6 @@ export default {
             "labelDetection": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("labelDetection")},
             "personTracking": {"MediaType": "Video", "Enabled": false},
             "Mediaconvert": {"MediaType": "Video", "Enabled": false},
-            "contentModeration": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("contentModeration")},
             "faceSearch": {
               "MediaType": "Video",
               "Enabled": this.enabledOperators.includes("faceSearch"),
@@ -708,7 +698,6 @@ export default {
         "labelDetection",
         "textDetection",
         "celebrityRecognition",
-        "contentModeration",
         "faceDetection",
         "thumbnail",
         "Transcribe",
@@ -790,9 +779,6 @@ export default {
                   Enabled: this.enabledOperators.includes(
                     "celebrityRecognition"
                   )
-                },
-                contentModerationImage: {
-                  Enabled: this.enabledOperators.includes("contentModeration")
                 },
                 faceDetectionImage: {
                   Enabled: this.enabledOperators.includes("faceDetection")

@@ -27,9 +27,9 @@ The following Cloudformation templates will deploy the VOD Localization front-en
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles-deploy-mie.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles-deploy-mie.template)
-<!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles-deploy-mie.template) -->
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles-deploy-mie.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles-deploy-mie.template)
+<!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles-deploy-mie.template) -->
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -101,9 +101,9 @@ The following Cloudformation templates can be used to deploy the MIE front-end r
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=hhttps://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/vod-subtitles-solution/v0.0.1/cf/aws-vod-subtitles.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=hhttps://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/vod-subtitles-solution/v1.0.0-alpha.2/cf/aws-vod-subtitles.template)
 
 ## Building the app from source code
 

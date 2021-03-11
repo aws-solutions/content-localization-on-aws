@@ -218,6 +218,14 @@ jobs:
       #     cd $GITHUB_WORKSPACE
       #     cd test/e2e
       #     ./run_e2e.sh
+
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
       - name: Delete stack
         run: |
           aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME
@@ -347,6 +355,12 @@ jobs:
       #     cd $GITHUB_WORKSPACE
       #     cd test/e2e
       #     ./run_e2e.sh
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       - name: Delete stack
         run: |

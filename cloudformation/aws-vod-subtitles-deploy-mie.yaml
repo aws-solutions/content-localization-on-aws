@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Analysis - Deploys the AWS Content Analysis Application and the required Media Insights Engine Framework
+Description: AWS Content Localization - Deploys the AWS Content Localization Application and the required Media Insights Engine Framework
 
 Parameters:
   AdminEmail:
@@ -78,6 +78,7 @@ Resources:
       Parameters:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
+        NodeType: !Ref ElasticSearchNodeSize
 
   # Deploy Auth stack
 
@@ -101,14 +102,13 @@ Resources:
           - "/aws-content-analysis-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
-        WorkflowAPIRestID: !GetAtt MieStack.Outputs.WorkflowApiRestID
-        DataplaneAPIRestID: !GetAtt MieStack.Outputs.DataplaneApiRestID
+        WorkflowApiId: !GetAtt MieStack.Outputs.WorkflowApiRestID
+        DataplaneApiId: !GetAtt MieStack.Outputs.DataplaneApiRestID
         ElasticDomainArn: !GetAtt ContentAnalysisElasticsearchStack.Outputs.DomainArn
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
 
   ContentAnalysisWebStack:
     Type: "AWS::CloudFormation::Stack"
-    DependsOn: StringFunctions
     Properties:
       TemplateURL: !Join
         - ""
@@ -163,28 +163,6 @@ Resources:
           Fn::GetAtt:
             - MieStack
             - Outputs.OperatorLibraryStack
-
-
-  # Custom resources
-
-  StringFunctions:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - S3Bucket
-          - ".s3."
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - TemplateKeyPrefix
-          - "/string.template"
 
 Outputs:
   ContentAnalyisSolution:

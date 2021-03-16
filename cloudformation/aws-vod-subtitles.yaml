@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Analysis - Deploys the AWS Content Analysis Application
+Description: AWS Content Localization - Deploys the AWS Content Localization Application
 
 Parameters:
   MieStackName:
@@ -57,6 +57,7 @@ Resources:
         MieDataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
+        NodeType: !Ref ElasticSearchNodeSize
 
   # Deploy Auth stack
 
@@ -80,10 +81,10 @@ Resources:
           - "/aws-content-analysis-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
-        WorkflowAPIRestID:
+        WorkflowApiId:
           Fn::ImportValue:
             !Sub "${MieStackName}:WorkflowApiId"
-        DataplaneAPIRestID:
+        DataplaneApiId:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneApiId"
         ElasticDomainArn: !GetAtt ContentAnalysisElasticsearchStack.Outputs.DomainArn
@@ -91,6 +92,33 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
 
+# Deploy Video Workflow
+
+  CompleteVideoWorkflow:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - S3Bucket
+          - .s3.
+          - !Ref AWS::Region
+          - ".amazonaws.com/"
+          - !FindInMap
+            - ContentAnalysisApp
+            - SourceCode
+            - TemplateKeyPrefix
+          - "/aws-vod-subtitles-video-workflow.template"
+      Parameters:
+        WorkflowCustomResourceArn:
+          Fn::ImportValue:
+            !Sub "${MieStackName}:WorkflowCustomResourceArn"
+        OperatorLibraryStack:
+          Fn::ImportValue:
+            !Sub "${MieStackName}:OperatorLibraryStack"
   ContentAnalysisWebStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -124,35 +152,17 @@ Resources:
         IdentityPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
         PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
 
-  # Deploy Video Workflow
-
-  CompleteVideoWorkflow:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
-          - !FindInMap
-            - ContentAnalysisApp
-            - SourceCode
-            - TemplateKeyPrefix
-          - "/aws-vod-subtitles-video-workflow.template"
-      Parameters:
-        WorkflowCustomResourceArn:
-          Fn::ImportValue:
-            !Sub "${MieStackName}:WorkflowCustomResourceArn"
-        OperatorLibraryStack:
-          Fn::ImportValue:
-            !Sub "${MieStackName}:OperatorLibraryStack"
+  
 
 
 Outputs:
   VODSubtitlesSolution:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
+  ElasticEndpoint:
+    Value: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
+  UserPoolId:
+    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolId
+  IdentityPoolId:
+    Value: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
+  UserPoolClientId:
+    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId    

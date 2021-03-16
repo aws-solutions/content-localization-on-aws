@@ -332,6 +332,8 @@ export default {
       enable_caption_editing: false,
       videoOperators: [
         { text: "Object Detection", value: "labelDetection" },
+        { text: "Technical Cue Detection", value: "technicalCueDetection" },
+        { text: "Shot Detection", value: "shotDetection" },
         { text: "Celebrity Recognition", value: "celebrityRecognition" },
         { text: "Face Detection", value: "faceDetection" },
         { text: "Word Detection", value: "textDetection" },
@@ -645,6 +647,8 @@ export default {
           },
           "defaultVideoStage2": {
             "faceDetection": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("faceDetection")},
+            "technicalCueDetection": {"Enabled": this.enabledOperators.includes("technicalCueDetection")},
+            "shotDetection": {"Enabled": this.enabledOperators.includes("shotDetection")},
             "textDetection": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("textDetection")},
             "celebrityRecognition": {"MediaType": "Video", "Enabled": this.enabledOperators.includes("celebrityRecognition")},
             "GenericDataLookup": {"MediaType": "Video", "Enabled": false},
@@ -700,11 +704,13 @@ export default {
         "celebrityRecognition",
         "faceDetection",
         "thumbnail",
-        "Transcribe",
+        "TranscribeVideo",
         "Translate",
         "Subtitles",
         "ComprehendKeyPhrases",
-        "ComprehendEntities"
+        "ComprehendEntities",
+        "technicalCueDetection",
+        "shotDetection"
       ];
       this.show_disclaimer = true;
       this.create_video_stream = true;
@@ -740,52 +746,11 @@ export default {
         media_type = this.$route.query.mediaType;
         s3Key = this.$route.query.s3key.split("/").pop();
       }
-      let data = {};
+      let workflow_config = {};
       if (this.hasAssetParam) {
         if (media_type === "video") {
-          data = vm.workflowConfig;
-          data["Input"] = { AssetId: this.assetIdParam, Media: { Video: {} } };
-        } else if (media_type === "image") {
-
-          data = {
-            Input: {
-              AssetId: this.assetIdParam,
-              Media: {
-                Image: {}
-              }
-            },
-            Name: "CasImageWorkflow",
-            Configuration: {
-              ValidationStage: {
-                MediainfoImage: {
-                  Enabled: true
-                }
-              },
-              RekognitionStage: {
-                faceSearchImage: {
-                  Enabled: this.enabledOperators.includes("faceSearch"),
-                  CollectionId:
-                    this.faceCollectionId === ""
-                      ? "undefined"
-                      : this.faceCollectionId
-                },
-                labelDetectionImage: {
-                  Enabled: this.enabledOperators.includes("labelDetection")
-                },
-                textDetectionImage: {
-                  Enabled: this.enabledOperators.includes("textDetection")
-                },
-                celebrityRecognitionImage: {
-                  Enabled: this.enabledOperators.includes(
-                    "celebrityRecognition"
-                  )
-                },
-                faceDetectionImage: {
-                  Enabled: this.enabledOperators.includes("faceDetection")
-                }
-              }
-            }
-          };
+          workflow_config = vm.workflowConfig;
+          workflow_config["Input"] = { AssetId: this.assetIdParam, Media: { Video: {} } };
         } else {
           vm.s3UploadError(
             "Unsupported media type, " + this.$route.query.mediaType + "."
@@ -795,30 +760,30 @@ export default {
         if (media_type.match(/video/g) || 
             this.valid_media_types.includes(location.s3ObjectLocation.fields.key.split('.').pop().toLowerCase())) {
           // Create workflow config from user-specified options:
-          data = vm.workflowConfig;
+          workflow_config = vm.workflowConfig;
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
-            data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
+            workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
           if (this.parallelData != null) {
-            data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
+            workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.customVocab !== null) {
-            data.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
+            workflow_config.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
-            if ("ExistingSubtitlesObject" in data.Configuration.WebCaptionsStage2.WebCaptions){
-                delete data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject
+            if ("ExistingSubtitlesObject" in workflow_config.Configuration.WebCaptionsStage2.WebCaptions){
+                delete workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject
             }
           }
           else {
-            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
-            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.customTerminology,
-            data.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.parallelData
+            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
+            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
+            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.customTerminology,
+            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.parallelData
           }
           // Add input parameter to workflow config:
-          data["Input"] = {
+          workflow_config["Input"] = {
             Media: {
               Video: {
                 S3Bucket: this.DATAPLANE_BUCKET,
@@ -840,7 +805,7 @@ export default {
           vm.s3UploadError("Unsupported media type: " + media_type + ".");
         }
       
-      console.log(JSON.stringify(data));
+      console.log(JSON.stringify(workflow_config));
       // TODO: Should this be its own function?
 
       let apiName = 'mieWorkflowApi'
@@ -850,7 +815,7 @@ export default {
             'Content-Type': 'application/json'
           },
           response: true,
-          body: data,
+          body: workflow_config,
           queryStringParameters: {} // optional
       };
       try {

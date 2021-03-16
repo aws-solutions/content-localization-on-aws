@@ -10,7 +10,7 @@ Parameters:
     # Description: "Name of the base media insights workflow stack"
     # Type: String
   OperatorLibraryStack:
-    Description: "Name of the operator library stack"
+    Description: "Name of the MIE operator library stack"
     Type: String
 
 Resources:
@@ -81,6 +81,10 @@ Resources:
             Fn::Sub: "${OperatorLibraryStack}:TextDetection"
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:Mediaconvert"
+        - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:TechnicalCueDetection"
+        - Fn::ImportValue:
+            Fn::Sub: "${OperatorLibraryStack}:ShotDetection"
   defaultAudioStage:
     Type: Custom::CustomResource
     Properties:

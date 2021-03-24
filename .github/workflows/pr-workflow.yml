@@ -53,7 +53,7 @@ jobs:
           path: src/templateUrlMieDevelopment.txt
           retention-days: 3
 
-    build-mie-dev-us-west-2:
+  build-mie-dev-us-west-2:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout MIE development branch

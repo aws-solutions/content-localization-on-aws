@@ -3,6 +3,7 @@ name: scheduled-workflow
 on:
   schedule:
     - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   # Build and new deploy based on latest release of MIE

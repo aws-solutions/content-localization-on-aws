@@ -21,9 +21,9 @@ Mappings:
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
-      CodeKeyPrefix: "vod-subtitles-solution/%%VERSION%%/code"
-      TemplateKeyPrefix: "vod-subtitles-solution/%%VERSION%%/cf"
-      WebsitePrefix: "vod-subtitles-solution/%%VERSION%%/code/website"
+      CodeKeyPrefix: "content-localization-solution/%%VERSION%%/code"
+      TemplateKeyPrefix: "content-localization-solution/%%VERSION%%/cf"
+      WebsitePrefix: "content-localization-solution/%%VERSION%%/code/website"
 
 Resources:
   # Web application resources

@@ -779,8 +779,7 @@ export default {
           else {
             workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
             workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.customTerminology,
-            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.parallelData
+            workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
           // Add input parameter to workflow config:
           workflow_config["Input"] = {

@@ -29,7 +29,7 @@ jobs:
       - name: Run build script
         run: |
           cd deployment
-          CONTENT_LOCALIZATION_STACK_NAME=cl-dev
+          CONTENT_LOCALIZATION_STACK_NAME="cl${SHORT_SHA}"
           EMAIL=micontentlocalization@gmail.com
           REGION=us-west-2
           VERSION=${SHORT_SHA}
@@ -75,7 +75,7 @@ jobs:
       - name: Run build script
         run: |
           cd deployment
-          MIE_STACK_NAME="mie-dev"
+          MIE_STACK_NAME="mi${SHORT_SHA}"
           REGION=us-west-2
           VERSION=${SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev
@@ -123,7 +123,7 @@ jobs:
       # python dependencies, other copyrighted code ...
       - name: Get stack name
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl-dev" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
 
       - name: Scan for new third party packages
         run: |
@@ -162,7 +162,7 @@ jobs:
       - name: Generate short sha
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl-dev" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master
         continue-on-error: true
@@ -191,7 +191,7 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "MIE_STACK_NAME=mie-dev" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -204,8 +204,8 @@ jobs:
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           TEMPLATE=`cat templateUrl/templateUrl.txt`
           
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=false ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=false ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
   
@@ -231,8 +231,8 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl-dev" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=mie-dev" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -270,8 +270,8 @@ jobs:
 
       - name: Generate short sha
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl-dev" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=mie-dev" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
 
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master

@@ -1,14 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Analysis - Deploys the AWS Content Analysis Application Cognito Infrastructure
+Description: AWS Content Localization - Deploys the AWS Content Localization Application Cognito Infrastructure
 
 Parameters:
   AdminEmail:
     Description: Email address of the Content Analysis Administrator
     Type: String
-  WorkflowAPIRestID:
+  WorkflowApiId:
     Description: REST API ID of the MIE Workflow API
     Type: String
-  DataplaneAPIRestID:
+  DataplaneApiId:
     Description: REST API ID of the MIE Dataplane API
     Type: String
   ElasticDomainArn:
@@ -36,7 +36,7 @@ Resources:
             "#/stacks/stackinfo?stackId=",
             Ref: "AWS::StackId"
           ]]
-          EmailSubject: "Welcome to AWS Content Analysis"
+          EmailSubject: "Welcome to AWS Content Localization"
       EmailConfiguration:
         EmailSendingAccount: 'COGNITO_DEFAULT'
       AutoVerifiedAttributes: ['email']
@@ -194,7 +194,7 @@ Resources:
   ContentAnalysisAdminGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      Description: 'User group for AWS Content Analysis Admins'
+      Description: 'User group for AWS Content Localization Admins'
       RoleArn: !GetAtt ContentAnalysisAdminRole.Arn
       UserPoolId: !Ref ContentAnalysisUserPool
       GroupName: !Sub "${AWS::StackName}-Admins"
@@ -267,8 +267,8 @@ Resources:
             - {
               region: !Ref "AWS::Region",
               account: !Ref "AWS::AccountId",
-              wfapi: !Ref WorkflowAPIRestID,
-              dataapi: !Ref DataplaneAPIRestID,
+              wfapi: !Ref WorkflowApiId,
+              dataapi: !Ref DataplaneApiId,
               esdomain: !Ref ElasticDomainArn,
               dataplanebucket: !Ref DataplaneBucket
             }

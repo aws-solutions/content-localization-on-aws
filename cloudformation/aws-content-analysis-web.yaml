@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Analysis Web - Deploys the AWS Content Analysis Website Resources
+Description: AWS Content Localization Web - Deploys the AWS Content Localization Website Resources
 
 Parameters:
   DataplaneEndpoint:
@@ -21,9 +21,9 @@ Mappings:
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
-      CodeKeyPrefix: "vod-subtitles-solution/%%VERSION%%/code"
-      TemplateKeyPrefix: "vod-subtitles-solution/%%VERSION%%/cf"
-      WebsitePrefix: "vod-subtitles-solution/%%VERSION%%/code/website"
+      CodeKeyPrefix: "content-localization-solution/%%VERSION%%/code"
+      TemplateKeyPrefix: "content-localization-solution/%%VERSION%%/cf"
+      WebsitePrefix: "content-localization-solution/%%VERSION%%/code/website"
 
 Resources:
   # Web application resources

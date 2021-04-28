@@ -91,12 +91,12 @@ echo "--------------------------------------------------------------------------
 
 echo "Preparing template files:"
 
-cp "$template_dir/aws-vod-subtitles-deploy-mie.yaml" "$dist_dir/aws-vod-subtitles-deploy-mie.template"
-cp "$template_dir/aws-vod-subtitles.yaml" "$dist_dir/aws-vod-subtitles.template"
+cp "$template_dir/aws-content-localization-deploy-mie.yaml" "$dist_dir/aws-content-localization-deploy-mie.template"
+cp "$template_dir/aws-content-localization.yaml" "$dist_dir/aws-content-localization.template"
 cp "$template_dir/aws-content-analysis-elasticsearch.yaml" "$dist_dir/aws-content-analysis-elasticsearch.template"
 cp "$template_dir/aws-content-analysis-auth.yaml" "$dist_dir/aws-content-analysis-auth.template"
 cp "$template_dir/aws-content-analysis-web.yaml" "$dist_dir/aws-content-analysis-web.template"
-cp "$template_dir/aws-vod-subtitles-video-workflow.yaml" "$dist_dir/aws-vod-subtitles-video-workflow.template"
+cp "$template_dir/aws-content-localization-video-workflow.yaml" "$dist_dir/aws-content-localization-video-workflow.template"
 cp "$template_dir/aws-content-analysis-image-workflow.yaml" "$dist_dir/aws-content-analysis-image-workflow.template"
 cp "$template_dir/string.yaml" "$dist_dir/string.template"
 
@@ -110,11 +110,11 @@ new_bucket="s/%%BUCKET_NAME%%/$bucket/g"
 new_version="s/%%VERSION%%/$version/g"
 
 # Update templates in place. Copy originals to [filename].orig
-sed -i.orig -e "$new_bucket" "$dist_dir/aws-vod-subtitles-deploy-mie.template"
-sed -i.orig -e "$new_version" "$dist_dir/aws-vod-subtitles-deploy-mie.template"
+sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-localization-deploy-mie.template"
+sed -i.orig -e "$new_version" "$dist_dir/aws-content-localization-deploy-mie.template"
 
-sed -i.orig -e "$new_bucket" "$dist_dir/aws-vod-subtitles.template"
-sed -i.orig -e "$new_version" "$dist_dir/aws-vod-subtitles.template"
+sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-localization.template"
+sed -i.orig -e "$new_version" "$dist_dir/aws-content-localization.template"
 
 sed -i.orig -e "$new_bucket" "$dist_dir/aws-content-analysis-elasticsearch.template"
 sed -i.orig -e "$new_version" "$dist_dir/aws-content-analysis-elasticsearch.template"
@@ -191,24 +191,24 @@ echo "Copying the prepared distribution to S3..."
 for file in "$dist_dir"/*.zip
 do
   if [ -n "$profile" ]; then
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/code/ --profile "$profile"
+    aws s3 cp "$file" s3://"$bucket"/content-localization-solution/"$version"/code/ --profile "$profile"
   else
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/code/
+    aws s3 cp "$file" s3://"$bucket"/content-localization-solution/"$version"/code/
   fi
 done
 for file in "$dist_dir"/*.template
 do
   if [ -n "$profile" ]; then
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/cf/ --profile "$profile"
+    aws s3 cp "$file" s3://"$bucket"/content-localization-solution/"$version"/cf/ --profile "$profile"
   else
-    aws s3 cp "$file" s3://"$bucket"/vod-subtitles-solution/"$version"/cf/
+    aws s3 cp "$file" s3://"$bucket"/content-localization-solution/"$version"/cf/
   fi
 done
 echo "Uploading the vod subtitles web app..."
 if [ -n "$profile" ]; then
-  aws s3 cp "$website_dist_dir" s3://"$bucket"/vod-subtitles-solution/"$version"/code/website --recursive --profile "$profile"
+  aws s3 cp "$website_dist_dir" s3://"$bucket"/content-localization-solution/"$version"/code/website --recursive --profile "$profile"
 else
-  aws s3 cp "$website_dist_dir" s3://"$bucket"/vod-subtitles-solution/"$version"/code/website --recursive
+  aws s3 cp "$website_dist_dir" s3://"$bucket"/content-localization-solution/"$version"/code/website --recursive
 fi
 
 echo "------------------------------------------------------------------------------"
@@ -227,14 +227,14 @@ echo ""
 echo "Templates to deploy:"
 echo ""
 echo "With existing MIE deployment:"
-echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles.template"'"
+echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/content-localization-solution/"$version"/cf/aws-content-localization.template"'"
 echo "Without existing MIE deployment:"
-echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles-deploy-mie.template"'"
+echo "TEMPLATE='"https://"$bucket".s3."$region".amazonaws.com/content-localization-solution/"$version"/cf/aws-content-localization-deploy-mie.template"'"
 
 touch templateUrlMieDevelopment.txt
-echo "https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles.template" > templateUrlMieDevelopment.txt
+echo "https://"$bucket".s3."$region".amazonaws.com/content-localization-solution/"$version"/cf/aws-content-localization.template" > templateUrlMieDevelopment.txt
 touch templateUrlMieRelease.txt
-echo "https://"$bucket".s3."$region".amazonaws.com/vod-subtitles-solution/"$version"/cf/aws-vod-subtitles-deploy-mie.template" > templateUrlMieRelease.txt
+echo "https://"$bucket".s3."$region".amazonaws.com/content-localization-solution/"$version"/cf/aws-content-localization-deploy-mie.template" > templateUrlMieRelease.txt
 
 echo "------------------------------------------------------------------------------"
 echo "Done"

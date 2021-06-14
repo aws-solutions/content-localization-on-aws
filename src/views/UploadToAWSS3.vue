@@ -769,7 +769,8 @@ export default {
             workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.customVocab !== null) {
-            workflow_config.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
+            //workflow_config.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
+            workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in workflow_config.Configuration.WebCaptionsStage2.WebCaptions){

@@ -1,8 +1,6 @@
 name: test-frontend-workflow
 
 on:
-  schedule:
-    - cron: '0 4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -291,6 +289,12 @@ jobs:
       #     cd $GITHUB_WORKSPACE
       #     cd test/integ
       #     ./run_integ.sh
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
       - name: Setup Chromedriver
         uses: nanasess/setup-chromedriver@master
       - name: Get user pool id
@@ -310,6 +314,12 @@ jobs:
         run: |
           echo TEST_MEDIA_PATH=$GITHUB_WORKSPACE/test/e2e/ >> $GITHUB_ENV
           echo TEST_FILE_NAME=run_e2e.sh >> $GITHUB_ENV
+      - name: Initialize test AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-west-2
       - name: Run e2e tests
         run: |
           cd $GITHUB_WORKSPACE

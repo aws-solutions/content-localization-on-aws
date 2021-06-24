@@ -80,7 +80,7 @@ export TEST_FACE_COLLECTION_ID="temporary_face_collection"
 
 echo "------------------------------------------------------------------------------"
 
-pytest -s -W ignore::DeprecationWarning -p no:cacheproviders
+pytest -s -W ignore::DeprecationWarning -p no:cacheproviders test_app.py
 
 if [ $? -eq 0 ]; then
     exit 0

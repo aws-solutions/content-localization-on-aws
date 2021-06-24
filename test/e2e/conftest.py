@@ -31,7 +31,10 @@ def testing_env_variables():
             'MIE_STACK_NAME': os.environ['MIE_STACK_NAME'],
             'FACE_COLLECTION_ID': os.environ['TEST_FACE_COLLECTION_ID'],
             'ACCESS_KEY': os.environ['AWS_ACCESS_KEY_ID'],
-            'SECRET_KEY': os.environ['AWS_SECRET_ACCESS_KEY']
+            'SECRET_KEY': os.environ['AWS_SECRET_ACCESS_KEY'],
+            'APP_USERNAME': os.environ['APP_USERNAME'],
+            'APP_PASSWORD': os.environ['APP_PASSWORD'],
+            'APP_ENDPOINT': os.environ['APP_ENDPOINT']
             }
 
     except KeyError as e:

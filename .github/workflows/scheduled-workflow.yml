@@ -25,11 +25,10 @@ jobs:
       - name: Generate short sha
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-
       - name: Run build script
         run: |
           cd deployment
-          CONTENT_LOCALIZATION_STACK_NAME="cl${SHORT_SHA}"
+          CONTENT_LOCALIZATION_STACK_NAME="cl"
           EMAIL=micontentlocalization@gmail.com
           REGION=us-west-2
           VERSION=${SHORT_SHA}
@@ -38,7 +37,6 @@ jobs:
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
           echo "read in the template"
           read -r TEMPLATE < ../src/templateUrlMieRelease.txt
-
       - name: 'Upload One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
@@ -71,18 +69,16 @@ jobs:
       - name: Generate short sha
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-
       - name: Run build script
         run: |
           cd deployment
-          MIE_STACK_NAME="mi${SHORT_SHA}"
+          MIE_STACK_NAME="mi"
           REGION=us-west-2
           VERSION=${SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-us-west-2
           ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           read -r TEMPLATE < templateUrl.txt
-
       - name: 'Upload MIE One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
@@ -123,8 +119,7 @@ jobs:
       # python dependencies, other copyrighted code ...
       - name: Get stack name
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
-
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
       - name: Scan for new third party packages
         run: |
           echo "TBD - scan for new 3rd party pacakges"
@@ -133,7 +128,6 @@ jobs:
       - name: Scan for sensitive data
         run: |
           echo "TBD - Scan for sensitive data"
-
       # FIXME - need to make sure this is working properly
       # scan for various types of keys and tokens
       - name: Trufflehog Scan
@@ -162,7 +156,7 @@ jobs:
       - name: Generate short sha
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master
         continue-on-error: true
@@ -191,7 +185,7 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -231,14 +225,14 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=us-west-2
           VERSION=${SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev
@@ -249,7 +243,6 @@ jobs:
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
-
   test-content-localization-dev-us-west-2:
     needs: deploy-content-localization-dev-us-west-2
     runs-on: ubuntu-latest
@@ -270,9 +263,8 @@ jobs:
 
       - name: Generate short sha
         run: |
-          echo "CONTENT_LOCALIZATION_STACK_NAME=cl${SHORT_SHA}" >> $GITHUB_ENV
-          echo "MIE_STACK_NAME=mi${SHORT_SHA}" >> $GITHUB_ENV
-
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
+          echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master
         continue-on-error: true
@@ -291,13 +283,42 @@ jobs:
       #     cd $GITHUB_WORKSPACE
       #     cd test/integ
       #     ./run_integ.sh
-
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Setup Chromedriver
+        uses: nanasess/setup-chromedriver@master
+      - name: Get user pool id
+        run: |
+          echo "USER_POOL_ID=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-ContentAnalysisAuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
+      - name: Reset CL user password
+        run: |
+          aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --permanent
+      - name: Get Content Localization endpoint
+        run: |
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-ContentAnalysisWebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+      - name: Set admin creds
+        run: |
+          echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
+          echo APP_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} >> $GITHUB_ENV
+      - name: Set media path and file name
+        run: |
+          echo TEST_MEDIA_PATH=$GITHUB_WORKSPACE/test/e2e/ >> $GITHUB_ENV
+          echo TEST_FILE_NAME=run_e2e.sh >> $GITHUB_ENV
+      - name: Initialize test AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-west-2
       - name: Run e2e tests
         run: |
           cd $GITHUB_WORKSPACE
           cd test/e2e
           ./run_e2e.sh
-
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

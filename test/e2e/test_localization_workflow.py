@@ -21,7 +21,7 @@ import urllib3
 import time
 
 
-def test_workflow_execution(workflow_api, dataplane_api, stack_resources, testing_env_variables):
+def test_workflow_execution_vtt_in(workflow_api, dataplane_api, stack_resources, testing_env_variables):
     workflow_api = workflow_api()
     dataplane_api = dataplane_api()
 
@@ -107,10 +107,37 @@ def test_workflow_execution(workflow_api, dataplane_api, stack_resources, testin
     asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "Mediainfo")
     assert asset_mediainfo_request.status_code == 200
 
-    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_en")
-    assert asset_mediainfo_request.status_code == 200
+    asset_webcaptions_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_en")
+    assert asset_webcaptions_request.status_code == 200
 
-    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_es")
-    assert asset_mediainfo_request.status_code == 200
+    asset_spanish_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_es")
+    assert asset_spanish_request.status_code == 200
 
     print(asset_mediainfo_request.json())
+
+def test_workflow_execution_reprocess_transcribe(workflow_api, dataplane_api, workflow, stack_resources, testing_env_variables):
+    workflow_api = workflow_api()
+    dataplane_api = dataplane_api()
+
+    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "Mediainfo")
+    assert asset_mediainfo_request.status_code == 200
+
+    asset_webcaptions_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_en")
+    assert asset_webcaptions_request.status_code == 200
+
+    asset_spanish_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_es")
+    assert asset_spanish_request.status_code == 200
+
+def test_workflow_execution_reprocess_translate(workflow_api, dataplane_api, workflow, stack_resources, testing_env_variables):
+    workflow_api = workflow_api()
+    dataplane_api = dataplane_api()
+
+    asset_mediainfo_request = dataplane_api.get_single_metadata_field(asset_id, "Mediainfo")
+    assert asset_mediainfo_request.status_code == 200
+
+    asset_webcaptions_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_en")
+    assert asset_webcaptions_request.status_code == 200
+
+    asset_spanish_request = dataplane_api.get_single_metadata_field(asset_id, "WebCaptions_es")
+    assert asset_spanish_request.status_code == 200
+

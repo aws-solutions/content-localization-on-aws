@@ -167,3 +167,5 @@ Resources:
 Outputs:
   ContentLocalizationSolution:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
+  MieStackName: 
+    Value: !GetAtt MieStack

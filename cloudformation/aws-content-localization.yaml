@@ -158,6 +158,8 @@ Resources:
 Outputs:
   ContentLocalizationSolution:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
+  MieStackName: 
+    Value: ${MieStackName}
   ElasticEndpoint:
     Value: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
   UserPoolId:

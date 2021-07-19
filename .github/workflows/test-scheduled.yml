@@ -76,6 +76,7 @@ jobs:
 
       - name: Run build script
         run: |
+          aws --version
           cd deployment
           MIE_STACK_NAME="mie-dev"
           REGION=us-west-2

@@ -76,6 +76,13 @@ jobs:
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Run build script
         run: |
+          cd deployment
+          MIE_STACK_NAME="mie-dev"
+          REGION=us-west-2
+          VERSION=${SHORT_SHA}
+          DIST_OUTPUT_BUCKET=micl-dev
+          TEMPLATE_OUTPUT_BUCKET=micl-dev-us-west-2
+          
           aws --version
           account_id=$(aws sts get-caller-identity --query Account --output text)
           if [ $? -ne 0 ]; then
@@ -90,12 +97,7 @@ jobs:
             msg "ERROR: Your AWS account does not own s3://$TEMPLATE_OUTPUT_BUCKET"
             die 1
           fi
-          cd deployment
-          MIE_STACK_NAME="mie-dev"
-          REGION=us-west-2
-          VERSION=${SHORT_SHA}
-          DIST_OUTPUT_BUCKET=micl-dev
-          TEMPLATE_OUTPUT_BUCKET=micl-dev-us-west-2
+          
           ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           read -r TEMPLATE < templateUrl.txt
 

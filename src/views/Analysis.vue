@@ -2,9 +2,9 @@
   <div>
     <Header />
     <b-container fluid>
-      <b-alert 
-        v-model="showElasticSearchAlert" 
-        variant="danger" 
+      <b-alert
+        v-model="showElasticSearchAlert"
+        variant="danger"
         dismissible
       >
         Elasticsearch server denied access. Please check its access policy.
@@ -13,24 +13,21 @@
         <b-col>
           <div>
             <b-row align-h="center">
-              <b-tabs 
-                content-class="mt-3" 
+              <b-tabs
+                content-class="mt-3"
                 fill
               >
                 <b-tab
                   title="ML Vision"
                   active
-                  @click="
-                    currentView = 'LabelObjects';
-                    mlTabs = 0;
-                  "
+                  @click="currentView = 'LabelObjects'; mlTabs = 0"
                 >
                   <b-container fluid>
                     <b-row>
                       <div>
-                        <b-tabs 
-                          v-model="mlTabs" 
-                          content-class="mt-3" 
+                        <b-tabs
+                          v-model="mlTabs"
+                          content-class="mt-3"
                           fill
                         >
                           <b-tab
@@ -69,12 +66,13 @@
                 <b-tab
                   v-if="mediaType !== 'image'"
                   title="Speech Recognition"
-                  @click="
-                    currentView = 'Transcript';
-                    speechTabs = 0;
-                  "
+                  @click="currentView = 'Transcript'; speechTabs = 0"
                 >
-                  <b-tabs v-model="speechTabs" content-class="mt-3" fill>
+                  <b-tabs
+                    v-model="speechTabs"
+                    content-class="mt-3"
+                    fill
+                  >
                     <b-tab
                       title="Transcript"
                       @click="currentView = 'Transcript'"
@@ -91,7 +89,10 @@
                       title="KeyPhrases"
                       @click="currentView = 'KeyPhrases'"
                     />
-                    <b-tab title="Entities" @click="currentView = 'Entities'" />
+                    <b-tab
+                      title="Entities"
+                      @click="currentView = 'Entities'"
+                    />
                   </b-tabs>
                 </b-tab>
               </b-tabs>
@@ -175,12 +176,12 @@
   import MediaSummaryBox from '@/components/MediaSummaryBox.vue'
   import LineChart from '@/components/LineChart.vue'
   import { mapState } from 'vuex'
-  import Waveform from "../components/Waveform";
+ //import Waveform from "../components/Waveform";
 
   export default {
     name: 'Home',
     components: {
-      Waveform,
+      //Waveform,
       Header,
       ComponentLoadingError,
       MediaSummaryBox,
@@ -413,18 +414,20 @@
       async getVideoUrl() {
         // This function gets the video URL then initializes the video player
         const bucket = this.s3_uri.split("/")[2];
+        let s3uri = this.s3_uri
+        let asset_id = this.$route.params.asset_id;
         // TODO: Get the path to the proxy mp4 from the mediaconvert operator - clarifying this comment, this should just be a from the dataplane results of the mediaconvert operator
         // Our mediaconvert operator sets proxy encode filename to [key]_proxy.mp4
-        let key="";
-        if (this.mediaType === "image") {
-          key = this.s3_uri.split(this.s3_uri.split("/")[2] + '/')[1];
-        }
-        if (this.mediaType === "video") {
-          const media_key = (this.s3_uri.split(this.s3_uri.split("/")[2])[1].replace('/input/public/upload', ''))
-          const proxy_encode_key = media_key.split(".").slice(0,-1).join('.') + "_proxy.mp4";
-          key = proxy_encode_key.replace("/", "")
-        }
-        const data = { "S3Bucket": bucket, "S3Key": key };
+        let proxy_key="";
+        let input_file = "";
+        let proxy_file = "";
+
+       
+        input_file = s3uri.split("/").slice(-1)[0]
+        proxy_file = input_file.split(".")[0]+"_proxy.mp4";
+        proxy_key = "private/assets/"+asset_id+"/"+proxy_file
+        
+        const data = { "S3Bucket": bucket, "S3Key": proxy_key };
 
         // get presigned URL to video file in S3
 
@@ -446,26 +449,27 @@
           alert(error)
         }
       },
-      updateAssetId () {
-        this.$store.commit('updateAssetId', this.$route.params.asset_id);
+    updateAssetId () {
+      this.$store.commit('updateAssetId', this.$route.params.asset_id);
       }
     }
   }
 </script>
 
 <style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
 
-.mediaSummary {
-  text-align: left;
-}
+  .mediaSummary {
+    text-align: left;
+  }
 
-@media screen and (max-width: 800px) {
+  @media screen and (max-width: 800px) {
   .dataColumns {
     flex-direction: column-reverse;
   }
 }
+
 </style>

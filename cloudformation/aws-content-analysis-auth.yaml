@@ -14,8 +14,11 @@ Parameters:
   ElasticDomainArn:
     Description: ARN of the Content Analysis ES Domain
     Type: String
-  DataplaneBucket: 
+  DataplaneBucket:
     Description: Name of the MIE dataplane bucket
+    Type: String
+  ParentStackName:
+    Description: Name of the parent Cloud Formation stack
     Type: String
 
 Resources:
@@ -26,15 +29,13 @@ Resources:
         AllowAdminCreateUserOnly: True
         InviteMessageTemplate:
           EmailMessage: !Join ["", [
-            "Your username is {username} and temporary password is {####}<br>Stack Name: ",
-            Ref: "AWS::StackName",
-            "<br>Stack Overview:<br>",
+            "Your username is {username} and temporary password is {####}<br>AWS CloudFormation stack:<br>",
             "https://",
-            Ref: "AWS::Region",
+            Ref: AWS::Region,
             ".console.aws.amazon.com/cloudformation/home?region=",
-            Ref: "AWS::Region",
+            Ref: AWS::Region,
             "#/stacks/stackinfo?stackId=",
-            Ref: "AWS::StackId"
+            Ref: ParentStackName
           ]]
           EmailSubject: "Welcome to AWS Content Localization"
       EmailConfiguration:

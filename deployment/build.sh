@@ -49,7 +49,6 @@ if [ "$region" != "us-east-1" ] &&
    exit 1
 fi
 
-
 # Setup deployment variables
 template_dir="../cloudformation"
 consumer_dir="../consumer"
@@ -132,7 +131,7 @@ echo "--------------------------------------------------------------------------
 
 echo "Building Elasticsearch Consumer function"
 cd "$consumer_dir" || exit 1
-pwd
+
 [ -e dist ] && rm -r dist
 mkdir -p dist
 [ -e package ] && rm -r package
@@ -153,7 +152,6 @@ fi
 zip -q -r9 ../dist/esconsumer.zip .
 popd || exit 1
 
-
 zip -q -g dist/esconsumer.zip ./*.py
 cp "./dist/esconsumer.zip" "$dist_dir/esconsumer.zip"
 
@@ -167,7 +165,6 @@ cd "$helper_dir" || exit 1
 mkdir -p dist
 zip -q -g ./dist/websitehelper.zip ./website_helper.py
 cp "./dist/websitehelper.zip" "$dist_dir/websitehelper.zip"
-
 
 echo "------------------------------------------------------------------------------"
 echo "Website"

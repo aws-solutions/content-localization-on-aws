@@ -761,7 +761,7 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         console.log(response.data)
-        this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
+        this.sourceLanguageCode = response.data.Configuration.TranslateStage2.TranslateWebCaptions.SourceLanguageCode
         this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.TranscribeVideo.TranscribeLanguage
         this.vocabulary_language_code = this.transcribe_language_code
         this.vocabulary_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName

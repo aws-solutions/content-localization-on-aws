@@ -22,6 +22,7 @@ Parameters:
       - "r4.xlarge.elasticsearch"
 
 Mappings:
+
   ContentAnalysisApp:
     SourceCode:
       S3Bucket: "%%BUCKET_NAME%%"
@@ -30,6 +31,7 @@ Mappings:
       WebsitePrefix: "content-localization-solution/%%VERSION%%/code/website"
 
 Resources:
+
   # Deploy Elasticsearch
 
   ContentAnalysisElasticsearchStack:
@@ -91,9 +93,9 @@ Resources:
         DataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
+        ParentStackName: !Ref AWS::StackId
 
-# Deploy Video Workflow
-
+  # Deploy Video Workflow
   CompleteVideoWorkflow:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -119,6 +121,8 @@ Resources:
         OperatorLibraryStack:
           Fn::ImportValue:
             !Sub "${MieStackName}:OperatorLibraryStack"
+
+      
   ContentAnalysisWebStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -167,4 +171,5 @@ Outputs:
   IdentityPoolId:
     Value: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
   UserPoolClientId:
-    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId    
+    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId 
+    

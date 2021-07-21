@@ -2,10 +2,6 @@
   <div>
     <div class="headerTextBackground">
       <Header :is-collection-active="true" />
-      <b-modal ref="delete-confirmation-modal" ok-title="Confirm" ok-variant="danger" title="Delete Asset?" @ok="deleteAsset">
-        <p>Are you sure you want to permanently delete asset ID <b>{{ delete_asset_id }}</b>?</p>
-      </b-modal>
-
       <b-container fluid>
         <b-alert
           v-model="showElasticSearchAlert"
@@ -97,31 +93,31 @@
                     </template>
                     <template v-slot:cell(status)="data">
                       <!-- open link in new tab -->
-                      <a v-if="data.item.status !== 'Queued'"  href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
-                      <div v-if="data.item.status === 'Queued'">{{ data.item.status }}</div>
+                      <a v-if="data.item.status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
+                      <div v-if="data.item.status === 'Queued'">
+                        {{ data.item.status }}
+                      </div>
                     </template>
                     <template v-slot:cell(Actions)="data">
-                      <b-button
-                        variant="orange"
+                      <b-link
                         :href="(`/analysis/${data.item.asset_id}`)"
                       >
                         Analyze
-                      </b-button>
-                      &nbsp;
-                      <b-button
-                        :pressed="false"
-                        variant="red"
+                      </b-link>
+                      <br>
+                      <b-link
+                        class="text-danger"
                         @click="deleteAsset(`${data.item.asset_id}`)"
                       >
                         Delete
-                      </b-button>
+                      </b-link>
                     </template>
                   </b-table>
                   <div
                     v-if="noAssets"
                   >
                     <p>
-                      Looks like no assets have been uploaded! Try uploading <a href="upload">here</a>
+                      Looks like no assets have been uploaded! Try uploading <a href="upload">here</a>.
                     </p>
                   </div>
                   <div
@@ -169,7 +165,6 @@
         showDataplaneAlert: false,
         showDeletedAlert: 0,
         noAssets: null,
-        delete_asset_id: "",
         currentPage: 1,
         perPage: 10,
         isBusy: false,
@@ -390,25 +385,28 @@
         }
       },
       async pushAssetToTable (assetId) {
-        let assetInfo = await this.getAssetInformation(assetId);
+        const assetInfo = await this.getAssetInformation(assetId);
         let created = new Date(0);
         created.setUTCSeconds(assetInfo.results.Created);
-        let bucket = assetInfo.results.S3Bucket;
-        let s3Key = assetInfo.results.S3Key;
-        let s3Uri = 's3://' + bucket + '/' + s3Key;
-        let filename = s3Key.split("/").pop();
+        const metadata_folder = "/private/assets/"+assetId
+        const source_bucket = assetInfo.results.S3Bucket;
+        const source_key = assetInfo.results.S3Key;
+        let s3Uri = 's3://' + this.DATAPLANE_BUCKET + '/' + metadata_folder;
+        const filename = source_key.split("/").pop();
         // The thumbnail is created by Media Convert, see:
         // source/operators/thumbnail/start_thumbnail.py
         let thumbnailS3Key = 'private/assets/' + assetId + '/' + filename.substring(0, filename.lastIndexOf(".")) + '_thumbnail.0000001.jpg';
+        let thumbnailS3Bucket = this.DATAPLANE_BUCKET
         // If it's an image then Media Convert won't create a thumbnail.
         // In that case we use the uploaded image as the thumbnail.
-        let supported_image_types = [".jpg", ".jpeg", ".tif", ".tiff", ".png", ".apng", ".gif", ".bmp", ".svg"];
-        let media_type = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+        const supported_image_types = [".jpg", ".jpeg", ".tif", ".tiff", ".png", ".apng", ".gif", ".bmp", ".s gvg"];
+        const media_type = filename.substring(filename.lastIndexOf(".")).toLowerCase();
         if (supported_image_types.includes(media_type)) {
           // use the uploaded image as a thumbnail
-          thumbnailS3Key = 'private/assets/' + assetId + '/input/public/upload/' + filename;
+          thumbnailS3Key = source_key;
+          thumbnailS3Bucket = source_bucket;
         }
-        let [thumbnail, workflowStatus] = await Promise.all([this.getAssetThumbnail(bucket, thumbnailS3Key), this.getAssetWorkflowStatus(assetId)]);
+        let [thumbnail, workflowStatus] = await Promise.all([this.getAssetThumbnail(thumbnailS3Bucket, thumbnailS3Key), this.getAssetWorkflowStatus(assetId)]);
         if (workflowStatus[0] && thumbnail)
         {
           this.asset_list.push({

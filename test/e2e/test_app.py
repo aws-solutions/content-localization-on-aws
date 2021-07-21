@@ -12,19 +12,20 @@ from selenium.webdriver.common.by import By
 @pytest.fixture
 def browser():
     chrome_options = Options()
+    
+    ####### TESTING - remove headless to see browser actions
     chrome_options.add_argument("--headless")
+    ####### TESTING - remove headless to see browser actions
+    
     browser = webdriver.Chrome(chrome_options=chrome_options)
     return browser
 
 # Test the happy path through the app by loading and verifying data after a successful workflow run.  No
 # CRUD interactions such as creating vocabularies are included here
-def test_complete_app(browser, workflow, testing_env_variables):
+def test_complete_app(browser, workflow_with_customizations, testing_env_variables):
 
 #### TESTING - workflow is already created
-# def test_complete_app(browser, testing_env_variables):
-
-#     workflow = {}
-#     workflow["AssetId"] = "1b69d77e-87ef-45fb-9630-6ff4515ac4ac"
+#def test_complete_app(browser, testing_env_variables):
 #### TESTING - workflow is already created
 
     browser.implicitly_wait(5)
@@ -52,36 +53,36 @@ def test_complete_app(browser, workflow, testing_env_variables):
     # Check the default boxes are set for the subtitles workflow
 
     # Expand the configure workflow menu
-    browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[2]/div/div/button[1]").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/button[1]").click()
     # Configure transcribe
-    transcribe_language_box = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[2]/select[1]")
+    transcribe_language_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[2]/select[1]")
     
-    # default language is en-US
-    assert transcribe_language_box.get_attribute("value") == "en-US"
+    # # default language is en-US
+    # assert transcribe_language_box.get_attribute("value") == "en-US"
     
-    transcribe_language_box.send_keys("ru-RU")
+    # transcribe_language_box.send_keys("ru-RU")
     
-    # now it should be ru-RU
-    assert transcribe_language_box.get_attribute("value") == "ru-RU"
+    # # now it should be ru-RU
+    # assert transcribe_language_box.get_attribute("value") == "ru-RU"
     
     # Configure subtitles
-    subtitles_box = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[4]/input")
+    subtitles_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[4]/input")
     subtitles_box.send_keys("test.vtt")
     assert subtitles_box.get_attribute("value") == "test.vtt"
 
     # Configure translate language to en-ES
     
-    translate_box = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
-    assert translate_box.get_attribute("textContent") == ""
+    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
+    assert translate_languages_box.get_attribute("textContent") == ""
     # Select spanish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[3]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click()
-    
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click() 
+
     # Check that spanish badge is in the input box
-    assert browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
 
     # click the Swedish badge
-    browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[45]").click()
-    assert browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div[3]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[45]").click()
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
     
      ####### Collection View
      # Navigate to Collection view
@@ -126,6 +127,8 @@ def test_complete_app(browser, workflow, testing_env_variables):
     # SHould look like: "Video duration:\n              00:09\n            "
     assert duration.split()[0] == "Video"
     assert len(duration.split()) == 3
+
+    time.sleep(5)
     
     ####### SUBTITLES COMPONENT
     # Navigate to subtitles
@@ -141,7 +144,7 @@ def test_complete_app(browser, workflow, testing_env_variables):
     # Edit a subtitle
     #subtitle1.clear()
     #subtitle1.send_keys("EDITED: COME BACK TO PORTLAND")
-    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 PORTLAND")
+    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003 00STEEN REPLACED BY EDITS00")
 
     # Check the file info
     source_language = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div/div/div/div/div[2]/div[4]").get_attribute("textContent")
@@ -156,7 +159,7 @@ def test_complete_app(browser, workflow, testing_env_variables):
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[2]").click()
     # Check the table for the edits
     vocabylary_1_display_as = browser.find_element_by_xpath("/html/body/div[3]/div[1]/div/div/div/div[3]/table/tbody/tr/td[5]/div/div[1]/div/input").get_attribute("value")
-    assert vocabylary_1_display_as == "PORTLAND" 
+    assert vocabylary_1_display_as == "00STEEN REPLACED BY EDITS00" 
 
     # Name vocabulary
     # Invalid name

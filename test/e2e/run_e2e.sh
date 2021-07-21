@@ -84,7 +84,9 @@ echo "--------------------------------------------------------------------------
 #pytest -s -W ignore::DeprecationWarning -p no:cacheproviders
 
 ######TESTING: test a single file
+
 pytest -s -W ignore::DeprecationWarning -p no:cacheproviders test_app.py
+
 ######TESTING: test a single file
 
 if [ $? -eq 0 ]; then

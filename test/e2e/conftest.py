@@ -393,6 +393,11 @@ def workflow_with_customizations(workflow_api, dataplane_api, vocabulary, termin
         test_workflow_execution)
     assert workflow_execution_request.status_code == 200
 
+    # Create a second workflow to avoid having to code 1 vs. many conditions for xpaths
+    workflow_execution_request2 = workflow_api.create_workflow_execution_request(
+        test_workflow_execution)
+    assert workflow_execution_request2.status_code == 200
+
     workflow_execution_response = workflow_execution_request.json()
     workflow_execution_id = workflow_execution_response["Id"]
     asset_id = workflow_execution_response["AssetId"]

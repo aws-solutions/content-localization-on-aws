@@ -46,14 +46,15 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     # It does not run any workflows
     
     # Navigate to the Upload View
-    browser.find_elements_by_link_text("Upload")[0].click()
-    #browser.find_element_by_xpath("/html/body/div/div/div[1]/div[1]/nav/div/ul/li[1]/a").click()
-                                   
+    
+    browser.find_element_by_link_text("Upload").click()
+    #browser.find_elements_by_xpath("/html/body/div/div/div[1]/nav/div/ul/li[1]/a).click()                            
 
     # Check the default boxes are set for the subtitles workflow
 
     # Expand the configure workflow menu
     browser.find_element_by_xpath("/html/body/div/div/div[2]/button[1]").click()
+    time.sleep(2)
     # Configure transcribe
     transcribe_language_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[2]/select[1]")
     
@@ -86,7 +87,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
      ####### Collection View
      # Navigate to Collection view
-    browser.find_elements_by_link_text("Collection")[0].click()
+    browser.find_element_by_link_text("Collection").click()
+    #browser.find_elements_by_xpath("/html/body/div/div/div[1]/nav/div/ul/li[2]/a").click()
     time.sleep(5)
 
     # Find the base test asset in the collection
@@ -95,12 +97,18 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
      ####### TRANSCRIPT COMPONENT
     # Navigate to the transcript
-    browser.find_elements_by_link_text("Analyze")[0].click()
+    #Analyze
+    browser.find_element_by_link_text("Analyze").click()
+    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
     time.sleep(2)
-    browser.find_elements_by_link_text("Speech Recognition")[0].click()
+    #Speech Recognition
+    browser.find_element_by_link_text("Speech Recognition").click()
+    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
     time.sleep(2)
-    browser.find_elements_by_link_text("Transcript")[0].click()
-    time.sleep(5)
+    #Transcript
+    browser.find_element_by_link_text("Transcript").click()
+    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[1]/a").click()
+    time.sleep(8)
 
     # Check the text for some keywords
     transcript_text = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div").get_attribute("textContent")
@@ -184,6 +192,68 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     time.sleep(5)
 
      ####### TRANSLATE COMPONENT
+     # Navigate to translation
+    browser.find_elements_by_link_text("Translation")[0].click()
+    wait = WebDriverWait(browser, 120)
+    wait.until(EC.presence_of_element_located((By.ID, "caption0")))
+
+    # Check the radio button menus at the top - the language shoulf be Spanish
+    button_language = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/fieldset/div/div/div/label").get_attribute("textContent")
+    assert button_language == "Spanish"
+
+    # Check a subtitle
+    subtitle1 = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[1]/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
+    subtitle1_text = subtitle1.get_attribute("value")
+    assert "Boulder" in subtitle1_text
+    assert "JEFF STEEN-replaced-by-terminology" in subtitle1_text
+
+    # Edit a subtitle
+    #subtitle1.clear()
+    #subtitle1.send_keys("EDITED: COME BACK TO PORTLAND")
+    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
+
+    # Check the file info
+    source_language = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[2]/div/div/div/div/div/div/div[2]/div[4]").get_attribute("textContent")
+    # Should look like: "Source Language: English, US"
+    assert "English" in source_language
+
+    # Test download buttons
+    # VTT
+    #browser.find_elements_by_link_text("Download VTT").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[2]/ul/li[1]/a")
+    #browser.find_elements_by_link_text("Download SRT").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[2]/ul/li[2]/a")
+    #browser.find_elements_by_link_text("Download Audio").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[2]/ul/li[3]/a")
+    
+    # # Test terminologies
+    # # Save terminology button
+    # browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[1]").click()
+    # # Check the table for the edits
+    # vocabylary_1_display_as = browser.find_element_by_xpath("/html/body/div[3]/div[1]/div/div/div/div[3]/table/tbody/tr/td[5]/div/div[1]/div/input").get_attribute("value")
+    # assert vocabylary_1_display_as == "00STEEN REPLACED BY EDITS00" 
+
+    # # Name terminology
+    # # Invalid name
+    # vocabulary_name_box = browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/div/div/div[1]/div[2]/input")
+    # vocabulary_name_box.send_keys("automated_test_vocabulary")
+    # error_text = browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/div/div/div[4]").get_attribute("textContent")
+    # assert "Invalid vocabulary name" in error_text
+    # vocabulary_name_box.clear()
+    # # valid name
+    # vocabulary_name_box.send_keys("automatedtestvocabulary")
+
+    # # Add a row to terminology
+    # time.sleep(1)
+    # browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/div/div/div[3]/table/tbody/tr/td[5]/div/div[2]/span[2]/button").click()
+    # time.sleep(3)
+    # # Delete a row from terminology
+    # browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/div/div/div[3]/table/tbody/tr[2]/td[5]/div/div[2]/span[1]/button").click()
+    
+    # # Cancel 
+    # browser.find_element_by_xpath('/html/body/div[2]/div[1]/div/div/footer/button[1]').click()
+
+    time.sleep(5)
 
     # Sign out
     browser.find_element_by_xpath("/html/body/div/div/div[1]/nav/div/ul/li[4]/a/p").click()

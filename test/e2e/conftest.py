@@ -21,6 +21,11 @@ from requests_aws4auth import AWS4Auth
 def testing_env_variables():
     print('Setting variables for tests')
     try:
+        if "USE_EXISTING_WORKFLOW" in os.environ:
+            use_existing_workflow = os.environ['USE_EXISTING_WORKFLOW']
+        else:
+            use_existing_workflow = False
+    
         test_env_vars = {
             'MEDIA_PATH': os.environ['TEST_MEDIA_PATH'],
             'SAMPLE_IMAGE': os.environ['TEST_IMAGE'],
@@ -37,7 +42,8 @@ def testing_env_variables():
             'SECRET_KEY': os.environ['AWS_SECRET_ACCESS_KEY'],
             'APP_USERNAME': os.environ['APP_USERNAME'],
             'APP_PASSWORD': os.environ['APP_PASSWORD'],
-            'APP_ENDPOINT': os.environ['APP_ENDPOINT']
+            'APP_ENDPOINT': os.environ['APP_ENDPOINT'],
+            'USE_EXISTING_WORKFLOW': use_existing_workflow
         }
 
     except KeyError as e:
@@ -169,7 +175,7 @@ class WorkflowAPI:
 
     def delete_terminology_request(self, body):
         headers = {"Content-Type": "application/json"}
-        print("POST /service/translate/create_terminology")
+        print("POST /service/translate/delete_terminology")
         create_terminology_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=False, auth=self.auth)
 
@@ -177,7 +183,7 @@ class WorkflowAPI:
 
     def delete_vocabulary_request(self, body):
         headers = {"Content-Type": "application/json"}
-        print("POST /service/transcribe/create_vocabulary")
+        print("POST /service/transcribe/delete_vocabulary")
         create_vocabulary_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
 
@@ -388,6 +394,9 @@ def workflow_with_customizations(workflow_api, dataplane_api, vocabulary, termin
             }
         }
     }
+
+    if testing_env_variables['USE_EXISTING_WORKFLOW']:
+        return {}
 
     workflow_execution_request = workflow_api.create_workflow_execution_request(
         test_workflow_execution)

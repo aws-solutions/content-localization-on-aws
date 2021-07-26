@@ -40,6 +40,10 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div[1]/div/div/div/div[3]/span[1]/button").click()
     
     time.sleep(10)
+    
+    # Verify log in is successful
+    header = browser.find_elements_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1")..get_attribute("textContent")
+    assert "Collection" in header
 
     ####### UPLOAD VIEW
     # This test visits all the input form elements that should be activated with the default workflow configuration

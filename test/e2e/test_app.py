@@ -44,7 +44,7 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     # Verify log in is successful
     header_element = browser.find_element_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1")
     header = header_element.get_attribute("textContent")
-    assert "Collection" in header
+    assert "Media Collection" in header
 
     ####### UPLOAD VIEW
     # This test visits all the input form elements that should be activated with the default workflow configuration
@@ -52,7 +52,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
     # Navigate to the Upload View
     
-    browser.find_element_by_link_text("Upload").click()
+    #browser.find_element_by_link_text("Upload").click()
+    browser.find_elements_by_partial_link_text("Upload")[0].click()
     #browser.find_elements_by_xpath("/html/body/div/div/div[1]/div[1]/nav/div/ul/li[1]/a").click()                            
 
     # Check the default boxes are set for the subtitles workflow

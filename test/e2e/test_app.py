@@ -42,7 +42,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     time.sleep(10)
     
     # Verify log in is successful
-    header = browser.find_elements_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1").get_attribute("textContent")
+    header_element = browser.find_element_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1")
+    header = header_element.get_attribute("textContent")
     assert "Collection" in header
 
     ####### UPLOAD VIEW

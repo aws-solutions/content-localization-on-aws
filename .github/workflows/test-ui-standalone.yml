@@ -2,12 +2,6 @@ name: scheduled-workflow
 
 on:
   workflow_dispatch:
-    app_endpoint:
-      description: 'Endpoint (URL) to Content Localization Application to test'
-      required: false
-    note:
-      description: 'Note'
-      required: false
 
 
 jobs:
@@ -98,10 +92,3 @@ jobs:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-
-      - name: Delete stack
-        run: |
-          aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME
-          aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
-          aws cloudformation delete-stack --stack-name $MIE_STACK_NAME
-          aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME

@@ -15,6 +15,8 @@ def browser():
     
     ####### TESTING - remove headless to see browser actions
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--start-maximized")
     ####### TESTING - remove headless to see browser actions
     
     browser = webdriver.Chrome(chrome_options=chrome_options)
@@ -41,6 +43,11 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
     time.sleep(60)
     
+    # Verify log in is successful
+    header_element = browser.find_element_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1")
+    header = header_element.get_attribute("textContent")
+    assert "Media Collection" in header
+
     # Verify log in is successful
     header_element = browser.find_element_by_xpath("/html/body/div/div/div[1]/div[2]/div[1]/h1")
     header = header_element.get_attribute("textContent")

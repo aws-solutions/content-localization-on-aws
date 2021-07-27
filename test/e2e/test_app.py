@@ -47,8 +47,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
     # Navigate to the Upload View
     
-    browser.find_element_by_link_text("Upload").click()
-    #browser.find_elements_by_xpath("/html/body/div/div/div[1]/div[1]/nav/div/ul/li[1]/a").click()                            
+    #browser.find_element_by_link_text("Upload").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[1]/div[1]/nav/div/ul/li[1]/a").click()                            
 
     # Check the default boxes are set for the subtitles workflow
 
@@ -87,8 +87,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
      ####### Collection View
      # Navigate to Collection view
-    browser.find_element_by_link_text("Collection").click()
-    #browser.find_elements_by_xpath("/html/body/div/div/div[1]/nav/div/ul/li[2]/a").click()
+    #browser.find_element_by_link_text("Collection").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[1]/nav/div/ul/li[2]/a").click()
     time.sleep(5)
 
     # Find the base test asset in the collection
@@ -98,16 +98,16 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
      ####### TRANSCRIPT COMPONENT
     # Navigate to the transcript
     #Analyze
-    browser.find_element_by_link_text("Analyze").click()
-    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
+    #browser.find_element_by_link_text("Analyze").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
     time.sleep(2)
     #Speech Recognition
-    browser.find_element_by_link_text("Speech Recognition").click()
-    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
+    #browser.find_element_by_link_text("Speech Recognition").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
     time.sleep(2)
     #Transcript
-    browser.find_element_by_link_text("Transcript").click()
-    #browser.find_elements_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[1]/a").click()
+    #browser.find_element_by_link_text("Transcript").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[1]/a").click()
     time.sleep(8)
 
     # Check the text for some keywords
@@ -140,7 +140,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     
     ####### SUBTITLES COMPONENT
     # Navigate to subtitles
-    browser.find_elements_by_link_text("Subtitles")[0].click()
+    #browser.find_elements_by_link_text("Subtitles")[0].click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
@@ -193,7 +194,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
      ####### TRANSLATE COMPONENT
      # Navigate to translation
-    browser.find_elements_by_link_text("Translation")[0].click()
+    #browser.find_elements_by_link_text("Translation")[0].click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[3]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 

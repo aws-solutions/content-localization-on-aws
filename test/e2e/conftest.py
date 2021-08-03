@@ -28,16 +28,11 @@ def testing_env_variables():
     
         test_env_vars = {
             'MEDIA_PATH': os.environ['TEST_MEDIA_PATH'],
-            'SAMPLE_IMAGE': os.environ['TEST_IMAGE'],
             'SAMPLE_VIDEO': os.environ['TEST_VIDEO'],
             'SAMPLE_AUDIO': os.environ['TEST_AUDIO'],
-            'SAMPLE_TEXT': os.environ['TEST_TEXT'],
-            'SAMPLE_JSON': os.environ['TEST_JSON'],
-            'SAMPLE_FACE_IMAGE': os.environ['TEST_FACE_IMAGE'],
             'SAMPLE_VOCABULARY_FILE': os.environ['TEST_VOCABULARY_FILE'],
             'REGION': os.environ['MIE_REGION'],
             'MIE_STACK_NAME': os.environ['MIE_STACK_NAME'],
-            'FACE_COLLECTION_ID': os.environ['TEST_FACE_COLLECTION_ID'],
             'ACCESS_KEY': os.environ['AWS_ACCESS_KEY_ID'],
             'SECRET_KEY': os.environ['AWS_SECRET_ACCESS_KEY'],
             'APP_USERNAME': os.environ['APP_USERNAME'],
@@ -102,11 +97,6 @@ def upload_media(testing_env_variables, stack_resources):
     print('Uploading Test Media')
     s3 = boto3.client('s3', region_name=testing_env_variables['REGION'])
     # Upload test media files
-    # s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_TEXT'], stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_TEXT'])
-    # s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_JSON'], stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_JSON'])
-    # s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_AUDIO'], stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_AUDIO'])
-    # s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_IMAGE'], stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_IMAGE'])
-    # s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_FACE_IMAGE'], stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_FACE_IMAGE'])
     s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_VIDEO'],
                    stack_resources['DataplaneBucket'], 'upload/' + testing_env_variables['SAMPLE_VIDEO'])
     s3.upload_file(testing_env_variables['MEDIA_PATH'] + testing_env_variables['SAMPLE_VOCABULARY_FILE'],
@@ -298,6 +288,136 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         delete_terminology_body)
     assert delete_terminology_request.status_code == 200
 
+# Return the workflow configuration.  If all operators is True, run all operators in the workflow.  
+# If all_operators is False, run only the subtitle workflow
+def workflow_config(all_operators):
+
+    # Define the video workflow used as the base for tests
+    defaultPrelimVideoStage2 = {
+        "Thumbnail": {
+            "ThumbnailPosition": "5",
+            "Enabled": True
+        },
+        "Mediainfo": {
+            "Enabled": True
+        }
+    }
+    defaultVideoStage2 = {
+        "faceDetection": {
+            "Enabled": all_operators
+        },
+        "technicalCueDetection": {
+            "Enabled": all_operators
+        },
+        "shotDetection": {
+            "Enabled": all_operators
+        },
+        "celebrityRecognition": {
+            "MediaType": "Video", 
+            "Enabled": all_operators
+        },
+        "labelDetection" : {
+            "MediaType": "Video", 
+            "Enabled": all_operators
+        },
+        "personTracking": {
+            "MediaType": "Video", 
+            "Enabled": False
+        },
+        "faceSearch": {
+            "MediaType": "Video",
+            "Enabled": False
+        },
+        "textDetection": {
+            "MediaType": "Video", 
+            "Enabled": all_operators
+        },
+        "Mediaconvert": {
+            "MediaType": "Video", 
+            "Enabled": False
+        },
+        "GenericDataLookup": {
+            "Enabled": False
+        }
+    }     
+    defaultAudioStage2 = {
+        "TranscribeVideo": {
+            "Enabled": True,
+            "TranscribeLanguage": "en-US",
+            "MediaType": "Audio"
+        }
+    }
+    defaultTextStage2 = {
+        "ComprehendEntities": {
+            "MediaType": "Text", 
+            "Enabled": all_operators
+        },
+        "ComprehendKeyPhrases": {
+            "MediaType": "Text", 
+            "Enabled": all_operators
+        }
+    }
+    
+    CaptionFileStage2 = {
+        "WebToSRTCaptions": {
+            "MediaType": "MetadataOnly",
+            "TargetLanguageCodes": [
+                "en",
+                "es"
+                ],
+            "Enabled": True
+            },
+        "WebToVTTCaptions": {
+            "MediaType": "MetadataOnly",
+            "TargetLanguageCodes": [
+                "en",
+                "es"
+                ],
+            "Enabled": True
+        },
+        "PollyWebCaptions": {
+            "MediaType":"MetadataOnly",
+            "Enabled": True,
+            "SourceLanguageCode": "en"
+        }
+    }
+    WebCaptionsStage2 = {
+        "WebCaptions": {
+            "MediaType": "MetadataOnly",
+            "SourceLanguageCode": "en",
+            "Enabled": True,
+        }
+    }
+    TranslateStage2 = {
+        "Translate": {
+            "MediaType": "Text",
+            "Enabled": False,
+        },
+        "TranslateWebCaptions": {
+            "MediaType":"MetadataOnly",
+            "Enabled": True,
+            "TargetLanguageCodes": [
+                "es"
+            ],
+            "SourceLanguageCode": "en",
+            "ParallelDataNames": []
+        }
+    }
+
+    workflow = {
+        "Name": "VODSubtitlesVideoWorkflow",
+    }
+    workflow["Configuration"] = {}
+    workflow["Configuration"]["defaultPrelimVideoStage2"] = defaultPrelimVideoStage2
+    workflow["Configuration"]["defaultVideoStage2"] = defaultVideoStage2
+    workflow["Configuration"]["CaptionFileStage2"] = CaptionFileStage2
+    workflow["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
+    workflow["Configuration"]["TranslateStage2"] = TranslateStage2
+    workflow["Configuration"]["defaultAudioStage2"] = defaultAudioStage2
+    workflow["Configuration"]["defaultTextStage2"] = defaultTextStage2
+    return workflow
+
+
 def execute_workflow(workflow_api,test_workflow_execution):
     # create workflow execution
 
@@ -338,73 +458,47 @@ def execute_workflow(workflow_api,test_workflow_execution):
     return workflow_execution_request
 
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope='function')
 def workflow_with_customizations(workflow_api, dataplane_api, vocabulary, terminology, stack_resources, testing_env_variables):
     workflow_api = workflow_api()
     dataplane_api = dataplane_api()
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    test_workflow_execution = {
-        "Name": "VODSubtitlesVideoWorkflow",
-        "Configuration": {
-            "defaultAudioStage2": {
-                "TranscribeVideo": {
-                    "MediaType": "Audio", 
-                    "Enabled": True, 
-                    "TranscribeLanguage": "en-US", 
-                    "VocabularyName": vocabulary["vocabulary_name"]
-                }
-            },
-            "TranslateStage2": {
-                "TranslateWebCaptions": {
-                    "MediaType": "MetadataOnly",
-                    "Enabled": True,
-                    "TargetLanguageCodes": [
-                        "es"
-                    ],
-                    "SourceLanguageCode": "en",
-                    "TerminologyNames": [{"Name":terminology["terminology_name"],"TargetLanguageCodes":["es"]}],
-                    "ParallelDataNames": []
-                }
-            },
-            "defaultVideoStage2": {
-                "faceSearch": {
-                    "MediaType": "Video",
-                    "Enabled": False
-                },
-                "GenericDataLookup": {
-                    "MediaType": "Video",
-                    "Enabled": False
-                }
-            },
-            "defaultPrelimVideoStage2": {
-                "Thumbnail": {
-                    "ThumbnailPosition": "5",
-                    "Enabled": True
-                    }
+    workflow = workflow_config(False)
+    workflow["Configuration"]["defaultAudioStage2"]["TranscribeVideo"]["VocabularyName"] \
+        = vocabulary["vocabulary_name"]
+    workflow["Configuration"]["TranslateStage2"]["TranslateWebCaptions"]["TerminologyNames"] \
+        = [{
+            "Name": terminology["terminology_name"],
+            "TargetLanguageCodes":[
+                "es"
+                ]
             }
-        },
-        "Input": {
-            "Media": {
-                "Video": {
-                    "S3Bucket": stack_resources['DataplaneBucket'],
-                    "S3Key": 'upload/' + testing_env_variables['SAMPLE_VIDEO']
-                }
+        ]
+
+    workflow["Input"] = {
+        "Media": {
+            "Video": {
+                "S3Bucket": stack_resources['DataplaneBucket'],
+                "S3Key": 'upload/' + testing_env_variables['SAMPLE_VIDEO']
             }
         }
     }
+
+    print(json.dumps(workflow))
 
     if testing_env_variables['USE_EXISTING_WORKFLOW']:
         return {}
 
     workflow_execution_request = workflow_api.create_workflow_execution_request(
-        test_workflow_execution)
+        workflow)
     assert workflow_execution_request.status_code == 200
 
     # Create a second workflow to avoid having to code 1 vs. many conditions for xpaths
     workflow_execution_request2 = workflow_api.create_workflow_execution_request(
-        test_workflow_execution)
+        workflow)
     assert workflow_execution_request2.status_code == 200
 
     workflow_execution_response = workflow_execution_request.json()
@@ -462,54 +556,21 @@ def workflow_to_modify(workflow_api, dataplane_api, vocabulary, terminology, sta
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    test_workflow_execution = {
-        "Name": "VODSubtitlesVideoWorkflow",
-        "Configuration": {
-            "defaultAudioStage2": {
-                "TranscribeVideo": {
-                    "MediaType": "Audio", 
-                    "Enabled": True, 
-                    "TranscribeLanguage": "en-US"
-                }
-            },
-            "TranslateStage2": {
-                "TranslateWebCaptions": {
-                    "MediaType": "MetadataOnly",
-                    "Enabled": True,
-                    "TargetLanguageCodes": [
-                        "es"
-                    ],
-                    "SourceLanguageCode": "en",
-                    "ParallelDataNames": []
-                }
-            },
-            "defaultVideoStage2": {
-                "faceSearch": {
-                    "MediaType": "Video",
-                    "Enabled": False
-                }
-            },
-            "defaultPrelimVideoStage2": {
-                "Thumbnail": {
-                    "ThumbnailPosition": "5",
-                    "Enabled": True
-                    }
-            }
-            
-        },
-        "Input": {
-            "Media": {
-                "Video": {
-                    "S3Bucket": stack_resources['DataplaneBucket'],
-                    "S3Key": 'upload/' + testing_env_variables['SAMPLE_VIDEO']
-                }
+    workflow = workflow_config(True)
+    workflow["Input"] = {
+        "Media": {
+            "Video": {
+                "S3Bucket": stack_resources['DataplaneBucket'],
+                "S3Key": 'upload/' + testing_env_variables['SAMPLE_VIDEO']
             }
         }
     }
-    
+
+    if testing_env_variables['USE_EXISTING_WORKFLOW']:
+        return {}
 
     workflow_execution_request = workflow_api.create_workflow_execution_request(
-        test_workflow_execution)
+        workflow)
     assert workflow_execution_request.status_code == 200
 
     workflow_execution_response = workflow_execution_request.json()

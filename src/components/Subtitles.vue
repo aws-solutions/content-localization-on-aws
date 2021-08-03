@@ -1235,20 +1235,21 @@ export default {
             this.webCaptions = response.data.results["WebCaptions"]
             console.log("low confidence words:")
             // TODO: highlight low confidence words in GUI
-            const low_confidence_words = []
-            const confidence_threshold = 0.90
-            console.log("confidence threshold: " + confidence_threshold)
-            this.webCaptions.forEach(item => {
-              item.wordConfidence.filter(word => word.c < "0.99")
-                .forEach(word => {
-                  // add low confidence word to array if it hasn't already been added
-                  if (low_confidence_words.includes(word.w) === false) {
-                    low_confidence_words.push(word.w)
-                  }
-                })
-            })
-            console.log(low_confidence_words)
-            this.sortWebCaptions()
+            // const low_confidence_words = []
+            // const confidence_threshold = 0.90
+            // console.log("confidence threshold: " + confidence_threshold)
+            // this.webCaptions.forEach(item => {
+            //   item.wordConfidence.filter(word => word.c < "0.99")
+            //     .forEach(word => {
+            //       // add low confidence word to array if it hasn't already been added
+            //       if (low_confidence_words.includes(word.w) === false) {
+            //         low_confidence_words.push(word.w)
+            //       }
+            //     })
+            // })
+            // console.log(low_confidence_words)
+            // FIXME - why do we need to sort as we read this?  Isn't it already sorted?
+            // this.sortWebCaptions()
             this.isBusy = false
             if (cursor)
               this.getWebCaptionPages(url,cursor)

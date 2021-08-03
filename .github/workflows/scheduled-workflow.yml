@@ -270,19 +270,6 @@ jobs:
         continue-on-error: true
         with:
             input_path: deployment
-
-      # - name: Run unit tests
-      #   run: |
-      #     cd $GITHUB_WORKSPACE
-      #     cd test/unit
-      #     ./run_unit.sh workflowapi
-      #     ./run_unit.sh dataplaneapi
-
-      # - name: Run integ tests
-      #   run: |
-      #     cd $GITHUB_WORKSPACE
-      #     cd test/integ
-      #     ./run_integ.sh
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

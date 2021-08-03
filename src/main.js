@@ -73,6 +73,7 @@ getRuntimeConfig().then(function(json) {
 
   Vue.use(AmplifyPlugin, AmplifyModules);
   Vue.use(BootstrapVue);
+  Vue.use(BootstrapVueIcons);
   Vue.use(VueHighlightJS)
 
   new Vue({

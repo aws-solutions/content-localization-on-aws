@@ -62,8 +62,6 @@ jobs:
 
   scan-job:
     runs-on: ubuntu-latest
-    # use a specific environment for this build that has secrets defined and protection rules in place, if needed
-    environment: test_env_var
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -81,7 +79,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.BUILD_SECRET_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.REGION }}
       - name: Set up Push variables
         if: github.event_name == 'push'

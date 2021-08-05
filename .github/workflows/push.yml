@@ -47,6 +47,16 @@ jobs:
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
           echo "read in the template"
           read -r TEMPLATE < ../src/templateUrlMieRelease.txt
+      - name: Store templates for check jobs
+        uses: actions/upload-artifact@v2
+        with:
+          name: cloudformation-templates
+          path: deployment/dist/*.template
+      - name: Store virtual environment requirements
+        uses: actions/upload-artifact@v2
+        with:
+          name: virtual-environment-requirements
+          path: deployment/requirements.txt
       - name: 'Upload One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
@@ -75,40 +85,6 @@ jobs:
         uses: edplato/trufflehog-actions-scan@master
         with:
           scanArguments: "--regex --entropy=False"
-      - name: Initialize AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.REGION }}
-      - name: Set up Push variables
-        if: github.event_name == 'push'
-        run: |
-          echo "VERSION=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-      - name: Update system path
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Install required system packages
-        run: |
-          pip install --upgrade --force-reinstall -r deployment/requirements.txt 2> error.txt
-          if [ -s error.txt ]; then
-            echo "ERROR: System package installation failed."
-            cat error.txt
-            exit 1
-          fi
-      - name: Run build script
-        run: |
-          cd deployment
-          ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME $VERSION
-      - name: Store templates for check jobs
-        uses: actions/upload-artifact@v2
-        with:
-          name: cloudformation-templates
-          path: deployment/global-s3-assets/*release.template
-      - name: Store virtual environment requirements
-        uses: actions/upload-artifact@v2
-        with:
-          name: virtual-environment-requirements
-          path: deployment/requirements.txt
 
   cfn-lint-check-job:
     needs: scan-job

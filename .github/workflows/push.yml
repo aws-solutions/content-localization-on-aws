@@ -52,11 +52,11 @@ jobs:
         with:
           name: cloudformation-templates
           path: deployment/dist/*.template
-      - name: Store virtual environment requirements
-        uses: actions/upload-artifact@v2
-        with:
-          name: virtual-environment-requirements
-          path: deployment/requirements.txt
+      #- name: Store virtual environment requirements
+      #  uses: actions/upload-artifact@v2
+      #  with:
+      #    name: virtual-environment-requirements
+      #    path: deployment/requirements.txt
       - name: 'Upload One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
@@ -96,20 +96,20 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: cloudformation-templates
-      - name: Download virtual environment requirements
-        uses: actions/download-artifact@v2
-        with:
-          name: virtual-environment-requirements
+      #- name: Download virtual environment requirements
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: virtual-environment-requirements
       - name: Update system path
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Install required system packages
-        run: |
-          pip install --upgrade --force-reinstall -r requirements.txt 2> error.txt
-          if [ -s error.txt ]; then
-            echo "ERROR: System package installation failed."
-            cat error.txt
-            exit 1
-          fi
+      #- name: Install required system packages
+      #  run: |
+      #    pip install --upgrade --force-reinstall -r requirements.txt 2> error.txt
+      #   if [ -s error.txt ]; then
+      #      echo "ERROR: System package installation failed."
+      #      cat error.txt
+      #      exit 1
+      #    fi
       - name: Check with cfn-lint
         run: cfn-lint *.template
   

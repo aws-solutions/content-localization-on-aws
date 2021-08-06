@@ -1,0 +1,13 @@
+networkx
+boto3
+botocore
+cfn-lint
+chalice
+crhelper
+defusedxml
+fuzzywuzzy
+jsonpath_ng
+pylint
+requests
+stringcase
+testresources

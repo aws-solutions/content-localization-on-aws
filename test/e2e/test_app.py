@@ -155,12 +155,12 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
     # Check a subtitle
-    subtitle3 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[3]/td[2]/div/div/div[1]/textarea")
-    subtitle3_text = subtitle3.get_attribute("value")
-    assert "Boulder" in subtitle3_text
+    subtitle1 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
+    subtitle1_text = subtitle1.get_attribute("value")
+    assert "Boulder" in subtitle1_text
 
     # Edit a subtitle
-    subtitle3.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00STEEN REPLACED BY EDITS00")
+    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00STEEN REPLACED BY EDITS00")
 
     # Check the file info
     source_language = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[2]/div/div/div/div/div/div/div[2]/div[3]").get_attribute("textContent")
@@ -211,18 +211,18 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     assert button_language == "Spanish"
 
     # Check a subtitle
-    subtitle3 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[3]/td[2]/div/div/div[1]/textarea")
-    subtitle3_text = subtitle3.get_attribute("value")
-    assert "Boulder" in subtitle3_text
+    subtitle1 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
+    subtitle1_text = subtitle1.get_attribute("value")
+    assert "Boulder" in subtitle1_text
 
-    subtitle5 = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[1]/div/table/tbody/tr[5]/td[2]/div/div/div[1]/textarea")
-    subtitle5_text = subtitle5.get_attribute("value")
-    assert "JEFF STEEN-replaced-by-terminology" in subtitle5_text
+    subtitle3 = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[1]/div/table/tbody/tr[3]/td[2]/div/div/div[1]/textarea")
+    subtitle3_text = subtitle3.get_attribute("value")
+    assert "JEFF STEEN-replaced-by-terminology" in subtitle3_text
 
     # Edit a subtitle
-    #subtitle3.clear()
-    #subtitle3.send_keys("EDITED: COME BACK TO PORTLAND")
-    subtitle3.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
+    #subtitle1.clear()
+    #subtitle1.send_keys("EDITED: COME BACK TO PORTLAND")
+    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
 
     # Check the file info
     time.sleep(2)

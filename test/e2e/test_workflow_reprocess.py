@@ -59,12 +59,12 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
     # Check a subtitle
-    subtitle3 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[3]/td[2]/div/div/div[1]/textarea")
-    subtitle3_text = subtitle3.get_attribute("value")
-    assert "Boulder" in subtitle3_text
+    subtitle1 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
+    subtitle1_text = subtitle1.get_attribute("value")
+    assert "Boulder" in subtitle1_text
 
     # Edit a subtitle
-    subtitle3.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00")
+    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00")
 
     # Save edits
     time.sleep(1)
@@ -118,9 +118,9 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
     # FIXME - ISSUE #132 Edits are not applied after workflow reprocess
-    # subtitle3 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
-    # subtitle3_text = subtitle3.get_attribute("value")
-    # assert "00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00" in subtitle3_text
+    # subtitle1 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
+    # subtitle1_text = subtitle1.get_attribute("value")
+    # assert "00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00" in subtitle1_text
 
     # Check for the edits in the Translation
     

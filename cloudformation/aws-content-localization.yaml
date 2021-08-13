@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Localization - Deploys the AWS Content Localization Application
+Description: (SO0164) AWS Content Localization - Deploys the AWS Content Localization Application
 
 Parameters:
   MieStackName:
@@ -60,6 +60,7 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         NodeType: !Ref ElasticSearchNodeSize
+        Boto3UserAgent: !Join ['', ['{"user_agent_extra": "AWSSOLUTION/', "SO0164", '/%%VERSION%%"}']]
 
   # Deploy Auth stack
 

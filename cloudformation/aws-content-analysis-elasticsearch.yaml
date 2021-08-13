@@ -25,6 +25,9 @@ Parameters:
   AnalyticsStreamArn:
     Description: "Arn of the MIE kinesis data stream"
     Type: String
+  Boto3UserAgent:
+    Type: String
+    Description: "Boto3 user agent string"
 
 Mappings:
   SourceCode:
@@ -80,6 +83,7 @@ Resources:
         Variables:
           EsEndpoint: !GetAtt ESDomain.DomainEndpoint
           DataplaneBucket: !Ref MieDataplaneBucket
+          botoConfig: !Ref "Boto3UserAgent"
 
   # stream event mapping for lambda
 

@@ -5,13 +5,18 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 import base64
 import json
 import os
+import botocore
+from botocore import config
 import boto3
 from requests_aws4auth import AWS4Auth
+
+mie_config = json.loads(os.environ['botoConfig'])
+config = config.Config(**mie_config)
 
 es_endpoint = os.environ['EsEndpoint']
 dataplane_bucket = os.environ['DataplaneBucket']
 
-s3 = boto3.client('s3')
+s3 = boto3.client('s3', config=config)
 
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
 supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "face_search", "contentmoderation", "facedetection", "key_phrases", "entities", "webcaptions", "shotdetection", "technicalcuedetection"]
@@ -730,7 +735,8 @@ def process_keyphrases(asset, workflow, results):
 
 
 def connect_es(endpoint):
-    # Handle aws auth for es
+    # Handle aws auth for es# Create a config
+
     session = boto3.Session()
     credentials = session.get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, session.region_name, 'es',

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Content Localization Web - Deploys the AWS Content Localization Website Resources
+Description: (SO0164) AWS Content Localization - Deploys the AWS Content Localization website resources"
 
 Parameters:
   DataplaneEndpoint:
@@ -18,18 +18,24 @@ Parameters:
     Type: String
 
 Mappings:
-  ContentAnalysisApp:
-    SourceCode:
-      S3Bucket: "%%BUCKET_NAME%%"
-      CodeKeyPrefix: "content-localization-solution/%%VERSION%%/code"
-      TemplateKeyPrefix: "content-localization-solution/%%VERSION%%/cf"
-      WebsitePrefix: "content-localization-solution/%%VERSION%%/code/website"
+  SourceCode:
+    General:
+      RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
+      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
+      WebsitePrefix: "aws-content-localization/%%VERSION%%/website"
 
 Resources:
   # Web application resources
   # WebsiteBucketNameFunction - derive a name for the website bucket based on the lower case stack name.
   WebsiteBucketNameFunction:
     Type: AWS::Lambda::Function
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "This resource does not need to access any other resource provisioned within a VPC."
+          - id: W92
+            reason: "This function does not require performance optimization, so the default concurrency limits suffice."
     Properties:
       Code:
         ZipFile: |
@@ -43,12 +49,14 @@ Resources:
       Handler: index.handler
       Runtime: python3.8
       Role: !GetAtt WebsiteBucketNameExecutionRole.Arn
+
   WebsiteBucketNameFunctionPermissions:
     Type: AWS::Lambda::Permission
     Properties:
       Action: 'lambda:InvokeFunction'
       FunctionName: !GetAtt WebsiteBucketNameFunction.Arn
       Principal: 'cloudformation.amazonaws.com'
+
   WebsiteBucketNameExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -68,8 +76,12 @@ Resources:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
-                Action: ['logs:*']
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
                 Resource: 'arn:aws:logs:*:*:*'
+
   GetWebsiteBucketName:
     Type: Custom::CustomResource
     Properties:
@@ -93,16 +105,16 @@ Resources:
         LogFilePrefix: "access_logs/"
       LifecycleConfiguration:
         Rules:
-          - Id: "Keep access log for 30 days"
+          - Id: "Keep access log for 10 days"
             Status: Enabled
             Prefix: "access_logs/"
-            ExpirationInDays: 30
+            ExpirationInDays: 10
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
-          - Id: "Keep cloudfront log for 30 days"
+          - Id: "Keep cloudfront log for 10 days"
             Status: Enabled
             Prefix: "cf_logs/"
-            ExpirationInDays: 30
+            ExpirationInDays: 10
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
 
@@ -125,8 +137,8 @@ Resources:
     Type: Custom::WebsiteDeployHelper
     Properties:
       ServiceToken: !GetAtt WebsiteDeployHelper.Arn
-      WebsiteCodeBucket: !FindInMap ["ContentAnalysisApp", "SourceCode", "S3Bucket"]
-      WebsiteCodePrefix: !FindInMap ["ContentAnalysisApp", "SourceCode", "WebsitePrefix"]
+      WebsiteCodeBucket: !Join ["-", [!FindInMap ["SourceCode", "General", "RegionalS3Bucket"], Ref: "AWS::Region"]]
+      WebsiteCodePrefix: !FindInMap ["SourceCode", "General", "WebsitePrefix"]
       DeploymentBucket: !GetAtt ContentAnalysisWebsiteBucket.DomainName
 
   ContentAnalysisOriginAccessIdentity:
@@ -155,8 +167,13 @@ Resources:
             Principal:
               CanonicalUser: !GetAtt ContentAnalysisOriginAccessIdentity.S3CanonicalUserId
 
-  ContentAnalysisWebsiteDistribution:
+  WebsiteDistribution:
     Type: AWS::CloudFront::Distribution
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W70
+            reason: "Specifying a TLS version is unnecessary because we're using the CloudFront default certificate."
     Properties:
       DistributionConfig:
         Comment: "Website distribution for Content Analysis Solution"
@@ -206,7 +223,7 @@ Resources:
       cfn_nag:
         rules_to_suppress:
           - id: W11
-            reason: "Website helper Lambda requires ability to read / write to both Content Analysis website bucket and build bucket"
+            reason: "Website helper Lambda requires ability to read / write to both MIE website bucket and MIE build bucket"
     DependsOn: ContentAnalysisWebsiteBucket
     Properties:
       AssumeRolePolicyDocument:
@@ -231,7 +248,7 @@ Resources:
                   - !Sub ${ContentAnalysisWebsiteBucket.Arn}/*
                   - Fn::Sub:
                       - arn:aws:s3:::${websitecode}/*
-                      - websitecode: !FindInMap ["ContentAnalysisApp", "SourceCode", "S3Bucket"]
+                      - websitecode: !Join ["-", [!FindInMap ["SourceCode", "General", "RegionalS3Bucket"], Ref: "AWS::Region"]]
               - Effect: Allow
                 Action:
                   - "s3:ListBucket"
@@ -239,7 +256,7 @@ Resources:
                   - !Sub ${ContentAnalysisWebsiteBucket.Arn}
                   - Fn::Sub:
                       - arn:aws:s3:::${websitecode}
-                      - websitecode: !FindInMap ["ContentAnalysisApp", "SourceCode", "S3Bucket"]
+                      - websitecode:  !Join ["-", [!FindInMap ["SourceCode", "General", "RegionalS3Bucket"], Ref: "AWS::Region"]]
               - Effect: Allow
                 Action:
                   - "logs:CreateLogGroup"
@@ -250,15 +267,22 @@ Resources:
 
   WebsiteDeployHelper:
     Type: AWS::Lambda::Function
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "This resource does not need to access any other resource provisioned within a VPC."
+          - id: W92
+            reason: "This function does not require performance optimization, so the default concurrency limits suffice."
     Properties:
       Code:
-        S3Bucket: !FindInMap ["ContentAnalysisApp", "SourceCode", "S3Bucket"]
+        S3Bucket:  !Join ["-", [!FindInMap ["SourceCode", "General", "RegionalS3Bucket"], Ref: "AWS::Region"]]
         S3Key:
           !Join [
-            "/",
+              "/",
             [
-            !FindInMap ["ContentAnalysisApp", "SourceCode", "CodeKeyPrefix"],
-            "websitehelper.zip",
+              !FindInMap ["SourceCode", "General", "CodeKeyPrefix"],
+              "websitehelper.zip",
             ],
           ]
       Handler: website_helper.lambda_handler
@@ -279,5 +303,5 @@ Resources:
 
 Outputs:
   CloudfrontUrl:
-    Value: !Join ["", ["https://", !GetAtt ContentAnalysisWebsiteDistribution.DomainName]]
+    Value: !Join ["", ["https://", !GetAtt WebsiteDistribution.DomainName]]
 

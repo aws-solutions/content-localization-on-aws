@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: (SO0164) AWS Content Localization - Deploys the AWS Content Localization Application
+Description: "(SO0164) AWS Content Localization - Deploys the AWS Content Localization Application over an existing Media Insights Engine stack."
 
 Parameters:
   MieStackName:
@@ -11,9 +11,9 @@ Parameters:
   ElasticSearchNodeSize:
     Description: "The node type to be provisioned for the Elasticsearch cluster"
     Type: String
-    Default: "t2.small.elasticsearch"
+    Default: "t3.small.elasticsearch"
     AllowedValues:
-      - "t2.small.elasticsearch"
+      - "t3.small.elasticsearch"
       - "m4.large.elasticsearch"
       - "m4.xlarge.elasticsearch"
       - "c4.large.elasticsearch"
@@ -22,18 +22,14 @@ Parameters:
       - "r4.xlarge.elasticsearch"
 
 Mappings:
-
   ContentAnalysisApp:
     SourceCode:
-      S3Bucket: "%%BUCKET_NAME%%"
-      CodeKeyPrefix: "content-localization-solution/%%VERSION%%/code"
-      TemplateKeyPrefix: "content-localization-solution/%%VERSION%%/cf"
-      WebsitePrefix: "content-localization-solution/%%VERSION%%/code/website"
+      GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
+      TemplateKeyPrefix: "aws-content-localization/%%VERSION%%"
 
 Resources:
 
   # Deploy Elasticsearch
-
   ContentAnalysisElasticsearchStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -43,10 +39,8 @@ Resources:
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
+            - GlobalS3Bucket
+          - ".s3.amazonaws.com/"
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
@@ -60,7 +54,6 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         NodeType: !Ref ElasticSearchNodeSize
-        Boto3UserAgent: !Join ['', ['{"user_agent_extra": "AWSSOLUTION/', "SO0164", '/%%VERSION%%"}']]
 
   # Deploy Auth stack
 
@@ -73,10 +66,8 @@ Resources:
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
+            - GlobalS3Bucket
+          - ".s3.amazonaws.com/"
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
@@ -106,10 +97,8 @@ Resources:
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
+            - GlobalS3Bucket
+          - ".s3.amazonaws.com/"
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
@@ -123,7 +112,6 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:OperatorLibraryStack"
 
-      
   ContentAnalysisWebStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -133,10 +121,8 @@ Resources:
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
-            - S3Bucket
-          - .s3.
-          - !Ref AWS::Region
-          - ".amazonaws.com/"
+            - GlobalS3Bucket
+          - ".s3.amazonaws.com/"
           - !FindInMap
             - ContentAnalysisApp
             - SourceCode
@@ -157,14 +143,9 @@ Resources:
         IdentityPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
         PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
 
-  
-
-
 Outputs:
-  ContentLocalizationSolution:
+  CloudfrontUrl:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
-  MieStackName: 
-    Value: ${MieStackName}
   ElasticEndpoint:
     Value: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
   UserPoolId:
@@ -172,5 +153,4 @@ Outputs:
   IdentityPoolId:
     Value: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
   UserPoolClientId:
-    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId 
-    
+    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId

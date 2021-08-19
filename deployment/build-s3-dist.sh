@@ -388,6 +388,12 @@ if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solut
   echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization-use-existing-mie-stack.template"'"
   echo "Without existing MIE deployment:"
   echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization.template"'"
+
+  touch templateUrlMieDevelopment.txt
+  echo "https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization.template" > templateUrlMieDevelopment.txt
+  touch templateUrlMieRelease.txt
+  echo "https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization-use-existing-mie-stack.template" > templateUrlMieRelease.txt
+
 fi
 
 cleanup

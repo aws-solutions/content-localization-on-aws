@@ -647,7 +647,7 @@ export default {
       }
     },
     getVttCaptions: async function () {
-      
+
       let asset_id = this.$route.params.asset_id;
 
       let apiName = 'mieDataplaneApi'
@@ -660,10 +660,10 @@ export default {
       };
 
       console.log("Getting VTT captions")
-      
+
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
+
         if (response.status !== 200) {
             this.isBusy = false
             this.noTranslation = true
@@ -693,7 +693,7 @@ export default {
                 'Content-Type': 'application/json'
               },
               body: {
-                "S3Bucket": bucket, 
+                "S3Bucket": bucket,
                 "S3Key": key
                 },
               response: true,
@@ -704,7 +704,7 @@ export default {
 
             let res = await vm.$Amplify.API.post(apiName, path, requestOpts);
             // record the signed urls in an array
-            
+
             vm.vttcaptions.push({'src': res.data, 'lang': item.LanguageCode, 'label': item.LanguageCode});
             console.log("pushed vtt captions "+item.LanguageCode)
           } catch  (error){
@@ -739,7 +739,7 @@ export default {
             new_track.src = vm.vtt_url
             // show the new caption in the video player
             new_track.mode = "showing"
-            
+
             // add a new text track for that vtt
             const manualCleanup = false
             // manualCleanup is needed in order to avoid a warning
@@ -747,7 +747,7 @@ export default {
             vm.player.addRemoteTextTrack(new_track, manualCleanup)
           }
         });
-        
+
       } catch (error) {
         console.log(error)
       }
@@ -764,10 +764,10 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        
+
         let captions_collection = [];
         this.num_caption_tracks = response.data.results.CaptionsCollection.length;
-        
+
         this.asyncForEach(response.data.results.CaptionsCollection, async(item) => {
           // TODO: map the language code to a language label
           const bucket = item.Results.S3Bucket;
@@ -781,7 +781,7 @@ export default {
                 'Content-Type': 'application/json'
               },
               body: {
-                "S3Bucket": bucket, 
+                "S3Bucket": bucket,
                 "S3Key": key
                 },
               response: true,
@@ -838,7 +838,7 @@ export default {
 
               let res = await this.$Amplify.API.post(apiName, path, requestOpts);
               captions_collection.push({'src': res.data, 'lang': item.TargetLanguageCode, 'label': item.TargetLanguageCode});
-        
+
             }
             catch {
               this.pollyaudiotranscripts = captions_collection
@@ -934,7 +934,7 @@ export default {
               // remove old_phrase from custom vocab, if it already exists
               this.customTerminologyUnsaved = this.customTerminologyUnsaved.filter(item => {return item.original_phrase !== old_phrase;});
               // add old_phrase to custom vocab
-              this.customTerminologyUnsaved.push({"original_phrase": old_phrase, "new_phrase": new_phrase})
+              this.customTerminologyUnsaved.push({[this.sourceLanguageCode]: "", [this.selected_lang_code]: new_phrase})
               console.log("CUSTOM TERMINOLOGY: " + JSON.stringify(this.customTerminologyUnsaved))
             }
             old_phrase = ''
@@ -1131,7 +1131,7 @@ export default {
       // regenerate VTT and SRT files.
       let data = this.disableUpstreamStages();
       data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-      
+
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'
       let requestOpts = {
@@ -1192,8 +1192,8 @@ export default {
           queryStringParameters: {} // optional
       };
 
-      
-      
+
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if (response.status === 200) {
@@ -1256,7 +1256,7 @@ export default {
           body: {"terminology_name": this.customTerminologyName, "terminology_csv": csv},
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if (response.status === 200) {
@@ -1298,7 +1298,7 @@ export default {
           body: {"terminology_name":customTerminologyName},
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if (response.status === 200) {
@@ -1339,7 +1339,7 @@ export default {
           body: {"terminology_name":this.customTerminologySelected},
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         const csv = response.data.terminology.replace(/"/g, '')
@@ -1391,7 +1391,7 @@ export default {
       console.log("after player")
     },
     getWebCaptionPages: async function (asset_id, operator_name, cursor) {
-      
+
       let apiName = 'mieDataplaneApi'
       console.log("getWebCaptionPages")
       let path = 'metadata/' + this.asset_id + '/' + operator_name

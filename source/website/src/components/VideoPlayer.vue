@@ -89,7 +89,7 @@ export default {
         },
         markers: []
       });
-      this.player.autoplay('muted');
+      // this.player.autoplay('muted');
       this.player.currentTime(0);
       let vm = this
       this.player.on('timeupdate', function() {

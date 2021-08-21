@@ -140,7 +140,7 @@
           ref="terminology-modal"
           size="lg"
           title="Custom Terminology Editor"
-          :ok-disabled="validTerminologyName === false || (customTerminologySelected.length === 0 && customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
+          :ok-disabled="validTerminologyName === false || (customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
           @cancel="customTerminologySelected=[]; customTerminologySaved=[];">
         <div v-if="customTerminologyList.length > 0">
           Load an existing terminology:
@@ -207,6 +207,7 @@
             <!-- The v-if/else here is used to show the add / delete row buttons
             only in the right-most column. -->
             <div v-if="key === customTerminologyLastTableField">
+              <!-- In this div we're controlling the right most column. -->
               <b-row no-gutters>
                 <b-col cols="9">
                   <div v-if="index < customTerminologyUnsaved.length">
@@ -232,12 +233,13 @@
               </b-row>
             </div>
             <div v-else>
+              <!-- In this div we're controlling every column except the right most column. -->
               <div v-if="index < customTerminologyUnsaved.length">
                 <!-- We use null in state to avoid showing a green check mark when field is valid -->
                 <b-form-input v-model="item[key]" class="custom-text-field" placeholder="(required)" :state="item[key] !== '' && item[key] !== undefined ? null : false" />
               </div>
               <div v-else>
-                <b-form-input v-model="item[key]" class="custom-text-field text-info" />
+                <b-form-input v-model="item[key]" class="custom-text-field text-info" placeholder="(required)" :state="item[key] !== '' && item[key] !== undefined ? null : false" />
               </div>
             </div>
           </template>
@@ -279,7 +281,7 @@ Uncomment the following buttons to get options for adding or removing languages 
         <b-form-group>
           <b-form-radio-group v-if="customTerminologySelected.length === 0"
             v-model="removeLanguageCode"
-            :options="translateLanguages.filter(langItem => translationsCollection.map(x => x.value).includes(langItem.value))"
+            :options="translateLanguages.filter(langItem => translationsCollection.map(x => x.value).includes(langItem.value)).concat(this.addedLanguages).filter(x => this.removedLanguages.includes(x) === false)"
           ></b-form-radio-group>
           <b-form-radio-group v-else
             v-model="removeLanguageCode"
@@ -423,7 +425,9 @@ export default {
   },
   computed: {
     customTerminologyFields: function () {
-      return [this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value).filter(x => this.removedLanguages.includes(x.value) === false))
+      console.log(this.customTerminologyUnion)
+      console.log([this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value).filter(y => this.removedLanguages.includes(y) === false)))
+      return [this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value).filter(y => this.removedLanguages.includes(y) === false))
     },
     customTerminologyLastTableField: function() {
       // if there's no custom terminology selected, then the terminology table only include 2 columns, the source language and the language selected in the web captions table, so we can just return selected_lang_code as the name of the last column.
@@ -1476,6 +1480,8 @@ export default {
     },
     add_language_request() {
       console.log("adding language " + this.newLanguageCode)
+      // if language was previously removed, then remove this language from the list of removed languages
+      this.removedLanguages = this.removedLanguages.filter(x => x !== this.newLanguageCode)
       // add the new language as a new column in the terminology table
       const language_label = this.translateLanguages.filter(x => (x.value === this.newLanguageCode))[0].text;
       this.addedLanguages = this.addedLanguages.concat({"text":language_label, "value": this.newLanguageCode})
@@ -1483,7 +1489,7 @@ export default {
 
       const terminology_row = this.customTerminologyUnsaved.pop()
       terminology_row[this.newLanguageCode] = ""
-      this.customTerminologyUnsaved.push(terminology_row)
+      this.customTerminologyUnsaved = this.customTerminologyUnsaved.concat(terminology_row)
 
       // reset the language code used in the add-language-modal form
       this.newLanguageCode=""
@@ -1493,21 +1499,25 @@ export default {
     },
     remove_language_request() {
       console.log("removing language " + this.removeLanguageCode)
-      if (this.customTerminologySelected === '') {
-        // add the new language as a new column in the terminology table
-        for (let i = 0; i < this.translationsCollection.length; i++) {
-          delete this.translationsCollection[i][this.removeLanguageCode]
-        }
+      if (this.addedLanguages.includes(this.removeLanguageCode)) {
+        this.addedLanguages = this.addedLanguages.filter(x => x.value !== this.removeLanguageCode)
       }
-      else if (this.customTerminologySelected !== '') {
-        for (let i = 0; i < this.customTerminologySaved.length; i++) {
-          delete this.customTerminologySaved[i][this.removeLanguageCode]
-        }
-        // This pop and push seems to be necessary in order to force the terminology table to refresh
-        const terminology_row = this.customTerminologySaved.pop()
-        this.customTerminologySaved.push(terminology_row)
-      }
-      this.translationsCollection = this.translationsCollection.filter(x => x.value !== this.removeLanguageCode)
+      this.removedLanguages = [this.removeLanguageCode].concat(this.removedLanguages)
+      // if (this.customTerminologySelected === '') {
+      //   // add the new language as a new column in the terminology table
+      //   for (let i = 0; i < this.translationsCollection.length; i++) {
+      //     delete this.translationsCollection[i][this.removeLanguageCode]
+      //   }
+      // }
+      // else if (this.customTerminologySelected !== '') {
+      //   for (let i = 0; i < this.customTerminologySaved.length; i++) {
+      //     delete this.customTerminologySaved[i][this.removeLanguageCode]
+      //   }
+      //   // This pop and push seems to be necessary in order to force the terminology table to refresh
+      //   const terminology_row = this.customTerminologySaved.pop()
+      //   this.customTerminologySaved.push(terminology_row)
+      // }
+      // this.translationsCollection = this.translationsCollection.filter(x => x.value !== this.removeLanguageCode)
       // reset the language code used in the form on remove-language-modal
       this.removeLanguageCode=""
     },

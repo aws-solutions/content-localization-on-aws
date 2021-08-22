@@ -279,11 +279,7 @@ Uncomment the following buttons to get options for adding or removing languages 
       <b-modal ref="remove-language-modal" title="Remove Language" ok-title="Remove" :ok-disabled="removeLanguageCode === ''" @ok="remove_language_request()">
         <p>Select language to remove:</p>
         <b-form-group>
-          <b-form-radio-group v-if="customTerminologySelected.length === 0"
-            v-model="removeLanguageCode"
-            :options="translateLanguages.filter(langItem => translationsCollection.map(x => x.value).includes(langItem.value)).concat(this.addedLanguages).filter(x => this.removedLanguages.includes(x) === false)"
-          ></b-form-radio-group>
-          <b-form-radio-group v-else
+          <b-form-radio-group
             v-model="removeLanguageCode"
             :options="alphabetized_language_collection.map(x => x.value)"
           ></b-form-radio-group>
@@ -425,8 +421,6 @@ export default {
   },
   computed: {
     customTerminologyFields: function () {
-      console.log(this.customTerminologyUnion)
-      console.log([this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value).filter(y => this.removedLanguages.includes(y) === false)))
       return [this.sourceLanguageCode].concat(this.alphabetized_language_collection.map(x => x.value).filter(y => this.removedLanguages.includes(y) === false))
     },
     customTerminologyLastTableField: function() {
@@ -503,7 +497,7 @@ export default {
           }
         })
       }
-      translations_collection = translations_collection.concat(this.addedLanguages)
+      translations_collection = translations_collection.filter(x => this.removedLanguages.includes(x.value) === false)
       return translations_collection.filter(x => x.text.length > 0)
           .sort(function(a, b) {
             const textA = a.text.toUpperCase();
@@ -1480,13 +1474,12 @@ export default {
     },
     add_language_request() {
       console.log("adding language " + this.newLanguageCode)
-      // if language was previously removed, then remove this language from the list of removed languages
+      // if language was previously removed, then undo the prior remove by removing this language from the list of removed languages
       this.removedLanguages = this.removedLanguages.filter(x => x !== this.newLanguageCode)
       // add the new language as a new column in the terminology table
-      const language_label = this.translateLanguages.filter(x => (x.value === this.newLanguageCode))[0].text;
+      const language_label = this.translateLanguages.filter(x => (x.value === this.newLanguageCode))[0].value;
       this.addedLanguages = this.addedLanguages.concat({"text":language_label, "value": this.newLanguageCode})
       // add the new language as a column in the terminology table data
-
       const terminology_row = this.customTerminologyUnsaved.pop()
       terminology_row[this.newLanguageCode] = ""
       this.customTerminologyUnsaved = this.customTerminologyUnsaved.concat(terminology_row)
@@ -1499,9 +1492,7 @@ export default {
     },
     remove_language_request() {
       console.log("removing language " + this.removeLanguageCode)
-      if (this.addedLanguages.includes(this.removeLanguageCode)) {
-        this.addedLanguages = this.addedLanguages.filter(x => x.value !== this.removeLanguageCode)
-      }
+      this.addedLanguages = this.addedLanguages.filter(x => x.value !== this.removeLanguageCode)
       this.removedLanguages = [this.removeLanguageCode].concat(this.removedLanguages)
       // if (this.customTerminologySelected === '') {
       //   // add the new language as a new column in the terminology table
@@ -1519,6 +1510,11 @@ export default {
       // }
       // this.translationsCollection = this.translationsCollection.filter(x => x.value !== this.removeLanguageCode)
       // reset the language code used in the form on remove-language-modal
+      console.log("this.customTerminologyUnsaved")
+      this.customTerminologyUnsaved.map(x => delete x[this.removeLanguageCode])
+      this.customTerminologySaved.map(x => delete x[this.removeLanguageCode])
+      console.log(this.customTerminologyUnsaved)
+      console.log(this.customTerminologySaved)
       this.removeLanguageCode=""
     },
     add_terminology_row(index) {

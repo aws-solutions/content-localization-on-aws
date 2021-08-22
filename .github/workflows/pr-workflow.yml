@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize]
     branches:
       - development
+  workflow_dispatch:
 
 jobs:
   # Build and new deploy based on latest release of MIE
@@ -43,8 +44,12 @@ jobs:
           echo "Templates artifacts:"
           cat ./templateUrlMieDevelopment.txt
           cat ./templateUrlMieRelease.txt
-          echo "TEMPLATE_URL_MIE_DEVELOPMENT=`cat ./templateUrlMieDevelopment.txt` >> $GITHUB_ENV"
-          echo "TEMPLATE_URL_MIE_RELEASE=`cat ./templateUrlMieRelease.txt` >> $GITHUB_ENV"
+      - name: 'Upload CL One-click Deployment Artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: templateUrlMieDevelopment
+          path: deployment/templateUrlMieDevelopment.txt
+          retention-days: 3
 
   build-mie-dev-us-west-2:
     runs-on: ubuntu-latest
@@ -227,7 +232,7 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          CLOUDFORMATION_TEMPLATE="${TEMPLATE_URL_MIE_DEVELOPMENT}"
+          CLOUDFORMATION_TEMPLATE=`cat templateUrl/templateUrlMieDevelopment.txt`
 
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback

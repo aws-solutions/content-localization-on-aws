@@ -234,6 +234,26 @@ jobs:
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrl/templateUrlMieDevelopment.txt`
 
+          # Delete $MIE_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $MIE_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$MIE_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            # Then delete $MIE_STACK_NAME...
+            echo "Removing $MIE_STACK_NAME so we can use that stack name again"
+            aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
+          fi
+
+          # Delete $CONTENT_LOCALIZATION_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $CONTENT_LOCALIZATION_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$CONTENT_LOCALIZATION_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            # Then delete $CONTENT_LOCALIZATION_STACK_NAME...
+            echo "Removing $CONTENT_LOCALIZATION_STACK_NAME so we can use that stack name again"
+            aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          fi
+
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME

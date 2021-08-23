@@ -45,7 +45,7 @@ Resources:
             - ContentAnalysisApp
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-elasticsearch.template"
+          - "/aws-content-localization-elasticsearch.template"
       Parameters:
         AnalyticsStreamArn:
           Fn::ImportValue:
@@ -72,7 +72,7 @@ Resources:
             - ContentAnalysisApp
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-auth.template"
+          - "/aws-content-localization-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
         WorkflowApiId:
@@ -127,7 +127,7 @@ Resources:
             - ContentAnalysisApp
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-web.template"
+          - "/aws-content-localization-web.template"
       Parameters:
         DataplaneEndpoint:
           Fn::ImportValue:

@@ -232,7 +232,7 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          CLOUDFORMATION_TEMPLATE=`cat templateUrl/templateUrlMieDevelopment.txt`
+          CLOUDFORMATION_TEMPLATE=`cat templateUrlMieDevelopment/templateUrlMieDevelopment.txt`
 
           # Delete $MIE_STACK_NAME if it already exists.
           # This is necessary in order to rerun github action workflows.

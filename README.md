@@ -12,7 +12,7 @@ Content Localization workflows can make use of advanced customization features p
 
 * [Amazon Transcribe Custom Vocabulary](https://docs.aws.amazon.com/transcribe/latest/dg/how-vocabulary.html) - you provide Amazon Transcribe with a list of terms that are specific to your content and how you want the terms to be displayed in transcipts.
 * [Amazon Transcribe Custom Language Models](https://docs.aws.amazon.com/transcribe/latest/dg/custom-language-models.html) - allows you to leverage pre-existing data to build a custom speech engine tailored for your transcription use case. It capitalizes on text data you already possess, such as website content, instruction manuals, and other assets that represent your domain of operation. 
-* [Amazon Translate Custom Terminologies](https://docs.aws.amazon.com/translate/latest/dg/how-custom-terminology.html)- you provide Amazon Translate with a list of terms or phrases in the source language content and specify how you want them to appear in the tranlated result.
+* [Amazon Translate Custom Terminologies](https://docs.aws.amazon.com/translate/latest/dg/how-custom-terminology.html)- you provide Amazon Translate with a list of terms or phrases in the source language content and specify how you want them to appear in the translated result.
 * [Amazon Translate Parallel Data for Active Custom Translation](https://docs.aws.amazon.com/translate/latest/dg/customizing-translations-parallel-data.html) - you provide Amazon Translate with a list of parallel phrases: the source language and the pharase tranlated the way you want it.  The Parallel Data customizes Amazon Translate models so they create more contectual translations based on the sample you provide.
 
 Application users can manually correct the results of the automation at different points in the automated workflow and then trigger a new workflow to inclue their corrections in downstream processing.  Corrections are tracked and can be used to update Amazon Transcribe Custom Vocabularies and Amazon Translate Custom Terminologies to improve future results.  
@@ -39,7 +39,7 @@ Region| Launch
 ------|-----
 US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template)
 US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template)
-<!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template)
+<!-- <!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template) -->
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -73,20 +73,10 @@ This application includes the following features:
 
 
 * Proxy encode of videos and separation of video and audio tracks using **AWS Elemental MediaConvert**. 
-* Object and activity detection in images and video using **Amazon Rekognition**. 
-* Celebrity detection in images and video using **Amazon Rekognition**
-* Face search from a collection of known faces in images and video using **Amazon Rekognition**
-* Facial analysis to detect facial features and faces in images and videos to determine things like happiness, age range, eyes open, glasses, facial hair, etc. In video, you can also measure how these things change over time, such as constructing a timeline of the emotions expressed by an actor.  From **Amazon Rekognition**.
-* Unsafe content detection using **Amazon Rekognition**. Identify potentially unsafe or inappropriate content across both image and video assets.
-* Detect text in videos and images using **Amazon Rekognition**.
-* Video segment detection using **Amazon Rekognition**. Identify black frames, color bars, end credits, and scene changes.
-* Identify start, end, and duration of each unique shot in your videos using **Amazon Rekognition.** 
 * Convert speech to text from audio and video assets using **Amazon Transcribe**.
 * Convert Transcribe transcripts to subtitles
 * Convert subtitles from one language to another using **Amazon Translate**.
 * Generate a voice audio track for translations using **Amazon Polly**
-* Identify entities in text using **Amazon Comprehend**. 
-* Identify key phrases in text using **Amazon Comprehend**
 
 Users can enable or disable operators in the upload view shown below:
 

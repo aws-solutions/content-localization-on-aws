@@ -234,5 +234,5 @@ Resources:
       Version: !FindInMap ["Application", "SourceCode", "Version"]
 
 Outputs:
-  UserInterface:
+  ContentLocalizationSolution:
     Value: !GetAtt WebStack.Outputs.CloudfrontUrl

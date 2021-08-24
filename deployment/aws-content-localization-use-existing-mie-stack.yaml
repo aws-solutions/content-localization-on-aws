@@ -144,7 +144,7 @@ Resources:
         PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
 
 Outputs:
-  CloudfrontUrl:
+  ContentLocalizationSolution:
     Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
   ElasticEndpoint:
     Value: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint

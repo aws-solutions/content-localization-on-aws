@@ -3,7 +3,7 @@ Description: "AWS Content Localization - user authentication infrastructure"
 
 Parameters:
   AdminEmail:
-    Description: Email address of the Content Analysis Administrator
+    Description: Email address of the Content Localization Administrator
     Type: String
   WorkflowApiId:
     Description: REST API ID of the MIE Workflow API
@@ -12,7 +12,7 @@ Parameters:
     Description: REST API ID of the MIE Dataplane API
     Type: String
   ElasticDomainArn:
-    Description: ARN of the Content Analysis ES Domain
+    Description: ARN of the Content Localization ES Domain
     Type: String
   DataplaneBucket:
     Description: Name of the MIE dataplane bucket
@@ -37,7 +37,7 @@ Resources:
               "#/stacks/stackinfo?stackId=",
               Ref: ParentStackName
           ]]
-          EmailSubject: "Welcome to AWS Content Analysis"
+          EmailSubject: "Welcome to AWS Content Localization"
       EmailConfiguration:
         EmailSendingAccount: 'COGNITO_DEFAULT'
       AutoVerifiedAttributes: ['email']
@@ -206,7 +206,7 @@ Resources:
   ContentAnalysisAdminGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      Description: 'User group for AWS Content Analysis Admins'
+      Description: 'User group for AWS Content Localization Admins'
       RoleArn: !GetAtt ContentAnalysisAdminRole.Arn
       UserPoolId: !Ref ContentAnalysisUserPool
       GroupName: !Sub "${AWS::StackName}-Admins"

@@ -22,32 +22,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
 
-      - name: Generate short sha
+      - name: Setup build environment
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+          DATETIME=$(date '+%s')
+          echo "DIST_OUTPUT_BUCKET=aws-content-localization-$DATETIME-dist" >> $GITHUB_ENV
+          echo "TEMPLATE_OUTPUT_BUCKET=aws-content-localization-$DATETIME" >> $GITHUB_ENV
+
       - name: Run build script
         run: |
           cd deployment
           CONTENT_LOCALIZATION_STACK_NAME="cl"
-          EMAIL=micontentlocalization@gmail.com
-          REGION=us-west-2
+          EMAIL="micontentlocalization@gmail.com"
+          REGION="us-west-2"
           VERSION=${SHORT_SHA}
-          DIST_OUTPUT_BUCKET=micl-dev
-          TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
-          echo "read in the template"
-          read -r TEMPLATE < ../src/templateUrlMieRelease.txt
-      - name: 'Upload One-click Deployment Artifact'
-        uses: actions/upload-artifact@v2
-        with:
-          name: templateUrlMieRelease
-          path: src/templateUrlMieRelease.txt
-          retention-days: 3
-      - name: 'Upload Developer Deployment Artifact'
+          aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
+          aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
+          ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
+          echo "Templates artifacts:"
+          cat ./templateUrlMieDevelopment.txt
+          cat ./templateUrlMieRelease.txt
+      - name: 'Upload CL One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
           name: templateUrlMieDevelopment
-          path: src/templateUrlMieDevelopment.txt
+          path: deployment/templateUrlMieDevelopment.txt
           retention-days: 3
 
   build-mie-dev-us-west-2:
@@ -85,17 +84,6 @@ jobs:
           name: templateUrl
           path: deployment/templateUrl.txt
           retention-days: 3
-      
-      - name: Build Failed
-        if: ${{ failure() }}
-        uses: nashmaniac/create-issue-action@v1.1
-        with:
-          title: Nightly build for $SHORT_SHA Failed
-          token: ${{secrets.GITHUB_TOKEN}}
-          assignees: aburkleaux-amazon
-          labels: bug
-          body: Nightly build failed for commit ${{github.sha}}
-  
 
   scan-3rd-party-data-us-west-2:
     needs: build-content-localization-dev-us-west-2
@@ -108,32 +96,34 @@ jobs:
         with:
           ref: development
 
-      - name: Initialize AWS credentials
+      - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
 
-      # FIXME - need to identify what to scan for here - new entries in packages, 
+      # FIXME - need to identify what to scan for here - new entries in packages,
       # python dependencies, other copyrighted code ...
       - name: Get stack name
         run: |
           echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
+
       - name: Scan for new third party packages
         run: |
           echo "TBD - scan for new 3rd party pacakges"
-      
+
       # FIXME - need to identify what to scan for here - is Trufflehog enough?
       - name: Scan for sensitive data
         run: |
           echo "TBD - Scan for sensitive data"
+
       # FIXME - need to make sure this is working properly
       # scan for various types of keys and tokens
       - name: Trufflehog Scan
         uses: edplato/trufflehog-actions-scan@master
         with:
-          scanArguments: '--regex --entropy=False'   
+          scanArguments: '--regex --entropy=False'
 
   scan-us-west-2:
     needs: build-content-localization-dev-us-west-2
@@ -149,24 +139,26 @@ jobs:
       - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
 
       - name: Generate short sha
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
           echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
+
       - name: Run cfn_nag
         uses: stelligent/cfn_nag@master
         continue-on-error: true
         with:
-            input_path: deployment
+          input_path: deployment
 
-      #FIXME - This is not working.  Need to test more
+      # FIXME - This is not working.  Need to test more
       # check it with Hawkeye
       # - name: Hawkeye Scanner
       #   uses: ./.github/actions/hawkeye-scan
+
   deploy-mie-dev-us-west-2:
     needs: build-mie-dev-us-west-2
     runs-on: ubuntu-latest
@@ -180,9 +172,9 @@ jobs:
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-            aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
       - name: Generate short sha
         run: |
           echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
@@ -197,14 +189,15 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           TEMPLATE=`cat templateUrl/templateUrl.txt`
-          
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=false ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=false ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+
+          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
-  
+
   deploy-content-localization-dev-us-west-2:
-    needs: 
+    needs:
       - deploy-mie-dev-us-west-2
       - build-content-localization-dev-us-west-2
       - scan-us-west-2
@@ -220,9 +213,9 @@ jobs:
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-            aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
       - name: Generate short sha
         run: |
           echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
@@ -232,17 +225,39 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
+          EMAIL=micontentlocalization@gmail.com
           REGION=us-west-2
           VERSION=${SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrlMieDevelopment/templateUrlMieDevelopment.txt`
-          
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+
+          # Delete $MIE_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $MIE_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$MIE_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            # Then delete $MIE_STACK_NAME...
+            echo "Removing $MIE_STACK_NAME so we can use that stack name again"
+            aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
+          fi
+
+          # Delete $CONTENT_LOCALIZATION_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $CONTENT_LOCALIZATION_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$CONTENT_LOCALIZATION_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            # Then delete $CONTENT_LOCALIZATION_STACK_NAME...
+            echo "Removing $CONTENT_LOCALIZATION_STACK_NAME so we can use that stack name again"
+            aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          fi
+
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+
+          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
+
   test-content-localization-dev-us-west-2:
     needs: deploy-content-localization-dev-us-west-2
     runs-on: ubuntu-latest

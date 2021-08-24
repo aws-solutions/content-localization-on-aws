@@ -161,7 +161,6 @@ jobs:
       # - name: Hawkeye Scanner
       #   uses: ./.github/actions/hawkeye-scan
 
-
   deploy-mie-dev-us-west-2:
     needs: build-mie-dev-us-west-2
     runs-on: ubuntu-latest
@@ -197,6 +196,7 @@ jobs:
           aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
+
 
   deploy-content-localization-dev-us-west-2:
     needs:
@@ -258,6 +258,7 @@ jobs:
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
+
 
   test-content-localization-dev-us-west-2:
     needs: deploy-content-localization-dev-us-west-2

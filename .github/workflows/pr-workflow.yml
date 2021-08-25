@@ -42,13 +42,13 @@ jobs:
           aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
           ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
           echo "Templates artifacts:"
-          cat ./templateUrlMieDevelopment.txt
-          cat ./templateUrlMieRelease.txt
+          cat ./template_url_that_uses_an_existing_mie_stack.txt
+          cat ./template_url_that_deploys_mie_solution_as_nested_stack.txt
       - name: 'Upload CL One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
           name: templateUrlMieDevelopment
-          path: deployment/templateUrlMieDevelopment.txt
+          path: deployment/template_url_that_uses_an_existing_mie_stack.txt
           retention-days: 3
 
   build-mie-dev-us-west-2:
@@ -79,8 +79,8 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-us-west-2
           ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
-          read -r TEMPLATE < templateUrl.txt
-          pwd
+          echo "Templates artifact:"
+          cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:
@@ -190,10 +190,11 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          TEMPLATE=`cat templateUrl/templateUrl.txt`
+          MIE_TEMPLATE=`cat templateUrl/templateUrl.txt`
 
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $MIE_TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+
+          aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $MIE_TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
 
@@ -232,7 +233,7 @@ jobs:
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
-          CLOUDFORMATION_TEMPLATE=`cat templateUrlMieDevelopment/templateUrlMieDevelopment.txt`
+          CLO_TEMPLATE=`cat templateUrlMieDevelopment/template_url_that_uses_an_existing_mie_stack.txt`
 
           # Delete $MIE_STACK_NAME if it already exists.
           # This is necessary in order to rerun github action workflows.
@@ -254,8 +255,9 @@ jobs:
             aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           fi
 
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
-          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+
+          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
 

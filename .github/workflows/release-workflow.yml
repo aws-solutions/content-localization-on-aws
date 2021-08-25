@@ -29,7 +29,6 @@ jobs:
       - name: Push new branch
         run: git push origin release/v${{ github.event.inputs.version }}
 
-
   build-content-localization-us-west-2:
     needs: create-release-branch
     runs-on: ubuntu-latest
@@ -75,9 +74,9 @@ jobs:
           name: templateUrlMieDevelopmentOr
           path: src/templateUrlMieDevelopment.txt
           retention-days: 3
-  
+
   deploy-content-localization-us-west-2:
-    needs: 
+    needs:
       - build-content-localization-us-west-2
     runs-on: ubuntu-latest
     env:
@@ -96,7 +95,7 @@ jobs:
             aws-region: us-west-2
       - name: Generate short sha
         run: |
-          
+
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -108,11 +107,12 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrlMieReleaseOr/templateUrlMieRelease.txt`
-          
+
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
+
 
   scan-3rd-party-data-us-west-2:
     needs: build-content-localization-us-west-2
@@ -132,7 +132,7 @@ jobs:
             aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
             aws-region: us-west-2
 
-      # FIXME - need to identify what to scan for here - new entries in packages, 
+      # FIXME - need to identify what to scan for here - new entries in packages,
       # python dependencies, other copyrighted code ...
       - name: Get stack name
         run: |
@@ -141,7 +141,7 @@ jobs:
       - name: Scan for new third party packages
         run: |
           echo "TBD - scan for new 3rd party pacakges"
-      
+
       # FIXME - need to identify what to scan for here - is Trufflehog enough?
       - name: Scan for sensitive data
         run: |
@@ -152,7 +152,7 @@ jobs:
       - name: Trufflehog Scan
         uses: edplato/trufflehog-actions-scan@master
         with:
-          scanArguments: '--regex --entropy=False'   
+          scanArguments: '--regex --entropy=False'
 
   scan-us-west-2:
     needs: build-content-localization-us-west-2
@@ -225,12 +225,13 @@ jobs:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-          
+
       - name: Delete stack
         run: |
           aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
-  
+
+
   build-content-localization-us-east-1:
     needs: create-release-branch
     runs-on: ubuntu-latest
@@ -276,9 +277,9 @@ jobs:
           name: templateUrlMieDevelopmentNv
           path: src/templateUrlMieDevelopment.txt
           retention-days: 3
-  
+
   deploy-content-localization-us-east-1:
-    needs: 
+    needs:
       - build-content-localization-us-west-2
     runs-on: ubuntu-latest
     env:
@@ -297,7 +298,7 @@ jobs:
             aws-region: us-east-1
       - name: Generate short sha
         run: |
-         
+
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -309,11 +310,12 @@ jobs:
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrlMieReleaseNv/templateUrlMieRelease.txt`
-          
+
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=ElasticSearchNodeSize,ParameterValue=t2.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
+
 
   test-us-east-1:
     needs: deploy-content-localization-us-east-1
@@ -367,6 +369,7 @@ jobs:
           aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
 
+
   update-version-in-docs:
     needs:
       - scan-us-west-2
@@ -390,7 +393,8 @@ jobs:
           git add README.md
           git commit -m "Update one-click links with new version"
           git push origin release/v${{ github.event.inputs.version }}
-  
+
+
   host-us-west-2:
     needs: update-version-in-docs
     runs-on: ubuntu-latest
@@ -416,7 +420,8 @@ jobs:
           DIST_OUTPUT_BUCKET=elementalrodeo99
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
-  
+
+
   host-us-east-1:
     needs: update-version-in-docs
     runs-on: ubuntu-latest
@@ -444,6 +449,7 @@ jobs:
           echo "./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION"
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
 
+
   host-eu-west-1:
     needs: update-version-in-docs
     runs-on: ubuntu-latest
@@ -469,6 +475,7 @@ jobs:
           DIST_OUTPUT_BUCKET=elementalrodeo99
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           ./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
+
 
   create-git-staging-branch:
     needs:
@@ -522,6 +529,7 @@ jobs:
       - name: Push
         run: |
           git push origin staging/v${{ github.event.inputs.version }}
+
   create-release-pr-main:
     needs: perform-staging-rebase
     runs-on: ubuntu-latest
@@ -545,6 +553,7 @@ jobs:
             PR Auto-generated from Github Actions release workflow.
             Review test results here:
             [1]: https://github.com/brandold/aws-media-insights-engine/actions/runs/${{ github.run_id }}
+
   pull-release-into-development-pr:
     needs: create-release-pr-main
     runs-on: ubuntu-latest

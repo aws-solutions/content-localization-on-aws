@@ -43,7 +43,7 @@ jobs:
           ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
           echo "Templates artifacts:"
           cat ./template_url_that_uses_an_existing_mie_stack.txt
-          cat ./template_url_that_deploys_mie_solution_as_nested_stack.txt
+          cat ./template_url_that_deploys_mie_as_nested_stack.txt
       - name: 'Upload CL One-click Deployment Artifact'
         uses: actions/upload-artifact@v2
         with:

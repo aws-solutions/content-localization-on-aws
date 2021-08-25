@@ -190,6 +190,16 @@ jobs:
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           TEMPLATE=`cat templateUrl/templateUrl.txt`
 
+          # Delete $MIE_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $MIE_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$MIE_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            # Then delete $MIE_STACK_NAME...
+            echo "Removing $MIE_STACK_NAME so we can use that stack name again"
+            aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
+          fi
+
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
 
           aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback

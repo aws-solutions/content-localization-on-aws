@@ -305,7 +305,7 @@ jobs:
         uses: nanasess/setup-chromedriver@master
       - name: Get user pool id
         run: |
-          echo "USER_POOL_ID=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-ContentAnalysisAuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "USER_POOL_ID=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-AuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
       - name: Reset CL user password
         run: |
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --permanent

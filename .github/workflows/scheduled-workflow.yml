@@ -242,16 +242,6 @@ jobs:
           TEMPLATE_OUTPUT_BUCKET=$DIST_OUTPUT_BUCKET-$REGION
           CLOUDFORMATION_TEMPLATE=`cat templateUrlMieDevelopment/template_url_that_uses_an_existing_mie_stack.txt`
 
-          # Delete $MIE_STACK_NAME if it already exists.
-          # This is necessary in order to rerun github action workflows.
-          # If $MIE_STACK_NAME exists...
-          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$MIE_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
-            # Then delete $MIE_STACK_NAME...
-            echo "Removing $MIE_STACK_NAME so we can use that stack name again"
-            aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
-            aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
-          fi
-
           # Delete $CONTENT_LOCALIZATION_STACK_NAME if it already exists.
           # This is necessary in order to rerun github action workflows.
           # If $CONTENT_LOCALIZATION_STACK_NAME exists...

@@ -196,16 +196,14 @@ jobs:
           # This is necessary in order to rerun github action workflows.
           # If $MIE_STACK_NAME exists...
           if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$MIE_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
-            # Then delete $MIE_STACK_NAME...
-            echo "Removing $MIE_STACK_NAME so we can use that stack name again"
+            echo "Removing stack, $CONTENT_LOCALIZATION_STACK_NAME"
+            # Then delete $MIE_STACK_NAME, but first delete $CONTENT_LOCALIZATION_STACK_NAME since we can't delete $MIE_STACK_NAME until we've removed the dependent stack.
+            aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+
+            echo "Removing stack, $MIE_STACK_NAME"
             aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
             aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
-            if [ $? -ne 0 ]; then
-              # try once more if the wait failed
-              echo "Trying to remove $MIE_STACK_NAME one more time"
-              aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
-              aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
-            fi
           fi
 
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $MIE_TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"

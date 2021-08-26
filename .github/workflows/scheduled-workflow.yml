@@ -177,6 +177,7 @@ jobs:
           aws-region: us-west-2
       - name: Generate short sha
         run: |
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
           echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts

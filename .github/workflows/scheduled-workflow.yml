@@ -306,7 +306,7 @@ jobs:
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --permanent
       - name: Get Content Localization endpoint
         run: |
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-ContentAnalysisWebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-WebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
       - name: Set admin creds
         run: |
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV

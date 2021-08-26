@@ -25,7 +25,7 @@ def testing_env_variables():
             use_existing_workflow = os.environ['USE_EXISTING_WORKFLOW']
         else:
             use_existing_workflow = False
-    
+
         test_env_vars = {
             'MEDIA_PATH': os.environ['TEST_MEDIA_PATH'],
             'SAMPLE_VIDEO': os.environ['TEST_VIDEO'],
@@ -81,8 +81,7 @@ def stack_resources(testing_env_variables):
     for output in outputs:
         resources[output["OutputKey"]] = output["OutputValue"]
 
-    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation',
-                          'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
+    expected_resources = ['WorkflowApiRestID', 'TestStack', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
 
     assert set(resources.keys()) == set(expected_resources)
 
@@ -288,7 +287,7 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         delete_terminology_body)
     assert delete_terminology_request.status_code == 200
 
-# Return the workflow configuration.  If all operators is True, run all operators in the workflow.  
+# Return the workflow configuration.  If all operators is True, run all operators in the workflow.
 # If all_operators is False, run only the subtitle workflow
 def workflow_config(all_operators):
 
@@ -313,15 +312,15 @@ def workflow_config(all_operators):
             "Enabled": all_operators
         },
         "celebrityRecognition": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "labelDetection" : {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "personTracking": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": False
         },
         "faceSearch": {
@@ -329,17 +328,17 @@ def workflow_config(all_operators):
             "Enabled": False
         },
         "textDetection": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "Mediaconvert": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": False
         },
         "GenericDataLookup": {
             "Enabled": False
         }
-    }     
+    }
     defaultAudioStage2 = {
         "TranscribeVideo": {
             "Enabled": True,
@@ -349,15 +348,15 @@ def workflow_config(all_operators):
     }
     defaultTextStage2 = {
         "ComprehendEntities": {
-            "MediaType": "Text", 
+            "MediaType": "Text",
             "Enabled": all_operators
         },
         "ComprehendKeyPhrases": {
-            "MediaType": "Text", 
+            "MediaType": "Text",
             "Enabled": all_operators
         }
     }
-    
+
     CaptionFileStage2 = {
         "WebToSRTCaptions": {
             "MediaType": "MetadataOnly",
@@ -622,4 +621,3 @@ def workflow_to_modify(workflow_api, dataplane_api, vocabulary, terminology, sta
     return workflow_execution_request
 
 
-    

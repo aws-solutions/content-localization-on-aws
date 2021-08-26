@@ -198,6 +198,12 @@ jobs:
             echo "Removing $MIE_STACK_NAME so we can use that stack name again"
             aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
             aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
+            if [ $? -ne 0 ]; then
+              # try once more if the wait failed
+              echo "Trying to remove $MIE_STACK_NAME one more time"
+              aws cloudformation delete-stack --stack-name $MIE_STACK_NAME --region $REGION
+              aws cloudformation wait stack-delete-complete --stack-name $MIE_STACK_NAME
+            fi
           fi
 
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
@@ -250,6 +256,12 @@ jobs:
             echo "Removing $CONTENT_LOCALIZATION_STACK_NAME so we can use that stack name again"
             aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
             aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+            if [ $? -ne 0 ]; then
+              # try once more if the wait failed
+              echo "Trying to remove $CONTENT_LOCALIZATION_STACK_NAME one more time"
+              aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
+              aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+            fi
           fi
 
           echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLOUDFORMATION_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"

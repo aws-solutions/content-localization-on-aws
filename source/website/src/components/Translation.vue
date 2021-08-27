@@ -1494,21 +1494,6 @@ export default {
       console.log("removing language " + this.removeLanguageCode)
       this.addedLanguages = this.addedLanguages.filter(x => x.value !== this.removeLanguageCode)
       this.removedLanguages = [this.removeLanguageCode].concat(this.removedLanguages)
-      // if (this.customTerminologySelected === '') {
-      //   // add the new language as a new column in the terminology table
-      //   for (let i = 0; i < this.translationsCollection.length; i++) {
-      //     delete this.translationsCollection[i][this.removeLanguageCode]
-      //   }
-      // }
-      // else if (this.customTerminologySelected !== '') {
-      //   for (let i = 0; i < this.customTerminologySaved.length; i++) {
-      //     delete this.customTerminologySaved[i][this.removeLanguageCode]
-      //   }
-      //   // This pop and push seems to be necessary in order to force the terminology table to refresh
-      //   const terminology_row = this.customTerminologySaved.pop()
-      //   this.customTerminologySaved.push(terminology_row)
-      // }
-      // this.translationsCollection = this.translationsCollection.filter(x => x.value !== this.removeLanguageCode)
       // reset the language code used in the form on remove-language-modal
       console.log("this.customTerminologyUnsaved")
       this.customTerminologyUnsaved.map(x => delete x[this.removeLanguageCode])

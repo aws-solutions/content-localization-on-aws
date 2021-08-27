@@ -95,40 +95,28 @@ Here are some sample searches:
 
 # Advanced Installation Options
 
-## Deploying the demo app over an existing MIE stack
+## Building the solution from source code
 
-The following Cloudformation templates can be used to deploy the MIE front-end reference application over an MIE stack that you have already deployed.
-
-Region| Launch
-------|-----
-
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=hhttps://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization.template)
-
-## Building the app from source code
-
-The following commands will build the MIE demo application from source code. Be sure to define values for `EMAIL`, `WEBAPP_STACK_NAME`, and `REGION` first.
+The following commands will build the Content Localization solution from source code. Be sure to define values for `EMAIL`, `WEBAPP_STACK_NAME`, and `REGION` first.
 
 ```
 EMAIL=[specify your email]
 WEBAPP_STACK_NAME=[specify a stack name]
 REGION=[specify a region]
 VERSION=1.0.0
-git clone https://github.com/awslabs/aws-media-insights-content-localization
-
+git clone https://github.com/aws-samples/aws-media-insights-content-localization
 cd aws-media-insights-content-localization
-
 cd deployment
 DATETIME=$(date '+%s')
-DIST_OUTPUT_BUCKET=media-insights-engine-frontend-$DATETIME
+DIST_OUTPUT_BUCKET=aws-content-localization--frontend-$DATETIME
 aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
-./build.sh $DIST_OUTPUT_BUCKET-$REGION $VERSION $REGION
+aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
+./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
 ```
 
 Once you have built the demo app with the above commands, then it's time to deploy it. You have two options, depending on whether you want to deploy over an existing MIE stack or a new one:
 
-#### *Option 1:* Install demo app only
+#### *Option 1:* Install AWS Content Localization over an existing MIE stack
 
 Use these commands to deploy the demo app over an existing MIE stack:
 
@@ -138,7 +126,7 @@ TEMPLATE=[copy "With existing MIE deployment" link from output of build script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
 
-#### *Option 2:* Install MIE framework AND demo app
+#### *Option 2:* Install AWS Content Localization with a new MIE stack
 
 Use these commands to deploy the demo app over a new MIE stack:
 
@@ -146,8 +134,6 @@ Use these commands to deploy the demo app over a new MIE stack:
 TEMPLATE=[copy "Without existing MIE deployment" link from output of build script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
-
-![FIXME - add screenshot](doc/images/upload_view.png)
 
 # Advanced Usage
 

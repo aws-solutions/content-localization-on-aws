@@ -22,30 +22,33 @@ Parameters:
       - "r4.xlarge.elasticsearch"
 
 Mappings:
-  ContentAnalysisApp:
+  Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
       TemplateKeyPrefix: "aws-content-localization/%%VERSION%%"
+      RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
+      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
+      Version: "%%VERSION%%"
 
 Resources:
 
   # Deploy Elasticsearch
-  ContentAnalysisElasticsearchStack:
+  ElasticsearchStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - GlobalS3Bucket
           - ".s3.amazonaws.com/"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-elasticsearch.template"
+          - "/aws-content-localization-elasticsearch.template"
       Parameters:
         AnalyticsStreamArn:
           Fn::ImportValue:
@@ -57,22 +60,22 @@ Resources:
 
   # Deploy Auth stack
 
-  ContentAnalysisAuthStack:
+  AuthStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - GlobalS3Bucket
           - ".s3.amazonaws.com/"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-auth.template"
+          - "/aws-content-localization-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
         WorkflowApiId:
@@ -81,26 +84,26 @@ Resources:
         DataplaneApiId:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneApiId"
-        ElasticDomainArn: !GetAtt ContentAnalysisElasticsearchStack.Outputs.DomainArn
+        ElasticDomainArn: !GetAtt ElasticsearchStack.Outputs.DomainArn
         DataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         ParentStackName: !Ref AWS::StackId
 
   # Deploy Video Workflow
-  CompleteVideoWorkflow:
+  VideoWorkflow:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - GlobalS3Bucket
           - ".s3.amazonaws.com/"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - TemplateKeyPrefix
           - "/aws-content-localization-video-workflow.template"
@@ -112,22 +115,22 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:OperatorLibraryStack"
 
-  ContentAnalysisWebStack:
+  WebStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - GlobalS3Bucket
           - ".s3.amazonaws.com/"
           - !FindInMap
-            - ContentAnalysisApp
+            - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-web.template"
+          - "/aws-content-localization-web.template"
       Parameters:
         DataplaneEndpoint:
           Fn::ImportValue:
@@ -135,22 +138,22 @@ Resources:
         WorkflowEndpoint:
           Fn::ImportValue:
             !Sub "${MieStackName}:WorkflowApiEndpoint"
-        ElasticEndpoint: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
+        ElasticEndpoint: !GetAtt ElasticsearchStack.Outputs.ElasticEndpoint
         DataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
-        UserPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolId
-        IdentityPoolId: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
-        PoolClientId: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
+        UserPoolId: !GetAtt AuthStack.Outputs.UserPoolId
+        IdentityPoolId: !GetAtt AuthStack.Outputs.IdentityPoolId
+        PoolClientId: !GetAtt AuthStack.Outputs.UserPoolClientId
 
 Outputs:
-  CloudfrontUrl:
-    Value: !GetAtt ContentAnalysisWebStack.Outputs.CloudfrontUrl
+  ContentLocalizationSolution:
+    Value: !GetAtt WebStack.Outputs.CloudfrontUrl
   ElasticEndpoint:
-    Value: !GetAtt ContentAnalysisElasticsearchStack.Outputs.ElasticEndpoint
+    Value: !GetAtt ElasticsearchStack.Outputs.ElasticEndpoint
   UserPoolId:
-    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolId
+    Value: !GetAtt AuthStack.Outputs.UserPoolId
   IdentityPoolId:
-    Value: !GetAtt ContentAnalysisAuthStack.Outputs.IdentityPoolId
+    Value: !GetAtt AuthStack.Outputs.IdentityPoolId
   UserPoolClientId:
-    Value: !GetAtt ContentAnalysisAuthStack.Outputs.UserPoolClientId
+    Value: !GetAtt AuthStack.Outputs.UserPoolClientId

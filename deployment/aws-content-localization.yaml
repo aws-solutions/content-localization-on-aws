@@ -76,7 +76,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-elasticsearch.template"
+          - "/aws-content-localization-elasticsearch.template"
       Parameters:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
@@ -99,7 +99,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-auth.template"
+          - "/aws-content-localization-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
         WorkflowApiId: !GetAtt MieStack.Outputs.WorkflowApiRestID
@@ -123,7 +123,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-analysis-web.template"
+          - "/aws-content-localization-web.template"
       Parameters:
         DataplaneEndpoint: !GetAtt MieStack.Outputs.DataplaneApiEndpoint
         WorkflowEndpoint: !GetAtt MieStack.Outputs.WorkflowApiEndpoint
@@ -234,5 +234,5 @@ Resources:
       Version: !FindInMap ["Application", "SourceCode", "Version"]
 
 Outputs:
-  UserInterface:
+  ContentLocalizationSolution:
     Value: !GetAtt WebStack.Outputs.CloudfrontUrl

@@ -293,7 +293,7 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
 def workflow_config(all_operators):
 
     # Define the video workflow used as the base for tests
-    defaultPrelimVideoStage2 = {
+    PreprocessVideo = {
         "Thumbnail": {
             "ThumbnailPosition": "5",
             "Enabled": True
@@ -302,7 +302,7 @@ def workflow_config(all_operators):
             "Enabled": True
         }
     }
-    defaultVideoStage2 = {
+    AnalyzeVideo = {
         "faceDetection": {
             "Enabled": all_operators
         },
@@ -338,16 +338,14 @@ def workflow_config(all_operators):
         },
         "GenericDataLookup": {
             "Enabled": False
-        }
-    }     
-    defaultAudioStage2 = {
+        },
         "TranscribeVideo": {
             "Enabled": True,
             "TranscribeLanguage": "en-US",
             "MediaType": "Audio"
         }
-    }
-    defaultTextStage2 = {
+    }     
+    AnalyzeText = {
         "ComprehendEntities": {
             "MediaType": "Text", 
             "Enabled": all_operators
@@ -358,7 +356,7 @@ def workflow_config(all_operators):
         }
     }
     
-    CaptionFileStage2 = {
+    TransformText = {
         "WebToSRTCaptions": {
             "MediaType": "MetadataOnly",
             "TargetLanguageCodes": [
@@ -388,7 +386,7 @@ def workflow_config(all_operators):
             "Enabled": True,
         }
     }
-    TranslateStage2 = {
+    Translate = {
         "Translate": {
             "MediaType": "Text",
             "Enabled": False,
@@ -405,16 +403,15 @@ def workflow_config(all_operators):
     }
 
     workflow = {
-        "Name": "VODSubtitlesVideoWorkflow",
+        "Name": "ContentLocalizationWorkflow",
     }
     workflow["Configuration"] = {}
-    workflow["Configuration"]["defaultPrelimVideoStage2"] = defaultPrelimVideoStage2
-    workflow["Configuration"]["defaultVideoStage2"] = defaultVideoStage2
-    workflow["Configuration"]["CaptionFileStage2"] = CaptionFileStage2
+    workflow["Configuration"]["PreprocessVideo"] = PreprocessVideo
+    workflow["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
+    workflow["Configuration"]["TransformText"] = TransformText
     workflow["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
-    workflow["Configuration"]["TranslateStage2"] = TranslateStage2
-    workflow["Configuration"]["defaultAudioStage2"] = defaultAudioStage2
-    workflow["Configuration"]["defaultTextStage2"] = defaultTextStage2
+    workflow["Configuration"]["Translate"] = Translate
+    workflow["Configuration"]["AnalyzeText"] = AnalyzeText
     return workflow
 
 
@@ -467,9 +464,9 @@ def workflow_with_customizations(workflow_api, dataplane_api, vocabulary, termin
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     workflow = workflow_config(False)
-    workflow["Configuration"]["defaultAudioStage2"]["TranscribeVideo"]["VocabularyName"] \
+    workflow["Configuration"]["AnalyzeVideo"]["TranscribeVideo"]["VocabularyName"] \
         = vocabulary["vocabulary_name"]
-    workflow["Configuration"]["TranslateStage2"]["TranslateWebCaptions"]["TerminologyNames"] \
+    workflow["Configuration"]["Translate"]["TranslateWebCaptions"]["TerminologyNames"] \
         = [{
             "Name": terminology["terminology_name"],
             "TargetLanguageCodes":[

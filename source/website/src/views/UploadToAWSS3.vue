@@ -595,7 +595,7 @@ export default {
     },
     videoWorkflowConfig() {
         // Define the video workflow based on user specified options for workflow configuration.
-      const defaultPrelimVideoStage2 = {
+      const PreprocessVideo = {
         Thumbnail: {
           ThumbnailPosition: this.thumbnail_position.toString(),
           Enabled: true
@@ -604,7 +604,7 @@ export default {
           Enabled: true
         }
       }
-      const defaultVideoStage2 = {
+      const AnalyzeVideo = {
         faceDetection: {
           Enabled: this.enabledOperators.includes("faceDetection")
         },
@@ -648,16 +648,14 @@ export default {
               this.genericDataFilename === ""
                   ? "undefined"
                   : this.genericDataFilename
-        }
-      }     
-      const defaultAudioStage2 = {
+        },
         TranscribeVideo: {
           Enabled: this.enabledOperators.includes("Transcribe"),
           TranscribeLanguage: this.transcribeLanguage,
           MediaType: "Audio"
         }
-      }
-      const defaultTextStage2 = {
+      }     
+      const AnalyzeText = {
         ComprehendEntities: {
           MediaType: "Text", 
           Enabled: this.enabledOperators.includes("ComprehendEntities")
@@ -668,10 +666,10 @@ export default {
         }
       }
       if (this.ComprehendEncryption === true && this.kmsKeyId.length > 0) {
-        defaultTextStage["ComprehendEntities"]["KmsKeyId"] = this.kmsKeyId
-        defaultTextStage["ComprehendKeyPhrases"]["KmsKeyId"] = this.kmsKeyId
+        AnalyzeText["ComprehendEntities"]["KmsKeyId"] = this.kmsKeyId
+        AnalyzeText["ComprehendKeyPhrases"]["KmsKeyId"] = this.kmsKeyId
       }
-      const CaptionFileStage2 = {
+      const TransformText = {
         WebToSRTCaptions: {
               MediaType: "MetadataOnly",
               TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
@@ -695,7 +693,7 @@ export default {
           Enabled: this.enabledOperators.includes("Transcribe"),
         }
       }
-      const TranslateStage2 = {
+      const Translate = {
         Translate: {
           MediaType: "Text",
           Enabled: false,
@@ -709,16 +707,15 @@ export default {
       }
     
       const workflow_config = {
-        Name: "VODSubtitlesVideoWorkflow",
+        Name: "ContentLocalizationWorkflow",
       }
       workflow_config["Configuration"] = {}
-      workflow_config["Configuration"]["defaultPrelimVideoStage2"] = defaultPrelimVideoStage2
-      workflow_config["Configuration"]["defaultVideoStage2"] = defaultVideoStage2
-      workflow_config["Configuration"]["CaptionFileStage2"] = CaptionFileStage2
+      workflow_config["Configuration"]["PreprocessVideo"] = PreprocessVideo
+      workflow_config["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
+      workflow_config["Configuration"]["TransformText"] = TransformText
       workflow_config["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
-      workflow_config["Configuration"]["TranslateStage2"] = TranslateStage2
-      workflow_config["Configuration"]["defaultAudioStage2"] = defaultAudioStage2
-      workflow_config["Configuration"]["defaultTextStage2"] = defaultTextStage2
+      workflow_config["Configuration"]["Translate"] = Translate
+      workflow_config["Configuration"]["AnalyzeText"] = AnalyzeText
       return workflow_config
     },
     workflowConfigWithInput() {
@@ -877,14 +874,13 @@ export default {
 
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
-            this.workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
+            this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
           if (this.parallelData != null) {
-            this.workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
+            this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.customVocab !== null) {
-            //workflow_config.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
-            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocab
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions){

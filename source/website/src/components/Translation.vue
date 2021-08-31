@@ -1061,8 +1061,8 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
         this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
-        this.terminology_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
-        this.parallel_data_used = response.data.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
+        this.terminology_used = response.data.Configuration.Translate.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
+        this.parallel_data_used = response.data.Configuration.Translate.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow
         const operator_info = []
         const sourceLanguage = this.translateLanguages.filter(x => (x.value === this.sourceLanguageCode))[0].text;
@@ -1087,10 +1087,10 @@ export default {
       }
     },
     disableUpstreamStages()  {
-      // This function disables all the operators in stages above TranslateStage2,
+      // This function disables all the operators in stages above Translate,
       // so all that's left are the operators that update vtt and srt files.
       let data = {
-        "Name": "VODSubtitlesVideoWorkflow",
+        "Name": "ContentLocalizationWorkflow",
         "Configuration": this.workflow_config
       }
       data["Input"] = {
@@ -1107,8 +1107,8 @@ export default {
         if ("End" in stage && stage["End"] == true){
           end = true
         }
-        // If the current stage is CaptionFileStage2 then end the loop.
-        else if (stage_name == "CaptionFileStage2") {
+        // If the current stage is TransformText then end the loop.
+        else if (stage_name == "TransformText") {
           end = true
         }
         // For all other stages disable all the operators in the stage
@@ -1127,10 +1127,10 @@ export default {
 
     },
     rerunWorkflow: async function () {
-      // This function reruns CaptionFileStage2 in order to
+      // This function reruns TransformText in order to
       // regenerate VTT and SRT files.
       let data = this.disableUpstreamStages();
-      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
       
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'

@@ -1060,7 +1060,7 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
-        this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
+        this.sourceLanguageCode = response.data.Configuration.WebCaptions.WebCaptions.SourceLanguageCode
         this.terminology_used = response.data.Configuration.Translate.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
         this.parallel_data_used = response.data.Configuration.Translate.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow

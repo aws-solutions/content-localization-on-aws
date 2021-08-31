@@ -1,5 +1,5 @@
 {
-  "name": "Media_Insights_Engine",
+  "name": "AWS_Content_Localization",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -71,8 +71,8 @@
     }
   },
   "eslintIgnore": [
-    "src/dist/*.js",
-    "src/dist/min/*.js"
+    "source/website/src/dist/*.js",
+    "source/website/src/dist/min/*.js"
   ],
   "postcss": {
     "plugins": {
@@ -86,8 +86,8 @@
   "description": "This application is a demo reference application for the [Media Insights Engine](https://github.com/awslabs/aws-media-insights-engine) (MIE). It automatically generates subtitles for videos using AWS AI services for computer vision and speech detection. A graphical user interface (GUI) enables users to edit and reprocess subtitle generation, to search through the catalog to find videos or images containing certain content and to analyze what the cataloged data looks like for selected files.",
   "main": "babel.config.js",
   "directories": {
-    "doc": "doc",
-    "test": "test"
+    "doc": "../../doc",
+    "test": "../../test"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Media Insights Engine - Workflow to run all MIE analyses for WHO"
+Description: "AWS Content Localization - Deploys video processing workflow"
 
 Parameters:
   WorkflowCustomResourceArn:

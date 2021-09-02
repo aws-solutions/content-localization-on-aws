@@ -13,7 +13,7 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: cas_sync
+          ref: development
 
       - name: Initialize AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -94,7 +94,7 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: cas_sync
+          ref: development
 
       - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -134,7 +134,7 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: cas_sync
+          ref: development
 
       - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -177,6 +177,7 @@ jobs:
           aws-region: us-west-2
       - name: Generate short sha
         run: |
+          echo "CONTENT_LOCALIZATION_STACK_NAME=cl" >> $GITHUB_ENV
           echo "MIE_STACK_NAME=mi" >> $GITHUB_ENV
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
       - name: Download all workflow run artifacts
@@ -223,7 +224,7 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: cas_sync
+          ref: development
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -271,7 +272,7 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: cas_sync
+          ref: development
 
       - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -305,7 +306,7 @@ jobs:
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --permanent
       - name: Get Content Localization endpoint
         run: |
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-ContentAnalysisWebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-WebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
       - name: Set admin creds
         run: |
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV

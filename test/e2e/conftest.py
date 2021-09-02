@@ -25,7 +25,7 @@ def testing_env_variables():
             use_existing_workflow = os.environ['USE_EXISTING_WORKFLOW']
         else:
             use_existing_workflow = False
-    
+
         test_env_vars = {
             'MEDIA_PATH': os.environ['TEST_MEDIA_PATH'],
             'SAMPLE_VIDEO': os.environ['TEST_VIDEO'],
@@ -81,8 +81,7 @@ def stack_resources(testing_env_variables):
     for output in outputs:
         resources[output["OutputKey"]] = output["OutputValue"]
 
-    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation',
-                          'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
+    expected_resources = ['WorkflowApiRestID', 'TestStack', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
 
     assert set(resources.keys()) == set(expected_resources)
 
@@ -288,12 +287,12 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         delete_terminology_body)
     assert delete_terminology_request.status_code == 200
 
-# Return the workflow configuration.  If all operators is True, run all operators in the workflow.  
+# Return the workflow configuration.  If all operators is True, run all operators in the workflow.
 # If all_operators is False, run only the subtitle workflow
 def workflow_config(all_operators):
 
     # Define the video workflow used as the base for tests
-    defaultPrelimVideoStage2 = {
+    PreprocessVideo = {
         "Thumbnail": {
             "ThumbnailPosition": "5",
             "Enabled": True
@@ -302,7 +301,7 @@ def workflow_config(all_operators):
             "Enabled": True
         }
     }
-    defaultVideoStage2 = {
+    AnalyzeVideo = {
         "faceDetection": {
             "Enabled": all_operators
         },
@@ -313,15 +312,15 @@ def workflow_config(all_operators):
             "Enabled": all_operators
         },
         "celebrityRecognition": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "labelDetection" : {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "personTracking": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": False
         },
         "faceSearch": {
@@ -329,36 +328,34 @@ def workflow_config(all_operators):
             "Enabled": False
         },
         "textDetection": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": all_operators
         },
         "Mediaconvert": {
-            "MediaType": "Video", 
+            "MediaType": "Video",
             "Enabled": False
         },
         "GenericDataLookup": {
             "Enabled": False
-        }
-    }     
-    defaultAudioStage2 = {
+        },
         "TranscribeVideo": {
             "Enabled": True,
             "TranscribeLanguage": "en-US",
             "MediaType": "Audio"
         }
-    }
-    defaultTextStage2 = {
+    }     
+    AnalyzeText = {
         "ComprehendEntities": {
-            "MediaType": "Text", 
+            "MediaType": "Text",
             "Enabled": all_operators
         },
         "ComprehendKeyPhrases": {
-            "MediaType": "Text", 
+            "MediaType": "Text",
             "Enabled": all_operators
         }
     }
     
-    CaptionFileStage2 = {
+    TransformText = {
         "WebToSRTCaptions": {
             "MediaType": "MetadataOnly",
             "TargetLanguageCodes": [
@@ -388,7 +385,7 @@ def workflow_config(all_operators):
             "Enabled": True,
         }
     }
-    TranslateStage2 = {
+    Translate = {
         "Translate": {
             "MediaType": "Text",
             "Enabled": False,
@@ -405,16 +402,15 @@ def workflow_config(all_operators):
     }
 
     workflow = {
-        "Name": "VODSubtitlesVideoWorkflow",
+        "Name": "ContentLocalizationWorkflow",
     }
     workflow["Configuration"] = {}
-    workflow["Configuration"]["defaultPrelimVideoStage2"] = defaultPrelimVideoStage2
-    workflow["Configuration"]["defaultVideoStage2"] = defaultVideoStage2
-    workflow["Configuration"]["CaptionFileStage2"] = CaptionFileStage2
+    workflow["Configuration"]["PreprocessVideo"] = PreprocessVideo
+    workflow["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
+    workflow["Configuration"]["TransformText"] = TransformText
     workflow["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
-    workflow["Configuration"]["TranslateStage2"] = TranslateStage2
-    workflow["Configuration"]["defaultAudioStage2"] = defaultAudioStage2
-    workflow["Configuration"]["defaultTextStage2"] = defaultTextStage2
+    workflow["Configuration"]["Translate"] = Translate
+    workflow["Configuration"]["AnalyzeText"] = AnalyzeText
     return workflow
 
 
@@ -467,9 +463,9 @@ def workflow_with_customizations(workflow_api, dataplane_api, vocabulary, termin
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     workflow = workflow_config(False)
-    workflow["Configuration"]["defaultAudioStage2"]["TranscribeVideo"]["VocabularyName"] \
+    workflow["Configuration"]["AnalyzeVideo"]["TranscribeVideo"]["VocabularyName"] \
         = vocabulary["vocabulary_name"]
-    workflow["Configuration"]["TranslateStage2"]["TranslateWebCaptions"]["TerminologyNames"] \
+    workflow["Configuration"]["Translate"]["TranslateWebCaptions"]["TerminologyNames"] \
         = [{
             "Name": terminology["terminology_name"],
             "TargetLanguageCodes":[
@@ -622,4 +618,3 @@ def workflow_to_modify(workflow_api, dataplane_api, vocabulary, terminology, sta
     return workflow_execution_request
 
 
-    

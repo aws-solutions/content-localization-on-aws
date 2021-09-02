@@ -5,7 +5,6 @@ deployment/global-s3-assets
 *node_modules
 *package
 *dist
-package-lock.json
 webapp-manifest.json
 source/website/public/runtimeConfig.json
 *.iml

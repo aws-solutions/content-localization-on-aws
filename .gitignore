@@ -10,4 +10,5 @@ webapp-manifest.json
 source/website/public/runtimeConfig.json
 *.iml
 .idea/
+*.pyc
 

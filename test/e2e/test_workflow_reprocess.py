@@ -1,5 +1,6 @@
 import pytest
 import time
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -19,7 +20,7 @@ def browser():
     chrome_options.add_argument("--start-maximized")
     ####### TESTING - remove headless to see browser actions
     
-    browser = webdriver.Chrome(chrome_options=chrome_options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
     return browser
 
 # Test the happy path through the app by loading and verifying data after a successful workflow run.  No

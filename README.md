@@ -37,9 +37,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template)
-<!-- <!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-solution/v1.0.7/cf/aws-content-localization-deploy-mie.template) -->
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-west-2.s3.us-west-2.amazonaws.com/content-localization-solution/v0.0.0/cf/aws-content-localization-deploy-mie.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-us-east-1.s3.us-east-1.amazonaws.com/content-localization-solution/v0.0.0/cf/aws-content-localization-deploy-mie.template)
+<!-- <!-- EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=mie&templateURL=https://elementalrodeo99-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-solution/v0.0.0/cf/aws-content-localization-deploy-mie.template) -->
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 

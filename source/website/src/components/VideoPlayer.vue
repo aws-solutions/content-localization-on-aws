@@ -57,7 +57,7 @@ export default {
     }
   },
   created() {
-    this.video_url = this.options.sources[0].src;
+    this.video_url = this.options.sources[0].src+"#t=1.5";
     if (this.options.captions.length > 0)
     {
       this.captions = this.options.captions;
@@ -89,7 +89,7 @@ export default {
         },
         markers: []
       });
-      this.player.autoplay('muted');
+      // this.player.autoplay('muted');
       this.player.currentTime(0);
       let vm = this
       this.player.on('timeupdate', function() {

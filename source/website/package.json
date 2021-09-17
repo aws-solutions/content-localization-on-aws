@@ -22,7 +22,7 @@
     "lodash": "^4.17.15",
     "number-to-words": "^1.2.4",
     "register-service-worker": "^1.6.2",
-    "video.js": "^6.13.0",
+    "video.js": ">=7.14.3",
     "videojs-flash": "2.1.0",
     "videojs-hotkeys": "^0.2.25",
     "videojs-markers": "^1.0.1",

@@ -21,8 +21,6 @@ jobs:
       - name: Create release branch
         run: |
           echo "Creating release/v${{ github.event.inputs.version }} branch"
-          git branch -r | grep release/v${{ github.event.inputs.version }}
-          if [ $? -eq 0 ]; then echo "This workflow will now fail because the release/v${{ github.event.inputs.version }} branch already exists. Remove it then run this workflow again."; fi
           git checkout -b release/v${{ github.event.inputs.version }}
       - name: Initialize mandatory git config
         run: |
@@ -752,9 +750,6 @@ jobs:
           ref: main
       - name: Create staging branch
         run: |
-          git branch -r | grep staging/v${{ github.event.inputs.version }}
-          if [ $? -eq 0 ]; then echo "Branch staging/v${{ github.event.inputs.version }} already exists. Deleting it now..."; fi
-          git push origin --delete staging/v${{ github.event.inputs.version }}
           echo "Creating staging/v${{ github.event.inputs.version }} branch"
           git checkout -b staging/v${{ github.event.inputs.version }}
       - name: Initialize mandatory git config

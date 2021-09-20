@@ -186,7 +186,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=sample@example.com
           REGION=us-west-2
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
@@ -212,7 +212,6 @@ jobs:
           aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $MIE_TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
-
 
   deploy-content-localization-dev-us-west-2:
     needs:

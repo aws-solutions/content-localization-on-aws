@@ -2,6 +2,8 @@
 .idea/*
 deployment/regional-s3-assets
 deployment/global-s3-assets
+deployment/template_url_that_deploys_mie_as_nested_stack.txt
+deployment/template_url_that_uses_an_existing_mie_stack.txt
 *node_modules
 *package
 *dist
@@ -10,4 +12,5 @@ webapp-manifest.json
 source/website/public/runtimeConfig.json
 *.iml
 .idea/
+*.pyc
 

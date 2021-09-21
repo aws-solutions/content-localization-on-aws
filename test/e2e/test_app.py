@@ -78,7 +78,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     time.sleep(5)
     # Configure transcribe
     transcribe_language_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[2]/select[1]")
-    
     # # default language is en-US
     assert transcribe_language_box.get_attribute("value") == "en-US"
     
@@ -94,17 +93,17 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
     # Configure translate language to en-ES
     
-    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
+    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div[2]/div[1]/p/input")
     assert translate_languages_box.get_attribute("textContent") == ""
     # Select spanish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click() 
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[2]/p/span[44]").click() 
 
     # Check that spanish badge is in the input box
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
 
     # click the Swedish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[45]").click()
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[2]/p/span[45]").click()
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
     
      ####### Collection View
      # Navigate to Collection view

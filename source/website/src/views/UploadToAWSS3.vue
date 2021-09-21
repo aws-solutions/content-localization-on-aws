@@ -136,10 +136,30 @@
                 <b-form-checkbox-group
                   id="checkbox-group-3"
                   v-model="enabledOperators"
-                  :options="textOperators"
-                  name="flavour-3"
-                ></b-form-checkbox-group>
-                <div v-if="enabledOperators.includes('Translate')">
+                  name="textOperators"
+                >
+                  <b-form-checkbox value="ComprehendEntities">
+                    Comprehend Entities
+                  </b-form-checkbox>
+                  <b-form-checkbox value="ComprehendKeyPhrases">
+                    Comprehend Key Phrases
+                  </b-form-checkbox>
+                    <b-form-checkbox
+                    v-if="enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases')"
+                    v-model="ComprehendEncryption"
+                  >
+                    Encrypt Comprehend Job
+                  </b-form-checkbox>
+                  <b-form-input
+                    v-if="ComprehendEncryption && (enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases'))"
+                    v-model="kmsKeyId"
+                    placeholder="Enter KMS key ID"
+                  ></b-form-input>
+                  <b-form-checkbox value="Translate">
+                    Translate
+                  </b-form-checkbox>
+
+                  <div v-if="enabledOperators.includes('Translate')">
                    <!-- && customTerminologyList.length > 0"> -->
                    <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
                   <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
@@ -175,6 +195,7 @@
                     </ul>
                   </div>
                 </div>
+              </b-form-checkbox-group>
                 <div v-if="enabledOperators.includes('Translate')" >
                   <b-form-group>
                     <b>Target Languages:</b>

@@ -707,7 +707,7 @@ export default {
               SourceLanguageCode: this.sourceLanguageCode
             }
           }
-      const WebCaptionsStage2 = {
+      const WebCaptions = {
         WebCaptions: {
           MediaType: "MetadataOnly",
           SourceLanguageCode: this.sourceLanguageCode,
@@ -734,7 +734,7 @@ export default {
       workflow_config["Configuration"]["PreprocessVideo"] = PreprocessVideo
       workflow_config["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
       workflow_config["Configuration"]["TransformText"] = TransformText
-      workflow_config["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
+      workflow_config["Configuration"]["WebCaptions"] = WebCaptions
       workflow_config["Configuration"]["Translate"] = Translate
       workflow_config["Configuration"]["AnalyzeText"] = AnalyzeText
       return workflow_config
@@ -904,14 +904,14 @@ export default {
             this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
-            if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions){
-                delete this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject
+            if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
+                delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
             }
           }
           else {
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject = {}
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
         
           

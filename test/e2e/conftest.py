@@ -378,7 +378,7 @@ def workflow_config(all_operators):
             "SourceLanguageCode": "en"
         }
     }
-    WebCaptionsStage2 = {
+    WebCaptions = {
         "WebCaptions": {
             "MediaType": "MetadataOnly",
             "SourceLanguageCode": "en",
@@ -408,7 +408,7 @@ def workflow_config(all_operators):
     workflow["Configuration"]["PreprocessVideo"] = PreprocessVideo
     workflow["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
     workflow["Configuration"]["TransformText"] = TransformText
-    workflow["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
+    workflow["Configuration"]["WebCaptions"] = WebCaptions
     workflow["Configuration"]["Translate"] = Translate
     workflow["Configuration"]["AnalyzeText"] = AnalyzeText
     return workflow

@@ -147,13 +147,144 @@ aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $
 ## Adding new operators and extending data stream consumers:
 ***(Difficulty: 60 minutes)***
 
+## Adding new operators and extending data stream consumers:
+***(Difficulty: 60 minutes)***
+
 The GUI for this demo application loads media analysis data from Elasticsearch. If you create a new analysis operator (see the MIE [Implementation Guide](https://github.com/awslabs/aws-media-insights-engine/blob/master/IMPLEMENTATION_GUIDE.md#4-implementing-a-new-operator-in-mie)) and you want to surface data from that new operator in this demo application, then edit `source/consumers/elastic/lambda_handler.py` and add your operator name to the list of `supported_operators`. Define a processing method to create Elasticsearch records from metadata JSON objects. This method should concatenate pages, flatten JSON arrays, add the operator name, add the workflow name, and add any other fields that can be useful for analytics. Call this processing method alongside the other processing methods referenced in the `lambda_handler()` entrypoint.
 
 Finally, you will need to write front-end code to retrieve your new operator's data from Elasticsearch and render it in the GUI.
 
-![FIXME - add screenshot](doc/images/upload_view.png)
+When you trigger workflows with your new operator, you should be able to validate how that operator's data is being processed from the Elasticsearch consumer log. To find this log, search Lambda functions for "ElasticsearchConsumer".
+
+### Validate metadata in Elasticsearch
+
+Validating data in Elasticsearch is easiest via the Kibana GUI. However, access to Kibana is disabled by default. To enable it, open your Elasticsearch Service domain in the AWS Console and click the "Modify access policy" under the Actions menu and add a policy that allows connections from your local IP address, such as:
+
+```
+{
+  "Effect": "Allow",
+  "Principal": {
+    "AWS": "*"
+  },
+  "Action": "es:*",
+  "Resource": "arn:aws:es:us-west-2:123456789012:domain/mie-es/*",
+  "Condition": {
+    "IpAddress": {
+      "aws:SourceIp": "52.108.112.178/32"
+    }
+  }
+}
+```
+
+Click Submit to save the new policy. After your domain is finished updating, click on the link to open Kibana. Now click on the **Discover** link from the left-hand side menu. This should take you to a page for creating an index pattern if you haven't created one already. Create an `mie*` index pattern in the **Index pattern** textbox. This will include all the indices that were created in the MIE stack.
+
+<img src="docs/images/kibana-create-index.png" width=600>
+
+Now you can use Kibana to validate that your operator's data is present in Elasticsearch. You can validate this by running a workflow where your operator is the only enabled operator, then searching for the asset_id produced by that workflow in Kibana.
 
 
+# User Authentication
+
+This solution uses [Amazon Cognito](https://docs.aws.amazon.com/cognito/index.html) for user authentication. When a user logs into the web application, Cognito provides temporary tokens that front-end Javascript components use to authenticate to back-end APIs in API Gateway and Elasticsearch. To learn more about these tokens, see [Using Tokens with User Pools](https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html) in the Amazon Cognito documentation.
+
+The front-end Javascript components in this application use the [Amplify Framework](https://docs.amplify.aws/) to perform back-end requests. You won't actually see any explicit handling of Cognito tokens in the source code for this application because that's all handled internally by the Amplify Framework. 
+
+## User account management
+
+All the necessary Cognito resources for this solution are configured in the [deployment/aws-content-localization-auth.yaml](deployment/aws-content-localization-auth.yaml) CloudFormation template and it includes an initial administration account. A temporary password for this account will be sent to the email address specified during the CloudFormation deployment. This administration account can be used to create additional user accounts for the application. 
+
+Follow this procedure to create new user accounts:
+
+1.	Sign in to the [Amazon Cognito console](https://console.aws.amazon.com/cognito/home).
+2.	Choose Manage User Pools.
+3.	In the User Pools page, select the user pool for your stack.
+4.	From the left navigation pane, choose Users and Groups.
+5.	On the Users tab, choose Create user.
+
+<img src="docs/images/create_user01.png" width=600>
+
+6.	In the Create user dialog box, enter a username and temporary password.
+7.	Choose Create user.
+8.	On the User Pool page, under the Username column, select the user you just created.
+
+<img src="docs/images/create_user02.png" width=600>
+
+9.	On the Users page, choose Add to group.
+10.	In the Add user dialog box, access the drop-down list and select the user group corresponding to your auth stack.
+
+<img src="docs/images/create_user03.png" width=400>
+
+The new user will now be able to use the web application.
+
+# Uninstall
+
+To uninstall the AWS Content Localization solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Analysis solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
+
+### Option 1: Uninstall using the AWS Management Console
+1. Sign in to the AWS CloudFormation console.
+2. Select your AWS Content Localization stack.
+3. Choose Delete.
+
+### Option 2: Uninstall using AWS Command Line Interface
+```
+aws cloudformation delete-stack --stack-name <installation-stack-name> --region <aws-region>
+```
+
+### Deleting Content Localization S3 buckets
+AWS Content Analysis creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
+
+1. Sign in to the Amazon S3 console.
+2. Select the `Dataplane` bucket.
+3. Choose Empty.
+4. Choose Delete.
+5. Select the `DataplaneLogsBucket` bucket.
+6. Choose Empty.
+7. Choose Delete.
+
+To delete an S3 bucket using AWS CLI, run the following command:
+```
+aws s3 rb s3://<bucket-name> --force
+```
+
+## Collection of operational metrics
+
+This solution includes an option to send anonymous operational metrics to AWS. Solution developers use this data to help improve the quality of the solution. When enabled, the following information is collected and sent to AWS:
+
+* **Solution ID:** the AWS solution ID (`SO0164`)
+* **Unique ID (UUID):** a randomly generated, unique identifier for each deployment
+* **Timestamp:** data-collection timestamp
+* **Version:** The version of the solution that was deployed
+* **CFTemplate:** The CloudFormation action that activated the metric report.
+
+Example data:
+
+```
+{
+    "Solution": "SO0164",
+    "UUID": "d84a0bd5-7483-494e-8ab1-fdfaa7e97687",
+    "TimeStamp": "2021-03-01T20:03:05.798545",
+    "Data": {
+        "Version": "v2.0.0",
+        "CFTemplate": "Created"
+    }
+}
+```
+
+To opt out of this reporting, edit [deployment/aws-content-localization.yaml](deployment/aws-content-localization.yaml) and change `AnonymousUsage` in the `Mappings` section from:
+
+```
+"Send" : {
+"AnonymousUsage" : { "Data" : "Yes" }
+},
+```
+
+to:
+
+```
+"Send" : {
+"AnonymousUsage" : { "Data" : "No" }
+},
+```
 
 # Help
 

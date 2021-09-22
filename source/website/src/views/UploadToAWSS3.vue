@@ -332,9 +332,9 @@ export default {
       invalid_file_types: 0,
       upload_in_progress: false,
       enabledOperators: [
-        "thumbnail", 
-        "Transcribe", 
-        "Translate", 
+        "thumbnail",
+        "Transcribe",
+        "Translate",
         "Subtitles"
       ],
       enable_caption_editing: false,
@@ -345,8 +345,7 @@ export default {
         { text: "Celebrity Recognition", value: "celebrityRecognition" },
         { text: "Face Detection", value: "faceDetection" },
         { text: "Word Detection", value: "textDetection" },
-        { text: "Face Search", value: "faceSearch" },
-        { text: "Generic Data Lookup (video only)", value: "genericDataLookup" }
+        { text: "Face Search", value: "faceSearch" }
       ],
       audioOperators: [
         { text: "Transcribe", value: "Transcribe" },
@@ -358,7 +357,6 @@ export default {
         { text: "Translate", value: "Translate" }
       ],
       faceCollectionId: "",
-      genericDataFilename: "",
       ComprehendEncryption: false,
       kmsKeyId: "",
       customVocab: null,
@@ -539,10 +537,10 @@ export default {
     translateLanguageTags() {
       return this.translateLanguages
         .map(x => {return {"text": x.value, "value": x.text}})
-        //FIXME: filtering source languge from language tag list doesn't refresh 
-        // tag picker in UI.  So, if source language is English to start, English is 
+        //FIXME: filtering source languge from language tag list doesn't refresh
+        // tag picker in UI.  So, if source language is English to start, English is
         // removed from the translation target languages.  When source language
-        // is changed to Spanish, Engish is added back to the tags on the Vue 
+        // is changed to Spanish, Engish is added back to the tags on the Vue
         // Translation component but Engish tag is still missing on the tag
         // picker.  For now, leave the source language in the list.
         //.filter(x => x.text !== this.sourceLanguageCode)
@@ -585,20 +583,6 @@ export default {
           return "Face collection name must have fewer than 255 characters.";
         }
       }
-      if (this.enabledOperators.includes("genericDataLookup")) {
-        // Validate that the collection ID is defined
-        if (this.genericDataFilename === "") {
-          return "Data filename is required.";
-        }
-        // Validate that the collection ID matches required regex
-        else if (!new RegExp("^.+\\.json$").test(this.genericDataFilename)) {
-          return "Data filename must have .json extension.";
-        }
-        // Validate that the data filename is not too long
-        else if (this.genericDataFilename.length > 255) {
-          return "Data filename must have fewer than 255 characters.";
-        }
-      }
       return "";
     },
     validForm() {
@@ -610,7 +594,7 @@ export default {
           this.videoFormError ||
           this.overlappingTerminologies.length > 0 ||
           this.overlappingParallelData > 0
-      ) 
+      )
         validStatus = false;
       return validStatus;
     },
@@ -636,11 +620,11 @@ export default {
           Enabled: this.enabledOperators.includes("shotDetection")
         },
         celebrityRecognition: {
-          MediaType: "Video", 
+          MediaType: "Video",
           Enabled: this.enabledOperators.includes("celebrityRecognition")
         },
         labelDetection : {
-          MediaType: "Video", 
+          MediaType: "Video",
           Enabled: this.enabledOperators.includes("labelDetection")
         },
         personTracking: {
@@ -655,34 +639,26 @@ export default {
                   : this.faceCollectionId
         },
         textDetection: {
-          MediaType: "Video", 
+          MediaType: "Video",
           Enabled: this.enabledOperators.includes("textDetection")
         },
         Mediaconvert: {
-          MediaType: "Video", 
+          MediaType: "Video",
           Enabled: false
-        },
-        GenericDataLookup: {
-          Enabled: this.enabledOperators.includes("genericDataLookup"),
-          Bucket: this.DATAPLANE_BUCKET,
-          Key:
-              this.genericDataFilename === ""
-                  ? "undefined"
-                  : this.genericDataFilename
         },
         TranscribeVideo: {
           Enabled: this.enabledOperators.includes("Transcribe"),
           TranscribeLanguage: this.transcribeLanguage,
           MediaType: "Audio"
         }
-      }     
+      }
       const AnalyzeText = {
         ComprehendEntities: {
-          MediaType: "Text", 
+          MediaType: "Text",
           Enabled: this.enabledOperators.includes("ComprehendEntities")
         },
         ComprehendKeyPhrases: {
-          MediaType: "Text", 
+          MediaType: "Text",
           Enabled: this.enabledOperators.includes("ComprehendKeyPhrases")
         }
       }
@@ -726,7 +702,7 @@ export default {
           SourceLanguageCode: this.sourceLanguageCode
         }
       }
-    
+
       const workflow_config = {
         Name: "ContentLocalizationWorkflow",
       }
@@ -891,7 +867,7 @@ export default {
               }
             }
           }
-          
+
 
           // Add optional parameters to workflow config:
           if (this.customTerminology !== null) {
@@ -913,15 +889,6 @@ export default {
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
-        
-          
-          // Add input parameter to workflow config:
-          
-        } else if (media_type === "application/json") {
-          // JSON files may be uploaded for the genericDataLookup operator, but
-          // we won't run a workflow for json file types.
-          console.log("Data file has been uploaded to s3://" + s3key);
-          return;
         } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() == 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.

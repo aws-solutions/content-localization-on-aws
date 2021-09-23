@@ -20,7 +20,7 @@ jobs:
           ref: development
       - name: Create release branch
         run: |
-          git push origin --delete release/v${{ github.event.inputs.version }}j
+          git push origin --delete release/v${{ github.event.inputs.version }}
           git checkout -b release/v${{ github.event.inputs.version }}
       - name: Initialize mandatory git config
         run: |

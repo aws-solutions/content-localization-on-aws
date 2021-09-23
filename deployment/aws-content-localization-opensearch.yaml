@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "(SO0042) - aws-content-analysis. Opensearch Consumer stack"
+Description: "AWS Content Localization - Opensearch Consumer stack"
 
 Parameters:
   NodeType:

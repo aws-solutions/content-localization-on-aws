@@ -20,7 +20,7 @@ jobs:
           ref: development
       - name: Create release branch
         run: |
-          git push origin --delete release/v${{ github.event.inputs.version }}
+          echo `git push origin --delete release/v${{ github.event.inputs.version }}`
           git checkout -b release/v${{ github.event.inputs.version }}
       - name: Initialize mandatory git config
         run: |
@@ -56,7 +56,7 @@ jobs:
           VERSION=v${{ github.event.inputs.version }}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-${{ env.REGION }}
-          ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
+          echo y | ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           echo "Templates artifact:"
           cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'
@@ -147,7 +147,7 @@ jobs:
           VERSION=v${{ github.event.inputs.version }}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-${{ env.REGION }}
-          ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
+          echo y | ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           echo "Templates artifact:"
           cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'
@@ -546,14 +546,14 @@ jobs:
         uses: nanasess/setup-chromedriver@master
       - name: Get access to Cognito user pool
         run: |
-          echo "USER_POOL_ID=`aws cloudformation describe-stacks --region ${{ env.REGION }} --query 'Stacks[?starts_with(StackName, \`cl-AuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "USER_POOL_ID=`aws cloudformation describe-stacks --region ${{ env.REGION }} --query 'Stacks[?starts_with(StackName, \`$CONTENT_LOCALIZATION_STACK_NAME-AuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
       - name: Set password for test user
         run: |
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --region ${{ env.REGION }}  --permanent
       - name: Initialize e2e test environment
         run: |
           echo "MIE_REGION=${{ env.REGION }}" >> $GITHUB_ENV
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --profile default --region eu-west-1 --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --region ${{ env.REGION }} --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
           echo AWS_ACCESS_KEY_ID=${{ secrets.BUILD_AWS_ACCESS_KEY_ID }} >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }} >> $GITHUB_ENV
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
@@ -592,14 +592,14 @@ jobs:
         uses: nanasess/setup-chromedriver@master
       - name: Get access to Cognito user pool
         run: |
-          echo "USER_POOL_ID=`aws cloudformation describe-stacks --region ${{ env.REGION }} --query 'Stacks[?starts_with(StackName, \`cl-AuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "USER_POOL_ID=`aws cloudformation describe-stacks --region ${{ env.REGION }} --query 'Stacks[?starts_with(StackName, \`$CONTENT_LOCALIZATION_STACK_NAME-AuthStack\`)].Outputs[1].OutputValue' --output text`" >> $GITHUB_ENV
       - name: Set password for test user
         run: |
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --region ${{ env.REGION }}  --permanent
       - name: Initialize e2e test environment
         run: |
           echo "MIE_REGION=${{ env.REGION }}" >> $GITHUB_ENV
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --profile default --region eu-west-1 --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --region ${{ env.REGION }} --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
           echo AWS_ACCESS_KEY_ID=${{ secrets.BUILD_AWS_ACCESS_KEY_ID }} >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }} >> $GITHUB_ENV
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
@@ -772,7 +772,7 @@ jobs:
           ref: main
       - name: Create staging branch
         run: |
-          git push origin --delete staging/v${{ github.event.inputs.version }}
+          echo `git push origin --delete staging/v${{ github.event.inputs.version }}`
           git checkout -b staging/v${{ github.event.inputs.version }}
       - name: Initialize mandatory git config
         run: |

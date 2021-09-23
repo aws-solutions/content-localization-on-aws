@@ -786,7 +786,7 @@ export default {
       this.enabledOperators = [];
     },
     openWindow: function(url) {
-      window.open(url);
+      window.open(url, "noopener,noreferer");
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;

@@ -553,17 +553,17 @@ jobs:
       - name: Initialize e2e test environment
         run: |
           echo "MIE_REGION=${{ env.REGION }}"
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-WebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --profile default --region eu-west-1 --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo AWS_ACCESS_KEY_ID=${{ secrets.BUILD_AWS_ACCESS_KEY_ID }} >> $GITHUB_ENV
+          echo AWS_SECRET_ACCESS_KEY=${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }} >> $GITHUB_ENV
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
           echo APP_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} >> $GITHUB_ENV
           echo TEST_MEDIA_PATH=$GITHUB_WORKSPACE/test/e2e/ >> $GITHUB_ENV
-          echo TEST_FILE_NAME=run_e2e.sh >> $GITHUB_ENV
       - name: Run e2e tests
         run: |
           cd $GITHUB_WORKSPACE
           cd test/e2e
           ./run_e2e.sh
-
 
   test-content-localization-dev-us-east-1:
     needs: deploy-content-localization-dev-us-east-1
@@ -599,11 +599,12 @@ jobs:
       - name: Initialize e2e test environment
         run: |
           echo "MIE_REGION=${{ env.REGION }}"
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`cl-WebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --profile default --region eu-west-1 --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo AWS_ACCESS_KEY_ID=${{ secrets.BUILD_AWS_ACCESS_KEY_ID }} >> $GITHUB_ENV
+          echo AWS_SECRET_ACCESS_KEY=${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }} >> $GITHUB_ENV
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
           echo APP_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} >> $GITHUB_ENV
           echo TEST_MEDIA_PATH=$GITHUB_WORKSPACE/test/e2e/ >> $GITHUB_ENV
-          echo TEST_FILE_NAME=run_e2e.sh >> $GITHUB_ENV
       - name: Run e2e tests
         run: |
           cd $GITHUB_WORKSPACE

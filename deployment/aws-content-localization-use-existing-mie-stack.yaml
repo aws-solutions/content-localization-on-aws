@@ -84,7 +84,7 @@ Resources:
         DataplaneApiId:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneApiId"
-        SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainEndpoint
+        SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainArn
         DataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
@@ -138,7 +138,7 @@ Resources:
         WorkflowEndpoint:
           Fn::ImportValue:
             !Sub "${MieStackName}:WorkflowApiEndpoint"
-        ElasticEndpoint: !GetAtt ElasticsearchStack.Outputs.ElasticEndpoint
+        SearchEndpoint: !GetAtt OpensearchStack.Outputs.DomainEndpoint
         DataplaneBucket:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"

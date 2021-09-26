@@ -203,7 +203,7 @@ echo "--------------------------------------------------------------------------
 echo ""
 echo "Preparing template files:"
 cp "$build_dir/aws-content-localization-auth.yaml" "$global_dist_dir/aws-content-localization-auth.template"
-cp "$build_dir/aws-content-localization-elasticsearch.yaml" "$global_dist_dir/aws-content-localization-elasticsearch.template"
+cp "$build_dir/aws-content-localization-opensearch.yaml" "$global_dist_dir/aws-content-localization-opensearch.template"
 cp "$build_dir/aws-content-localization-web.yaml" "$global_dist_dir/aws-content-localization-web.template"
 cp "$build_dir/aws-content-localization-use-existing-mie-stack.yaml" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
 cp "$build_dir/aws-content-localization-video-workflow.yaml" "$global_dist_dir/aws-content-localization-video-workflow.template"
@@ -219,9 +219,9 @@ new_version="s/%%VERSION%%/$version/g"
 sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-auth.template"
 sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-auth.template"
 sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-auth.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-elasticsearch.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-elasticsearch.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-elasticsearch.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-opensearch.template"
 sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-web.template"
 sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-web.template"
 sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-web.template"
@@ -237,10 +237,10 @@ sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization.templat
 
 
 echo "------------------------------------------------------------------------------"
-echo "Elasticsearch consumer Function"
+echo "Opensearch consumer Function"
 echo "------------------------------------------------------------------------------"
 
-echo "Building Elasticsearch Consumer function"
+echo "Building Opensearch Consumer function"
 cd "$source_dir/consumer" || exit 1
 
 [ -e dist ] && rm -r dist

@@ -6,7 +6,7 @@ Parameters:
     Type: String
   WorkflowEndpoint:
     Type: String
-  ElasticEndpoint:
+  SearchEndpoint:
     Type: String
   DataplaneBucket:
     Type: String
@@ -296,7 +296,7 @@ Resources:
         Variables:
           DataplaneEndpoint: !Ref DataplaneEndpoint
           WorkflowEndpoint: !Ref WorkflowEndpoint
-          ElasticEndpoint: !Ref ElasticEndpoint
+          SearchEndpoint: !Ref SearchEndpoint
           DataplaneBucket: !Ref DataplaneBucket
           UserPoolId: !Ref UserPoolId
           IdentityPoolId: !Ref IdentityPoolId

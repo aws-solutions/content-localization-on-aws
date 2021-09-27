@@ -6,7 +6,7 @@ Parameters:
     Type: String
   WorkflowEndpoint:
     Type: String
-  ElasticEndpoint:
+  SearchEndpoint:
     Type: String
   DataplaneBucket:
     Type: String
@@ -127,7 +127,9 @@ Resources:
           - Effect: Deny
             Principal: "*"
             Action: "*"
-            Resource: !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
+            Resource:
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}"
             Condition:
               Bool:
                 aws:SecureTransport: false
@@ -294,7 +296,7 @@ Resources:
         Variables:
           DataplaneEndpoint: !Ref DataplaneEndpoint
           WorkflowEndpoint: !Ref WorkflowEndpoint
-          ElasticEndpoint: !Ref ElasticEndpoint
+          SearchEndpoint: !Ref SearchEndpoint
           DataplaneBucket: !Ref DataplaneBucket
           UserPoolId: !Ref UserPoolId
           IdentityPoolId: !Ref IdentityPoolId

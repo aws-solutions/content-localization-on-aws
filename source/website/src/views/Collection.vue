@@ -246,7 +246,7 @@
         }
       },
       async elasticsearchQuery (query) {
-            let apiName = 'contentAnalysisElasticsearch';
+            let apiName = 'search';
             let path = '/_search';
             let apiParams = {
               headers: {'Content-Type': 'application/json'},

@@ -20,7 +20,7 @@
         :sort-by="sortBy"
       >
         <template v-slot:cell(Type)="data">
-          <b-button variant="link" @click="setPlayerTime(data.item.EndTimestamp, data.item.StartTimestamp)"> 
+          <b-button variant="link" @click="setPlayerTime(data.item.EndTimestamp, data.item.StartTimestamp)">
             {{ data.item.Type }}
           </b-button>
         </template>
@@ -76,13 +76,13 @@
             }
           },
           {
-            'EndTimecodeSMPTE': { 
+            'EndTimecodeSMPTE': {
               label: 'End',
               sortable: false
               }
           },
           {
-            'DurationSMPTE': { 
+            'DurationSMPTE': {
               label: 'Duration',
               sortable: true
               }
@@ -141,7 +141,7 @@
       },
       async fetchAssetData () {
           let query = 'AssetId:'+this.$route.params.asset_id+' Operator:'+this.operator;
-          let apiName = 'contentAnalysisElasticsearch';
+          let apiName = 'search';
           let path = '/_search';
           let apiParams = {
             headers: {'Content-Type': 'application/json'},

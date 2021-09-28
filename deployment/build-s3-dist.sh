@@ -15,7 +15,7 @@
 #    VERSION can be anything but should be in a format like v1.0.0 just to be consistent
 #      with the official solution release labels.
 #    REGION needs to be in a format like us-east-1
-#    PROFILE is optional. It's the profile that you have setup in ~/.aws/config
+#    PROFILE is optional. It's the profile that you have setup in ~/.aws/credentials
 #      that you want to use for AWS CLI commands.
 #
 #    The following options are available:
@@ -203,7 +203,7 @@ echo "--------------------------------------------------------------------------
 echo ""
 echo "Preparing template files:"
 cp "$build_dir/aws-content-localization-auth.yaml" "$global_dist_dir/aws-content-localization-auth.template"
-cp "$build_dir/aws-content-localization-elasticsearch.yaml" "$global_dist_dir/aws-content-localization-elasticsearch.template"
+cp "$build_dir/aws-content-localization-opensearch.yaml" "$global_dist_dir/aws-content-localization-opensearch.template"
 cp "$build_dir/aws-content-localization-web.yaml" "$global_dist_dir/aws-content-localization-web.template"
 cp "$build_dir/aws-content-localization-use-existing-mie-stack.yaml" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
 cp "$build_dir/aws-content-localization-video-workflow.yaml" "$global_dist_dir/aws-content-localization-video-workflow.template"
@@ -219,9 +219,9 @@ new_version="s/%%VERSION%%/$version/g"
 sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-auth.template"
 sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-auth.template"
 sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-auth.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-elasticsearch.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-elasticsearch.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-elasticsearch.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-opensearch.template"
 sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-web.template"
 sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-web.template"
 sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-web.template"
@@ -237,10 +237,10 @@ sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization.templat
 
 
 echo "------------------------------------------------------------------------------"
-echo "Elasticsearch consumer Function"
+echo "Opensearch consumer Function"
 echo "------------------------------------------------------------------------------"
 
-echo "Building Elasticsearch Consumer function"
+echo "Building Opensearch Consumer function"
 cd "$source_dir/consumer" || exit 1
 
 [ -e dist ] && rm -r dist
@@ -350,19 +350,19 @@ if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solut
   echo "------------------------------------------------------------------------------"
   echo "Validating ownership of distribution buckets before copying deployment assets to them..."
   # Get account id
-  account_id=$(aws sts get-caller-identity --query Account --output text)
+  account_id=$(aws sts get-caller-identity --query Account --output text $(if [ ! -z $profile ]; then echo "--profile $profile"; fi))
   if [ $? -ne 0 ]; then
     msg "ERROR: Failed to get AWS account ID"
     die 1
   fi
   # Validate ownership of $global_dist_dir
-  aws s3api head-bucket --bucket $global_bucket --expected-bucket-owner $account_id
+  aws s3api head-bucket --bucket $global_bucket --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
   if [ $? -ne 0 ]; then
     msg "ERROR: Your AWS account does not own s3://$global_bucket/"
     die 1
   fi
   # Validate ownership of ${regional_bucket}-${region}
-  aws s3api head-bucket --bucket ${regional_bucket}-${region} --expected-bucket-owner $account_id
+  aws s3api head-bucket --bucket ${regional_bucket}-${region} --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
   if [ $? -ne 0 ]; then
     msg "ERROR: Your AWS account does not own s3://${regional_bucket}-${region} "
     die 1

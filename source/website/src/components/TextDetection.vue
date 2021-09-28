@@ -223,7 +223,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "red";  
+        ctx.strokeStyle = "red";
         ctx.font = "15px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -283,7 +283,7 @@
       },
       async fetchAssetData () {
           let query = 'AssetId:'+this.$route.params.asset_id+' Confidence:>'+this.Confidence+' Operator:'+this.operator;
-          let apiName = 'contentAnalysisElasticsearch';
+          let apiName = 'search';
           let path = '/_search';
           let apiParams = {
             headers: {'Content-Type': 'application/json'},
@@ -407,7 +407,7 @@
             if (record.DetectedText === this.selectedWord) {
                   saveTimestamp(millisecond);
             }
-          } 
+          }
           else {
             // No word has been selected, so enumerate timestamps for all word names.
             // Iterate through bounding boxes if present.

@@ -14,7 +14,7 @@
         <br>
         <label>Filename:&nbsp;</label>
         <a
-          :href="videoUrl"
+          :href="videoUrl" rel="noopener noreferrer"
           download
         >
           {{ filename }}
@@ -119,7 +119,7 @@
       async fetchAssetData () {
         this.isBusy = true;
         let query = 'AssetId:'+this.$route.params.asset_id+' Operator:mediainfo';
-        let apiName = 'contentAnalysisElasticsearch';
+        let apiName = 'search';
         let path = '/_search';
         let apiParams = {
           headers: {'Content-Type': 'application/json'},

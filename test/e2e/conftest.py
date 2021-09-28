@@ -251,10 +251,20 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
         create_vocabulary_body)
     assert create_vocabulary_request.status_code == 200
 
-    # wait for vocabulary to complete
-    # FIXME - should us a polling loop here
-    time.sleep(60)
     yield create_vocabulary_body
+
+    # Delete the vocabulary during pytest cleanup.
+
+    client = boto3.client('transcribe', region_name=testing_env_variables['REGION'])
+    # we must wait for vocabulary to be in a ready status before it can be deleted
+    max_wait_time = 300 # Wait max 300 seconds
+    start_time = time.time()
+    vocabulary_state = client.get_vocabulary(VocabularyName=testing_env_variables['SAMPLE_VOCABULARY_FILE'])['VocabularyState']
+    # Poll vocabulary status up to max_wait_time
+    while vocabulary_state != 'READY' and vocabulary_state != 'FAILED' and time.time()-start_time < max_wait_time:
+        time.sleep(5)
+        vocabulary_state = client.get_vocabulary(VocabularyName=testing_env_variables['SAMPLE_VOCABULARY_FILE'])['VocabularyState']
+
     delete_vocabulary_body = {
         "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
     }
@@ -335,15 +345,12 @@ def workflow_config(all_operators):
             "MediaType": "Video",
             "Enabled": False
         },
-        "GenericDataLookup": {
-            "Enabled": False
-        },
         "TranscribeVideo": {
             "Enabled": True,
             "TranscribeLanguage": "en-US",
             "MediaType": "Audio"
         }
-    }     
+    }
     AnalyzeText = {
         "ComprehendEntities": {
             "MediaType": "Text",
@@ -354,7 +361,7 @@ def workflow_config(all_operators):
             "Enabled": all_operators
         }
     }
-    
+
     TransformText = {
         "WebToSRTCaptions": {
             "MediaType": "MetadataOnly",

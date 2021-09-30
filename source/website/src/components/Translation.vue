@@ -137,11 +137,12 @@
         <p>Are you sure you want to permanently delete the custom terminology <b>{{ customTerminologySelected }}</b>?</p>
       </b-modal>
       <b-modal
-          ref="terminology-modal"
-          size="lg"
-          title="Custom Terminology Editor"
-          :ok-disabled="validTerminologyName === false || (customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
-          @cancel="customTerminologySelected=[]; customTerminologySaved=[];">
+        ref="terminology-modal"
+        size="lg"
+        title="Custom Terminology Editor"
+        :ok-disabled="validTerminologyName === false || (customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
+        @cancel="customTerminologySelected=[]; customTerminologySaved=[];"
+      >
         <div v-if="customTerminologyList.length > 0">
           Load an existing terminology:
         </div>
@@ -246,7 +247,7 @@
           <!-- Here we show buttons to add / remove languages from custom terminology: -->
           <template v-slot:table-caption>
             <span style="position:absolute; right: 10px">
-<!--
+              <!--
 Uncomment the following buttons to get options for adding or removing languages to the terminology table:
 -->
               <b-button v-if="customTerminologySelected !== ''" v-b-tooltip.hover.top title="Add a new language" variant="outline-secondary" class="btn-xs" @click="add_language()">Add Language</b-button>&nbsp;
@@ -257,7 +258,7 @@ Uncomment the following buttons to get options for adding or removing languages 
         <div v-if="validTerminologyName === false" style="color:red">
           Invalid terminology name. Valid characters are a-z, A-Z, and 0-9. Max length is 200.
         </div>
-        <div v-else-if="(customTerminologyUnsaved.length !== 0 || customTerminologySaved.length !== 0)  && customTerminologyCreateNew === ''" style="color:red">
+        <div v-else-if="(customTerminologyUnsaved.length !== 0 || customTerminologySaved.length !== 0) && customTerminologyCreateNew === ''" style="color:red">
           Specify a terminology name to save as.<br>
         </div>
         <div v-else-if="validCSV === false" style="color:red">
@@ -270,10 +271,10 @@ Uncomment the following buttons to get options for adding or removing languages 
       <b-modal ref="add-language-modal" title="Add Language" ok-title="Save" :ok-disabled="newLanguageCode === ''" @ok="add_language_request()">
         <p>Select language to add:</p>
         <b-form-select
-            v-model="newLanguageCode"
-            placeholder="language code"
-            :options="translateLanguages"
-            size="sm"
+          v-model="newLanguageCode"
+          placeholder="language code"
+          :options="translateLanguages"
+          size="sm"
         />
       </b-modal>
       <b-modal ref="remove-language-modal" title="Remove Language" ok-title="Remove" :ok-disabled="removeLanguageCode === ''" @ok="remove_language_request()">
@@ -457,6 +458,8 @@ export default {
     customTerminologyName: function () {
       if (this.customTerminologyCreateNew !== "")
         return this.customTerminologyCreateNew
+      else
+        return null
     },
     inputListeners: function () {
       var vm = this

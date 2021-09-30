@@ -144,7 +144,7 @@
                   <b-form-checkbox value="ComprehendKeyPhrases">
                     Comprehend Key Phrases
                   </b-form-checkbox>
-                    <b-form-checkbox
+                  <b-form-checkbox
                     v-if="enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases')"
                     v-model="ComprehendEncryption"
                   >
@@ -160,43 +160,51 @@
                   </b-form-checkbox>
 
                   <div v-if="enabledOperators.includes('Translate')">
-                   <!-- && customTerminologyList.length > 0"> -->
-                   <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
-                  <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <div v-else><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <b-form-select
-                    v-model="customTerminology"
-                    :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                    multiple
-                  >
-                  </b-form-select>
-                  <div v-if="overlappingTerminologies.length > 0" style="color:red">
-                    You must not select terminologies that define translations for the same language. The following terminologies overlap:
-                    <ul id="overlapping_terminologies">
-                      <li v-for="terminology in overlappingTerminologies">
-                        {{ terminology }}
-                      </li>
-                    </ul>
+                    <!-- && customTerminologyList.length > 0"> -->
+                    <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
+                    <div v-if="customTerminology.length > 0">
+                      <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
+                    </div>
+                    <div v-else>
+                      <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
+                    </div>
+                    <b-form-select
+                      v-model="customTerminology"
+                      :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
+                    >
+                    </b-form-select>
+                    <div v-if="overlappingTerminologies.length > 0" style="color:red">
+                      You must not select terminologies that define translations for the same language. The following terminologies overlap:
+                      <ul id="overlapping_terminologies">
+                        <li v-for="terminology in overlappingTerminologies" :key="terminology">
+                          {{ terminology }}
+                        </li>
+                      </ul>
+                    </div>
+                    <div v-if="parallelDataList.length > 0">
+                      <b>Parallel Data:</b> ({{ parallelData.length }} selected)
+                    </div>
+                    <div v-else>
+                      <b>Parallel Data:</b>
+                    </div>
+                    <b-form-select
+                      v-model="parallelData"
+                      :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
+                    >
+                    </b-form-select>
+                    <div v-if="overlappingParallelData.length > 0" style="color:red">
+                      You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
+                      <ul id="overlapping_parallel_data">
+                        <li v-for="parallel_data in overlappingParallelData" :key="parallel_data">
+                          {{ parallel_data }}
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                  <div v-if="parallelDataList.length > 0"><b>Parallel Data:</b> ({{ parallelData.length }} selected) </div>
-                  <div v-else><b>Parallel Data:</b></div>
-                  <b-form-select
-                    v-model="parallelData"
-                    :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                    multiple
-                  >
-                  </b-form-select>
-                  <div v-if="overlappingParallelData.length > 0" style="color:red">
-                    You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
-                    <ul id="overlapping_parallel_data">
-                      <li v-for="parallel_data in overlappingParallelData">
-                        {{ parallel_data }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </b-form-checkbox-group>
-                <div v-if="enabledOperators.includes('Translate')" >
+                </b-form-checkbox-group>
+                <div v-if="enabledOperators.includes('Translate')">
                   <b-form-group>
                     <b>Target Languages:</b>
                     <div v-if="textFormError" style="color:red">

@@ -38,8 +38,8 @@
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
             Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-            Delete
-          </b-button>
+              Delete
+            </b-button>
           </div>
         </b-col>
         <b-col>

@@ -1,89 +1,105 @@
 <template>
-    <div class="tags-input-root" style="position: relative;">
-        <div :class="{
-            [wrapperClass + ' tags-input']: true,
-            'active': isActive,
-        }">
-            <span class="tags-input-badge tags-input-badge-pill tags-input-badge-selected-default"
-                v-for="(tag, index) in tags"
-                :key="index"
-            >
-                <span v-html="tag.value"></span>
+  <div class="tags-input-root" style="position: relative;">
+    <div :class="{
+      [wrapperClass + ' tags-input']: true,
+      'active': isActive,
+    }"
+    >
+      <span v-for="(tag, index) in tags"
+            :key="index"
+            class="tags-input-badge tags-input-badge-pill tags-input-badge-selected-default"
+      >
+        <span v-text="tag.value"></span>
 
-                <a href="#"
-                    class="tags-input-remove"
-                    @click.prevent="removeTag(index)"></a>
-            </span>
-            <p><input type="text"
-                ref="taginput"
-                :placeholder="placeholder"
-                v-model="input"
-                v-show="!hideInputField"
-                @keydown.enter.prevent="tagFromInput(false)"
-                @keydown.8="removeLastTag"
-                @keydown.down="nextSearchResult"
-                @keydown.up="prevSearchResult"
-                @keydown="onKeyDown"
-                @keyup="onKeyUp"
-                @keyup.esc="clearSearchResults"
-                @focus="onFocus"
-                @click="onClick"
-                @blur="onBlur"
-                @value="tags"></p>
+        <a href="#"
+           class="tags-input-remove"
+           @click.prevent="removeTag(index)"
+        ></a>
+      </span>
+      <p>
+        <input v-show="!hideInputField"
+               ref="taginput"
+               v-model="input"
+               type="text"
+               :placeholder="placeholder"
+               @keydown.enter.prevent="tagFromInput(false)"
+               @keydown.8="removeLastTag"
+               @keydown.down="nextSearchResult"
+               @keydown.up="prevSearchResult"
+               @keydown="onKeyDown"
+               @keyup="onKeyUp"
+               @keyup.esc="clearSearchResults"
+               @focus="onFocus"
+               @click="onClick"
+               @blur="onBlur"
+               @value="tags"
+        >
+      </p>
 
-            <input type="hidden" v-if="elementId"
-                :name="elementId"
-                :id="elementId"
-                v-model="hiddenInput">
-        </div>
-        <b-alert
-            :show="hideInputField"
-            variant="warning"
-        >Pick no more than 10.
-        </b-alert>
-
-        <!-- Typeahead/Autocomplete -->
-        <div v-show="searchResults.length">
-            <p v-if="typeaheadStyle === 'badges'" :class="`typeahead-${typeaheadStyle}`">
-                <span v-if="!typeaheadHideDiscard" class="tags-input-badge typeahead-hide-btn tags-input-typeahead-item-default"
-                    @click.prevent="clearSearchResults(true)"
-                    v-text="discardSearchText"></span>
-
-                <span v-for="(tag, index) in searchResults"
-                    :key="index"
-                    v-html="tag.value"
-                    @mouseover="searchSelection = index"
-                    @mousedown.prevent="tagFromSearchOnClick(tag)"
-                    class="tags-input-badge"
-                    v-bind:class="{
-                        'tags-input-typeahead-item-default': index != searchSelection,
-                        'tags-input-typeahead-item-highlighted-default': index == searchSelection
-                    }"></span>
-            </p>
-
-            <ul v-else-if="typeaheadStyle === 'dropdown'" :class="`typeahead-${typeaheadStyle}`">
-                <li v-if="!typeaheadHideDiscard" class="tags-input-typeahead-item-default typeahead-hide-btn"
-                    @click.prevent="clearSearchResults(true)"
-                    v-text="discardSearchText"></li>
-
-                <li v-for="(tag, index) in searchResults"
-                :key="index"
-                v-html="tag.value"
-                @mouseover="searchSelection = index"
-                @mousedown.prevent="tagFromSearchOnClick(tag)"
-                v-bind:class="{
-                    'tags-input-typeahead-item-default': index != searchSelection,
-                    'tags-input-typeahead-item-highlighted-default': index == searchSelection
-                }"></li>
-            </ul>
-        </div>
+      <input v-if="elementId" :id="elementId"
+             v-model="hiddenInput"
+             type="hidden"
+             :name="elementId"
+      >
     </div>
+    <b-alert
+      :show="hideInputField"
+      variant="warning"
+    >
+      Pick no more than 10.
+    </b-alert>
+
+    <!-- Typeahead/Autocomplete -->
+    <div v-show="searchResults.length">
+      <p v-if="typeaheadStyle === 'badges'" :class="`typeahead-${typeaheadStyle}`">
+        <span v-if="!typeaheadHideDiscard" class="tags-input-badge typeahead-hide-btn tags-input-typeahead-item-default"
+              @click.prevent="clearSearchResults(true)"
+              v-text="discardSearchText"
+        ></span>
+
+        <span v-for="(tag, index) in searchResults"
+              :key="index"
+              class="tags-input-badge"
+              :class="{
+                'tags-input-typeahead-item-default': index != searchSelection,
+                'tags-input-typeahead-item-highlighted-default': index == searchSelection
+              }"
+              @mouseover="searchSelection = index"
+              @mousedown.prevent="tagFromSearchOnClick(tag)"
+              v-text="tag.value"
+        ></span>
+      </p>
+
+      <ul v-else-if="typeaheadStyle === 'dropdown'" :class="`typeahead-${typeaheadStyle}`">
+        <li v-if="!typeaheadHideDiscard" class="tags-input-typeahead-item-default typeahead-hide-btn"
+            @click.prevent="clearSearchResults(true)"
+            v-text="discardSearchText"
+        ></li>
+
+        <li v-for="(tag, index) in searchResults"
+            :key="index"
+            :class="{
+              'tags-input-typeahead-item-default': index != searchSelection,
+              'tags-input-typeahead-item-highlighted-default': index == searchSelection
+            }"
+            @mouseover="searchSelection = index"
+            @mousedown.prevent="tagFromSearchOnClick(tag)"
+            v-text="tag.value"
+        ></li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
     props: {
-        elementId: String,
+        elementId: {
+          type: String,
+          default: () => {
+            return "";
+          }
+        },
 
         existingTags: {
             type: Array,

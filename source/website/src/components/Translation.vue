@@ -33,7 +33,7 @@
       <b-form-group>
         <b-form-radio-group
           v-model="selected_lang_code"
-          :options="translationsCollection"
+          :options="alphabetized_language_collection"
           @change="getWebCaptions"
         ></b-form-radio-group>
       </b-form-group>

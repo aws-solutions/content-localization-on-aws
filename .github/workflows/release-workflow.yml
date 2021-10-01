@@ -561,8 +561,8 @@ jobs:
           aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --region ${{ env.REGION }}  --permanent
       - name: Initialize e2e test environment
         run: |
-          echo "MIE_REGION=${{ env.REGION }}" >> $GITHUB_ENV
-          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --region ${{ env.REGION }} --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query 'Stacks[].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+          echo MIE_REGION=${{ env.REGION }} >> $GITHUB_ENV
+          echo APP_ENDPOINT=`aws cloudformation describe-stacks --region ${{ env.REGION }} --stack-name ${CONTENT_LOCALIZATION_STACK_NAME} --query "Stacks[0].Outputs[?OutputKey=='ContentLocalizationSolution'].OutputValue" --output text` >> $GITHUB_ENV
           echo AWS_ACCESS_KEY_ID=${{ secrets.BUILD_AWS_ACCESS_KEY_ID }} >> $GITHUB_ENV
           echo AWS_SECRET_ACCESS_KEY=${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }} >> $GITHUB_ENV
           echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV

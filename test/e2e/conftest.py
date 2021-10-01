@@ -165,18 +165,18 @@ class WorkflowAPI:
     def delete_terminology_request(self, body):
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/delete_terminology")
-        create_terminology_response = requests.post(
+        delete_terminology_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=False, auth=self.auth)
 
-        return create_terminology_response
+        return delete_terminology_response
 
     def delete_vocabulary_request(self, body):
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/delete_vocabulary")
-        create_vocabulary_response = requests.post(
+        delete_vocabulary_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
 
-        return create_vocabulary_response
+        return delete_vocabulary_response
 
 
 # Workflow API Fixture
@@ -251,13 +251,10 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
         create_vocabulary_body)
     assert create_vocabulary_request.status_code == 200
 
-    yield create_vocabulary_body
-
-    # Delete the vocabulary during pytest cleanup.
-
+    # Wait for vocabulary to be in a ready status before proceeding to use it
     client = boto3.client('transcribe', region_name=testing_env_variables['REGION'])
-    # we must wait for vocabulary to be in a ready status before it can be deleted
-    max_wait_time = 300 # Wait max 300 seconds
+    # Wait max 300 seconds
+    max_wait_time = 300
     start_time = time.time()
     vocabulary_state = client.get_vocabulary(VocabularyName=testing_env_variables['SAMPLE_VOCABULARY_FILE'])['VocabularyState']
     # Poll vocabulary status up to max_wait_time
@@ -265,6 +262,9 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
         time.sleep(5)
         vocabulary_state = client.get_vocabulary(VocabularyName=testing_env_variables['SAMPLE_VOCABULARY_FILE'])['VocabularyState']
 
+    yield create_vocabulary_body
+
+    # Delete the vocabulary during pytest cleanup.
     delete_vocabulary_body = {
         "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
     }
@@ -286,10 +286,8 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         create_terminology_body)
     assert create_terminology_request.status_code == 200
 
-    # wait for terminology to complete
-    # FIXME - should us a polling loop here
-    time.sleep(60)
     yield create_terminology_body
+
     delete_terminology_body = {
         "terminology_name": "uitestterminology"
     }

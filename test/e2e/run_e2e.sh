@@ -86,7 +86,7 @@ pytest -s -W ignore::DeprecationWarning -p no:cacheproviders
 
 if [ $? -eq 0 ]; then
     exit 0
-else 
+else
     exit 1
 fi
 

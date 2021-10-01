@@ -14,7 +14,7 @@
         :src="video_url"
         type="video/mp4"
       >
-      <track v-for="caption in captions" kind="captions" :src="caption.src" :srclang="caption.lang" :label="caption.label" default>
+      <track v-for="caption in alphabetical_caption_list" :key="caption.label" kind="captions" :src="caption.src" :srclang="caption.lang" :label="caption.label" default>
     </video>
     <canvas
       id="canvas"
@@ -48,6 +48,14 @@ export default {
       caption_lang: '',
       caption_label: '',
       player: null
+    }
+  },
+  computed: {
+    alphabetical_caption_list: function () {
+      const alphabetical_caption_list = this.captions
+      return alphabetical_caption_list.sort(function(a, b) {
+        return (a.label < b.label) ? -1 : (a.label > b.label) ? 1 : 0;
+      });
     }
   },
   beforeDestroy() {

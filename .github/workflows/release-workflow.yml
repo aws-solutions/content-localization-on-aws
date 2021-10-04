@@ -777,6 +777,7 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v2.3.4
         with:
+          token: ${{secrets.GITHUB_TOKEN}}
           ref: main
       - name: Create staging branch
         run: |

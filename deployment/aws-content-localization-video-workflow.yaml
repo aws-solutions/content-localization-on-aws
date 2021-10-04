@@ -100,9 +100,16 @@ Resources:
 
   ContentLocalizationWorkflow:
     DependsOn:
+<<<<<<<< HEAD:deployment/aws-content-localization-video-workflow.yaml
       - PreprocessVideoStage
       - AnalyzeVideoStage
       - AnalyzeTextStage
+========
+      - PreliminaryStage
+      - defaultVideoStage
+      - defaultAudioStage
+      - defaultTextStage
+>>>>>>>> main:cloudformation/aws-vod-subtitles-video-workflow.yaml
       - WebCaptionsStage
       - TranslateStage
       - TransformTextStage
@@ -121,7 +128,14 @@ Resources:
             "${AnalyzeVideoStage}":{
               "Next": "${AnalyzeTextStage}"
               },
+<<<<<<<< HEAD:deployment/aws-content-localization-video-workflow.yaml
             "${AnalyzeTextStage}":{
+========
+            "${defaultAudioStage}":{
+              "Next": "${defaultTextStage}"
+              },
+            "${defaultTextStage}":{
+>>>>>>>> main:cloudformation/aws-vod-subtitles-video-workflow.yaml
               "Next": "${WebCaptionsStage}"
               },
             "${WebCaptionsStage}":{
@@ -135,9 +149,16 @@ Resources:
               }
           }
         - {
+<<<<<<<< HEAD:deployment/aws-content-localization-video-workflow.yaml
           PreprocessVideoStage: !GetAtt PreprocessVideoStage.Name,
           AnalyzeVideoStage: !GetAtt AnalyzeVideoStage.Name,
           AnalyzeTextStage: !GetAtt AnalyzeTextStage.Name,
+========
+          PreliminaryStage: !GetAtt PreliminaryStage.Name,
+          defaultVideoStage: !GetAtt defaultVideoStage.Name,
+          defaultAudioStage: !GetAtt defaultAudioStage.Name,
+          defaultTextStage: !GetAtt defaultTextStage.Name,
+>>>>>>>> main:cloudformation/aws-vod-subtitles-video-workflow.yaml
           WebCaptionsStage: !GetAtt WebCaptionsStage.Name,
           TranslateStage: !GetAtt TranslateStage.Name,
           TransformTextStage: !GetAtt TransformTextStage.Name

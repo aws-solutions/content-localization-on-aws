@@ -215,7 +215,7 @@ The new user will now be able to use the web application.
 
 # Uninstall
 
-To uninstall the AWS Content Localization solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Analysis solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
+To uninstall the AWS Content Localization solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Localization solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
 
 ### Option 1: Uninstall using the AWS Management Console
 1. Sign in to the AWS CloudFormation console.
@@ -228,7 +228,7 @@ aws cloudformation delete-stack --stack-name <installation-stack-name> --region 
 ```
 
 ### Deleting Content Localization S3 buckets
-AWS Content Analysis creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
+AWS Content Localization creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
 
 1. Sign in to the Amazon S3 console.
 2. Select the `Dataplane` bucket.

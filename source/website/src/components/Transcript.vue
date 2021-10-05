@@ -33,6 +33,7 @@ export default {
   data() {
     return {
       transcript: "",
+      elasticsearch_data: "",
       isBusy: false,
       operator: "transcript",
       noTranscript: false
@@ -82,22 +83,32 @@ export default {
               this.transcript = this.transcript.concat(data[i]._source.transcript + " ")
               this.noTranscript = false;
             }
-            //console.log("data")
-            //console.log(data)
+            
           }
+          this.elasticsearch_data = data
         }
         this.isBusy = false
       }
     },
     downloadTranscript() {
-      const blob = new Blob([this.transcript], {type: 'text/plain', endings:'native'});
-      const e = document.createEvent('MouseEvents'),
+      // const blob = new Blob([this.transcript], {type: 'text/plain', endings:'native'});
+      // const e = document.createEvent('MouseEvents'),
+      //     a = document.createElement('a');
+      // a.download = "transcript.txt";
+      // a.href = window.URL.createObjectURL(blob);
+      // a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+      // e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      // a.dispatchEvent(e);
+
+      const elasticsearch_data = JSON.stringify(this.elasticsearch_data);
+        const blob = new Blob([elasticsearch_data], {type: 'text/plain'});
+        const e = document.createEvent('MouseEvents'),
           a = document.createElement('a');
-      a.download = "transcript.txt";
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      a.dispatchEvent(e);
+        a.download = "data.json";
+        a.href = window.URL.createObjectURL(blob);
+        a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        a.dispatchEvent(e);
     },
   }
 }

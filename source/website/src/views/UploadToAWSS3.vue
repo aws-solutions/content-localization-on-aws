@@ -780,7 +780,7 @@ export default {
         "celebrityRecognition",
         "faceDetection",
         "thumbnail",
-        "TranscribeVideo",
+        "Transcribe",
         "Translate",
         "Subtitles",
         "ComprehendKeyPhrases",

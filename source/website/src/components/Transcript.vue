@@ -82,8 +82,7 @@ export default {
               this.transcript = this.transcript.concat(data[i]._source.transcript + " ")
               this.noTranscript = false;
             }
-            //console.log("data")
-            //console.log(data)
+            
           }
         }
         this.isBusy = false
@@ -98,6 +97,7 @@ export default {
       a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
       e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
       a.dispatchEvent(e);
+
     },
   }
 }

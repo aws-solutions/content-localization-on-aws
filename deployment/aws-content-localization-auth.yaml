@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - user authentication infrastructure"
+Description: "Content Localization on AWS - user authentication infrastructure"
 
 Parameters:
   AdminEmail:
@@ -37,7 +37,7 @@ Resources:
               "#/stacks/stackinfo?stackId=",
               Ref: ParentStackName
           ]]
-          EmailSubject: "Welcome to AWS Content Localization"
+          EmailSubject: "Welcome to Content Localization on AWS"
       EmailConfiguration:
         EmailSendingAccount: 'COGNITO_DEFAULT'
       AutoVerifiedAttributes: ['email']
@@ -206,7 +206,7 @@ Resources:
   ContentAnalysisAdminGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      Description: 'User group for AWS Content Localization Admins'
+      Description: 'User group for Content Localization on AWS Admins'
       RoleArn: !GetAtt ContentLocalizationAdminRole.Arn
       UserPoolId: !Ref ContentAnalysisUserPool
       GroupName: !Sub "${AWS::StackName}-Admins"

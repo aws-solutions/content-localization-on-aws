@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - Opensearch Consumer stack"
+Description: "Content Localization on AWS - Opensearch Consumer stack"
 
 Parameters:
   NodeType:

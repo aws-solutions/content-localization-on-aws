@@ -47,11 +47,11 @@ For more installation options, see the [Advanced Installation](#advanced-install
 
 Translation analysis:
 
-![screenshot-analytics](doc/images/screenshot-analytics.png)
+![screenshot-analytics](doc/images/ig-view-subtitles.png)
 
 Workflow configuration:
 
-![screenshot-uploads](doc/images/screenshot-uploads.png)
+![screenshot-uploads](doc/images/ig-upload-configure.png)
 
 
 # COST
@@ -80,7 +80,7 @@ This application includes the following features:
 
 Users can enable or disable operators in the upload view shown below:
 
-![FIXME - add screenshot](doc/images/upload_view.png)
+![operators categories](doc/images/ig-operator-categories.png)
 
 
 # Search Capabilities:
@@ -121,7 +121,7 @@ aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
 
 Once you have built the demo app with the above commands, then it's time to deploy it. You have two options, depending on whether you want to deploy over an existing MIE stack or a new one:
 
-#### *Option 1:* Install AWS Content Localization over an existing MIE stack
+#### *Option 1:* Install Content Localization on AWS over an existing MIE stack
 
 Use these commands to deploy the demo app over an existing MIE stack:
 
@@ -132,7 +132,7 @@ TEMPLATE=[copy "With existing MIE deployment" link from output of build script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
 
-#### *Option 2:* Install AWS Content Localization with a new MIE stack
+#### *Option 2:* Install Content Localization on AWS with a new MIE stack
 
 Use these commands to deploy the demo app over a new MIE stack:
 
@@ -175,7 +175,7 @@ Validating data in Elasticsearch is easiest via the Kibana GUI. However, access 
 
 Click Submit to save the new policy. After your domain is finished updating, click on the link to open Kibana. Now click on the **Discover** link from the left-hand side menu. This should take you to a page for creating an index pattern if you haven't created one already. Create an `mie*` index pattern in the **Index pattern** textbox. This will include all the indices that were created in the MIE stack.
 
-<img src="docs/images/kibana-create-index.png" width=600>
+<img src="doc/images/kibana-create-index.png" width=600>
 
 Now you can use Kibana to validate that your operator's data is present in Elasticsearch. You can validate this by running a workflow where your operator is the only enabled operator, then searching for the asset_id produced by that workflow in Kibana.
 
@@ -198,28 +198,30 @@ Follow this procedure to create new user accounts:
 4.	From the left navigation pane, choose Users and Groups.
 5.	On the Users tab, choose Create user.
 
-<img src="docs/images/create_user01.png" width=600>
+![create user image](doc/images/create_user01.png)
+
 
 6.	In the Create user dialog box, enter a username and temporary password.
 7.	Choose Create user.
 8.	On the User Pool page, under the Username column, select the user you just created.
 
-<img src="docs/images/create_user02.png" width=600>
+<img src="doc/images/create_user02.png" width=600>
 
 9.	On the Users page, choose Add to group.
 10.	In the Add user dialog box, access the drop-down list and select the user group corresponding to your auth stack.
 
-<img src="docs/images/create_user03.png" width=400>
+<img src="doc/images/create_user03.png" width=400>
 
 The new user will now be able to use the web application.
 
 # Uninstall
 
-To uninstall the AWS Content Localization solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Localization solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
+To uninstall the Content Localization on AWS solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Analysis solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
+
 
 ### Option 1: Uninstall using the AWS Management Console
 1. Sign in to the AWS CloudFormation console.
-2. Select your AWS Content Localization stack.
+2. Select your Content Localization on AWS stack.
 3. Choose Delete.
 
 ### Option 2: Uninstall using AWS Command Line Interface

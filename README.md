@@ -37,9 +37,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/aws-content-localization/v1.0.7/aws-content-localization.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/aws-content-localization/v1.0.7/aws-content-localization.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/aws-content-localization/v1.0.7/aws-content-localization.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -218,6 +218,7 @@ The new user will now be able to use the web application.
 
 To uninstall the Content Localization on AWS solution, delete the CloudFormation stack, as described below. This will delete all the resources created for the Content Analysis solution except the `Dataplane` and the `DataplaneLogs` S3 buckets. These two buckets are retained when the solution stack is deleted in order to help prevent accidental data loss. You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to empty, then delete those S3 buckets after deleting the CloudFormation stack.
 
+
 ### Option 1: Uninstall using the AWS Management Console
 1. Sign in to the AWS CloudFormation console.
 2. Select your Content Localization on AWS stack.
@@ -229,7 +230,7 @@ aws cloudformation delete-stack --stack-name <installation-stack-name> --region 
 ```
 
 ### Deleting Content Localization S3 buckets
-AWS Content Analysis creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
+AWS Content Localization creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
 
 1. Sign in to the Amazon S3 console.
 2. Select the `Dataplane` bucket.

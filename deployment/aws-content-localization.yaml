@@ -56,7 +56,7 @@ Resources:
         MaxConcurrentWorkflows: 5
         EnableXrayTrace: Yes
         SendAnonymousData: !FindInMap [AnonymousData,SendAnonymousData,Data]
-        SolutionId: SO0042
+        SolutionId: SO0164
         SolutionVersion: "%%VERSION%%"
 
   # Deploy Opensearch

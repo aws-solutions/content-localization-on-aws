@@ -642,9 +642,11 @@ def process_webcaptions(asset, workflow, results, language_code):
     metadata_type = "webcaptions"+"_"+language_code
 
     webcaptions = metadata
-    webcaptions["workflow"] = workflow
+    webcaptions["Workflow"] = workflow
+    webcaptions["Operator"] = metadata_type
     es = connect_es(es_endpoint)
     index_document(es, asset, metadata_type, webcaptions)
+
 
 def process_transcribe(asset, workflow, results, type):
     metadata = json.loads(results)
@@ -673,7 +675,8 @@ def process_transcribe(asset, workflow, results, type):
 
         item["confidence"] = confidence
         item["content"] = content
-        item["workflow"] = workflow
+        item["Workflow"] = workflow
+        item["Operator"] = "transcribe"
 
         transcribe_items.append(item)
 

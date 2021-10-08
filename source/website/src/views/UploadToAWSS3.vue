@@ -43,16 +43,15 @@
         Upload and Run Workflow
       </b-button>
       <br>
-      <!-- TODO: add a drop-down option in this modal to choose update workflow, then update workflowConfigWithInput to include the appropriate workflow config -->
-      <!--      <b-button-->
-      <!--        :pressed="false"-->
-      <!--        size="sm"-->
-      <!--        variant="link"-->
-      <!--        class="text-decoration-none"-->
-      <!--        @click="showExecuteApi = true"-->
-      <!--      >-->
-      <!--        Show API request to run workflow-->
-      <!--      </b-button>-->
+        <b-button
+          :pressed="false"
+          size="sm"
+          variant="link"
+          class="text-decoration-none"
+          @click="showExecuteApi = true"
+        >
+          Show API request to run workflow
+        </b-button>
       <b-modal
         v-model="showExecuteApi"
         scrollable
@@ -719,7 +718,7 @@ export default {
     workflowConfigWithInput() {
       // This function is just used to pretty print the rest api
       // for workflow execution in a popup modal
-      let data = JSON.parse(JSON.stringify(this.workflow_config));
+      let data = JSON.parse(JSON.stringify(this.videoWorkflowConfig));
       data["Input"] = {
         "Media": {
           "Video": {

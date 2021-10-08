@@ -43,16 +43,15 @@
         Upload and Run Workflow
       </b-button>
       <br>
-      <!-- TODO: add a drop-down option in this modal to choose update workflow, then update workflowConfigWithInput to include the appropriate workflow config -->
-      <!--      <b-button-->
-      <!--        :pressed="false"-->
-      <!--        size="sm"-->
-      <!--        variant="link"-->
-      <!--        class="text-decoration-none"-->
-      <!--        @click="showExecuteApi = true"-->
-      <!--      >-->
-      <!--        Show API request to run workflow-->
-      <!--      </b-button>-->
+        <b-button
+          :pressed="false"
+          size="sm"
+          variant="link"
+          class="text-decoration-none"
+          @click="showExecuteApi = true"
+        >
+          Show API request to run workflow
+        </b-button>
       <b-modal
         v-model="showExecuteApi"
         scrollable
@@ -544,14 +543,7 @@ export default {
     // for the voerro-tags-input. The flipping is done in here as a computed property.
     translateLanguageTags() {
       return this.translateLanguages
-        .map(x => {return {"text": x.value, "value": x.text}})
-        //FIXME: filtering source languge from language tag list doesn't refresh
-        // tag picker in UI.  So, if source language is English to start, English is
-        // removed from the translation target languages.  When source language
-        // is changed to Spanish, Engish is added back to the tags on the Vue
-        // Translation component but Engish tag is still missing on the tag
-        // picker.  For now, leave the source language in the list.
-        //.filter(x => x.text !== this.sourceLanguageCode)
+        .map(x => {return {"text": x.value, "value": x.text}}).filter(x => x.text !== this.sourceLanguageCode)
     },
     ...mapState(['execution_history']),
     sourceLanguageCode() {
@@ -726,7 +718,7 @@ export default {
     workflowConfigWithInput() {
       // This function is just used to pretty print the rest api
       // for workflow execution in a popup modal
-      let data = JSON.parse(JSON.stringify(this.workflow_config));
+      let data = JSON.parse(JSON.stringify(this.videoWorkflowConfig));
       data["Input"] = {
         "Media": {
           "Video": {
@@ -780,7 +772,7 @@ export default {
         "celebrityRecognition",
         "faceDetection",
         "thumbnail",
-        "TranscribeVideo",
+        "Transcribe",
         "Translate",
         "Subtitles",
         "ComprehendKeyPhrases",

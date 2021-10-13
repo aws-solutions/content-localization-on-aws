@@ -404,8 +404,9 @@ export default {
       parallelData: [],
       parallelDataList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "en-US",
+      transcribeLanguage: "auto",
       transcribeLanguages: [
+        {text: '(auto detect)', value: 'auto'},
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
         {text: 'Chinese Mandarin', value: 'zh-CN'},
@@ -708,12 +709,12 @@ export default {
       const TransformText = {
         WebToSRTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         WebToVTTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         PollyWebCaptions: {

@@ -162,6 +162,14 @@ class WorkflowAPI:
 
         return create_vocabulary_response
 
+    def get_vocabulary_request(self, body):
+        headers = {"Content-Type": "application/json"}
+        print("POST /service/transcribe/get_vocabulary")
+        get_vocabulary_response = requests.post(
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+
+        return get_vocabulary_response
+
     def delete_terminology_request(self, body):
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/delete_terminology")
@@ -252,8 +260,30 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
     assert create_vocabulary_request.status_code == 200
 
     # wait for vocabulary to complete
-    # FIXME - should us a polling loop here
-    time.sleep(60)
+
+    processing = True
+
+    while processing:
+        body = {'vocabulary_name': testing_env_variables['SAMPLE_VOCABULARY_FILE']}
+        get_vocabulary_response = workflow_api.get_vocabulary_request(body)
+
+        assert get_vocabulary_response.status_code == 200
+
+        response = get_vocabulary_response.json()
+
+        json.dumps(response)
+        status = response["VocabularyState"]
+
+        allowed_statuses = ['PENDING','READY']
+
+        assert status in allowed_statuses
+
+        if status == "READY":
+            processing = False
+        else:
+            print('Sleeping for 30 seconds before retrying')
+            time.sleep(30)
+
     yield create_vocabulary_body
     delete_vocabulary_body = {
         "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
@@ -333,9 +363,6 @@ def workflow_config(all_operators):
         },
         "Mediaconvert": {
             "MediaType": "Video",
-            "Enabled": False
-        },
-        "GenericDataLookup": {
             "Enabled": False
         },
         "TranscribeVideo": {

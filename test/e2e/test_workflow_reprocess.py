@@ -48,14 +48,13 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
 
     # Analyze view
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
-    # Speech recognition
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
+    # Speech recognition is the default tab
     time.sleep(5)
                                    
     ####### SUBTITLES COMPONENT
     # Navigate to subtitles and wait for them to load
     #browser.find_elements_by_link_text("Subtitles")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
@@ -109,12 +108,11 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     # Reload the page and check for the edits
     # Analyze view
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
-    # Speech recognition
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
-    time.sleep(5)
+    # Speech recognition is the default tab
+    time.sleep(10)
     # Navigate to subtitles
     #browser.find_elements_by_link_text("Subtitles")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 

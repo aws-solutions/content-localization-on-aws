@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "(SO0164) Content Localization on AWS - Deploys the Content Localization on AWS Application"
+Description: "(SO0164) Content Localization on AWS Version %%VERSION%% - Deploys the Content Localization on AWS Application"
 
 Parameters:
   AdminEmail:

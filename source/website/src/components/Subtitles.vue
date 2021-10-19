@@ -83,7 +83,7 @@
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
-        <template v-slot:thead-top="data">
+        <template>
           <b-tr>
             <b-th colspan="1"></b-th>
             <b-th colspan="4" variant="secondary" class="text-center">
@@ -487,8 +487,8 @@ export default {
   methods: {
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
-        
-        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)  
+
+        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)
 
         let apiName = 'mieWorkflowApi'
         let path = 'service/transcribe/get_vocabulary'
@@ -500,10 +500,10 @@ export default {
             body: body,
             response: true
         };
-        
+
         try {
           let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-          
+
           if (response.status === 200) {
             console.log("Failed vocabulary details:")
             console.log(response.data)
@@ -519,7 +519,7 @@ export default {
               this.customVocabularyFailedReason = ''
             }
           }
-          
+
         } catch (error) {
           this.customVocabularyFailedReason = ""
           console.log(error)
@@ -732,7 +732,7 @@ export default {
       } catch (error) {
         console.log(error)
       }
-      
+
     },
     getAssetWorkflowStatus: async function() {
       let apiName = 'mieWorkflowApi'
@@ -773,7 +773,7 @@ export default {
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
-      
+
       } catch (error) {
         console.log("ERROR: Failed to get transcribe language");
         console.log(error)
@@ -807,7 +807,7 @@ export default {
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
             this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
-          }       
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to get vocabularies."
@@ -849,7 +849,7 @@ export default {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
-          }      
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to restart workflow."
@@ -915,7 +915,7 @@ export default {
           body: data,
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         //console.log("Media assigned asset id: " + asset_id);
@@ -1068,7 +1068,7 @@ export default {
             'Content-Type': 'application/json'
           },
           body: {
-            "S3Bucket": this.DATAPLANE_BUCKET, 
+            "S3Bucket": this.DATAPLANE_BUCKET,
             "S3Key":this.customVocabularyName
             },
           response: true
@@ -1128,11 +1128,11 @@ export default {
       console.log("this.webCaptions")
       console.log(JSON.stringify(this.webCaptions))
       let data={
-        "OperatorName": operator_name, 
-        "Results": webCaptions, 
+        "OperatorName": operator_name,
+        "Results": webCaptions,
         "WorkflowId": this.workflow_id
       }
-      
+
       let apiName = 'mieDataplaneApi'
       let path = 'metadata/' + this.asset_id
       let requestOpts = {

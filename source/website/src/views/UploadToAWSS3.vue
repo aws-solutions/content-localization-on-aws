@@ -43,15 +43,15 @@
         Upload and Run Workflow
       </b-button>
       <br>
-        <b-button
-          :pressed="false"
-          size="sm"
-          variant="link"
-          class="text-decoration-none"
-          @click="showExecuteApi = true"
-        >
-          Show API request to run workflow
-        </b-button>
+      <b-button
+        :pressed="false"
+        size="sm"
+        variant="link"
+        class="text-decoration-none"
+        @click="showExecuteApi = true"
+      >
+        Show API request to run workflow
+      </b-button>
       <b-modal
         v-model="showExecuteApi"
         scrollable
@@ -171,9 +171,9 @@
                   <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <b-form-select
-                        v-model="customTerminology"
-                        :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="customTerminology"
+                      :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
                   </div>
@@ -182,9 +182,9 @@
                   <div v-else-if="sourceLanguageCode === 'auto' && customTerminologyList.length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <b-form-select
-                        v-model="customTerminology"
-                        :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="customTerminology"
+                      :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
                   </div>
@@ -205,9 +205,9 @@
                   <div v-if="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
                     <b-form-select
-                        v-model="parallelData"
-                        :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="parallelData"
+                      :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
                   </div>
@@ -216,9 +216,9 @@
                   <div v-else-if="sourceLanguageCode === 'auto' && parallelDataList.length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
                     <b-form-select
-                        v-model="parallelData"
-                        :options="parallelDataList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="parallelData"
+                      :options="parallelDataList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
                   </div>

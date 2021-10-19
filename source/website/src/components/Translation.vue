@@ -200,7 +200,7 @@
           small
           show-empty
         >
-          <template #empty="scope">
+          <template>
             No data
           </template>
           <!-- Here we define the cell contents for the terminology table: -->

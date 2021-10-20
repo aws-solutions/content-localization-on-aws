@@ -67,15 +67,17 @@
           }]
         },
         options: {
-          legend: {
-            display: false
-          },
-          title: {
-            display: true,
-            text: ''
-          },
-          tooltips: {
-            enabled: false
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: true,
+              text: ''
+            },
+            tooltips: {
+              enabled: false
+            },
           },
           responsive: true,
           maintainAspectRatio: false,
@@ -175,7 +177,7 @@
         const lengthOfVideo = this.duration;
         const data = this.chart_tuples;
         const ctx = document.getElementById('lineChart');
-        this.chartConfig.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
+        this.chartConfig.options.plugins.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
         if (this.chart === undefined) {
           this.chart = new Chart(ctx, {
             type: this.chartConfig.type,
@@ -187,7 +189,7 @@
             options: this.chartConfig.options,
           });
         } else {
-          this.chart.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
+          this.chart.options.plugins.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
           if (lengthOfVideo) {
             this.chart.options.scales.xAxes[0].ticks.max = lengthOfVideo*1000;
           }

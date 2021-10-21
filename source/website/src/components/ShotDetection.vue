@@ -20,7 +20,7 @@
         :fields="fields"
         :sort-by="sortBy"
       >
-        <template v-slot:cell(Index)="data">
+        <template #cell(Index)="data">
           <b-button variant="link" @click="setPlayerTime(data.item.EndTimestamp, data.item.StartTimestamp)">
             {{ data.item.Index }}
           </b-button>

@@ -110,7 +110,7 @@
                       value-field="name"
                       disabled-field="notEnabled"
                     >
-                      <template v-slot:first>
+                      <template #first>
                         <b-form-select-option :value="null" disabled>
                           (optional)
                         </b-form-select-option>
@@ -286,7 +286,7 @@
         fixed
         :items="executed_assets"
       >
-        <template v-slot:cell(workflow_status)="data">
+        <template #cell(workflow_status)="data">
           <a v-if="data.item.workflow_status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.workflow_status }}</a>
           <div v-if="data.item.workflow_status === 'Queued'">
             {{ data.item.workflow_status }}

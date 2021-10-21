@@ -1,6 +1,6 @@
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
-Content Analysis on AWS
+Content Localization on AWS
 
 **********************
 THIRD PARTY COMPONENTS
@@ -47,4 +47,3 @@ vuex under the Massachusetts Institute of Technology license
 vuex-persistedstate under the Massachusetts Institute of Technology license
 wavesurfer.js under the Creative Commons Attribution 3.0 Unported License
 webdriver_manager under the Apache License Version 2.0
-

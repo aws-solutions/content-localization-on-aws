@@ -15,7 +15,7 @@
     "bad-words": "^3.0.4",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
-    "chart.js": "^3.5.1",
+    "chart.js": "^2.9.4",
     "diff": "^5.0.0",
     "dropzone": "^5.9.3",
     "jquery": "^3.6.0",

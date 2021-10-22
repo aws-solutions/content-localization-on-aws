@@ -39,7 +39,6 @@
       },
       player: function() {
         this.getDuration();
-        this.getTimeUpdate();
         this.renderLineChart();
       },
     },
@@ -204,6 +203,9 @@
         var canvas_overlay = document.getElementById('verticalLineCanvas');
         canvas_overlay.width=this.chart.width;
         canvas_overlay.height=this.chart.height;
+        // Call getTimeUpdate to initialize the red player time marker
+        // over the line chart.
+        this.getTimeUpdate()
       },
       drawVerticleLine(position) {
         var canvas_overlay = document.getElementById('verticalLineCanvas');

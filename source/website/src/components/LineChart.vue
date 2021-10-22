@@ -38,7 +38,6 @@
         this.renderLineChart();
       },
       player: function() {
-        this.getDuration();
         this.renderLineChart();
       },
     },
@@ -142,19 +141,11 @@
           if (event.offsetX < chart_left) {
             return
           }
-          if (this.duration > 0) {
+          if (this.player.duration() > 0) {
             // Calculate click position as a percentage of chart width, to 1/10th precision.
             const percentage = Math.round((event.offsetX - chart_left) / chart_width * 1000) / 10;
-            this.player.currentTime(this.duration * percentage / 100)
+            this.player.currentTime(this.player.duration() * percentage / 100)
           }
-        }
-      },
-      getDuration() {
-        // Get the duration for the video player source
-        if (this.player) {
-          this.player.on('loadedmetadata', function () {
-            this.duration = this.player.duration();
-          }.bind(this));
         }
       },
       getTimeUpdate() {
@@ -171,7 +162,7 @@
         }
       },
       renderLineChart() {
-        const lengthOfVideo = this.duration;
+        const lengthOfVideo = this.player.duration();
         const data = this.chart_tuples;
         const ctx = document.getElementById('lineChart');
         this.chartConfig.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
@@ -187,18 +178,19 @@
           });
         } else {
           this.chart.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
-          if (lengthOfVideo) {
-            this.chart.options.scales.xAxes[0].ticks.max = lengthOfVideo*1000;
-          }
-          if (lengthOfVideo > 3600) {
-            this.chart.options.scales.xAxes[0].scaleLabel.labelString = "Time (hh:mm:ss)";
-          }
-
           this.chart.data.datasets[0].data = null;
           this.chart.data.datasets[0].data = data;
           this.chart.lineAtIndex = .25;
-          this.chart.update();
         }
+        if (lengthOfVideo) {
+          this.chart.options.scales.xAxes[0].ticks.max = lengthOfVideo*1000;
+        }
+        if (lengthOfVideo > 3600) {
+          this.chart.options.scales.xAxes[0].scaleLabel.labelString = "Time (hh:mm:ss)";
+        }
+        // render the above updates to xAxes
+        this.chart.update();
+
         // Place canvas over line chart
         var canvas_overlay = document.getElementById('verticalLineCanvas');
         canvas_overlay.width=this.chart.width;

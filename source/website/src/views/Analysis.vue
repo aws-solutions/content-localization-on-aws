@@ -381,6 +381,7 @@
           }
 
         } catch (error) {
+          this.videoOptions.captions = []
           console.log(error)
         }
       },

@@ -1,21 +1,18 @@
 <template>
   <div>
-    <div v-if="noTranscript === true">
-      No transcript found for this asset
-    </div>
     <b-alert
-      v-model="showSaveNotification"
-      variant="success"
-      dismissible
-      fade
+        v-model="showSaveNotification"
+        variant="success"
+        dismissible
+        fade
     >
       {{ saveNotificationMessage }}
     </b-alert>
     <b-alert
-      v-model="showVocabularyNotification"
-      :variant="vocabularyNotificationStatus"
-      dismissible
-      fade
+        v-model="showVocabularyNotification"
+        :variant="vocabularyNotificationStatus"
+        dismissible
+        fade
     >
       {{ vocabularyNotificationMessage }}
     </b-alert>
@@ -25,21 +22,21 @@
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
             <b-form-radio-group
-              id="custom-vocab-selection"
-              v-model="customVocabularySelected"
-              name="custom-vocab-list"
-              :options="customVocabularyList"
-              text-field="name_and_status"
-              value-field="name"
-              disabled-field="notEnabled"
-              stacked
+                id="custom-vocab-selection"
+                v-model="customVocabularySelected"
+                name="custom-vocab-list"
+                :options="customVocabularyList"
+                text-field="name_and_status"
+                value-field="name"
+                disabled-field="notEnabled"
+                stacked
             >
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
             Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-              Delete
-            </b-button>
+            Delete
+          </b-button>
           </div>
         </b-col>
         <b-col>
@@ -52,9 +49,9 @@
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
           <b-form-select
-            v-model="vocabulary_language_code"
-            :options="transcribeLanguages"
-            size="sm"
+              v-model="vocabulary_language_code"
+              :options="transcribeLanguages"
+              size="sm"
           />
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
@@ -73,13 +70,13 @@
         </div>
       </div>
       <b-table
-        :items="customVocabularyUnion"
-        :fields="customVocabularyFields"
-        selectable
-        select-mode="single"
-        fixed responsive="sm"
-        bordered
-        small
+          :items="customVocabularyUnion"
+          :fields="customVocabularyFields"
+          selectable
+          select-mode="single"
+          fixed responsive="sm"
+          bordered
+          small
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
@@ -184,15 +181,17 @@ to highlight the fields in the custom vocab schema. -->
     <b-modal ref="delete-vocab-modal" ok-title="Confirm" ok-variant="danger" title="Delete Vocabulary?" @ok="deleteVocabularyRequest(customVocabularyName=customVocabularySelected)">
       <p>Are you sure you want to permanently delete the custom vocabulary <b>{{ customVocabularySelected }}</b>?</p>
     </b-modal>
-
     <div v-if="isBusy">
       <b-spinner
-        variant="secondary"
-        label="Loading..."
+          variant="secondary"
+          label="Loading..."
       />
       <p class="text-muted">
         (Loading...)
       </p>
+    </div>
+    <div v-else-if="noSubtitles === true">
+      No transcript found for this asset
     </div>
     <div v-else>
       <div v-if="isProfane">
@@ -342,7 +341,7 @@ export default {
       isBusy: false,
       isSaving: false,
       operator: "transcript",
-      noTranscript: false,
+      noSubtitles: false,
       transcribeLanguages: [
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
@@ -469,6 +468,7 @@ export default {
     }
   },
   deactivated: function () {
+    this.noSubtitles = false;
     console.log('deactivated component:', this.operator)
   },
   activated: function () {
@@ -487,8 +487,8 @@ export default {
   methods: {
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
-        
-        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)  
+
+        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)
 
         let apiName = 'mieWorkflowApi'
         let path = 'service/transcribe/get_vocabulary'
@@ -500,10 +500,10 @@ export default {
             body: body,
             response: true
         };
-        
+
         try {
           let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-          
+
           if (response.status === 200) {
             console.log("Failed vocabulary details:")
             console.log(response.data)
@@ -519,7 +519,7 @@ export default {
               this.customVocabularyFailedReason = ''
             }
           }
-          
+
         } catch (error) {
           this.customVocabularyFailedReason = ""
           console.log(error)
@@ -732,7 +732,7 @@ export default {
       } catch (error) {
         console.log(error)
       }
-      
+
     },
     getAssetWorkflowStatus: async function() {
       let apiName = 'mieWorkflowApi'
@@ -773,7 +773,7 @@ export default {
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
-      
+
       } catch (error) {
         console.log("ERROR: Failed to get transcribe language");
         console.log(error)
@@ -807,7 +807,7 @@ export default {
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
             this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
-          }       
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to get vocabularies."
@@ -849,7 +849,7 @@ export default {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
-          }      
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to restart workflow."
@@ -915,7 +915,7 @@ export default {
           body: data,
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         //console.log("Media assigned asset id: " + asset_id);
@@ -1068,7 +1068,7 @@ export default {
             'Content-Type': 'application/json'
           },
           body: {
-            "S3Bucket": this.DATAPLANE_BUCKET, 
+            "S3Bucket": this.DATAPLANE_BUCKET,
             "S3Key":this.customVocabularyName
             },
           response: true
@@ -1128,11 +1128,11 @@ export default {
       console.log("this.webCaptions")
       console.log(JSON.stringify(this.webCaptions))
       let data={
-        "OperatorName": operator_name, 
-        "Results": webCaptions, 
+        "OperatorName": operator_name,
+        "Results": webCaptions,
         "WorkflowId": this.workflow_id
       }
-      
+
       let apiName = 'mieDataplaneApi'
       let path = 'metadata/' + this.asset_id
       let requestOpts = {
@@ -1163,7 +1163,6 @@ export default {
           console.log("Response: " + response.status);
         }
       } catch (error) {
-        this.showDataplaneAlert = true
         console.log(error)
       }
     },
@@ -1228,7 +1227,7 @@ export default {
             console.log(response.data.Message);
             console.log("Response: " + response.status);
             this.isBusy = false
-            this.noTranscript = true
+            this.noSubtitles = true
           }
           if (response.data.results) {
             cursor = response.data.cursor;
@@ -1257,7 +1256,8 @@ export default {
             this.videoOptions.captions = []
           }
       } catch (error) {
-        this.showDataplaneAlert = true
+        this.noSubtitles = true
+        this.isBusy = false
         console.log(error)
       }
     },

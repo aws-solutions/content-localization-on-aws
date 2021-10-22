@@ -407,11 +407,12 @@ export default {
         vm.file = null
       }
     },
-    setAWSSigningURL(location) {
-      if (this.isS3) {
-        this.awss3.signingURL = location;
-      }
-    }
+    // Commented out to resolve lint warning:
+    // setAWSSigningURL(location) {
+    //   if (this.isS3) {
+    //     this.awss3.signingURL = location;
+    //   }
+    // }
   }
 }
 

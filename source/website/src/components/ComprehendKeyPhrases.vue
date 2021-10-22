@@ -29,7 +29,7 @@
         :fields="fields"
         :sort-by="sortBy"
       >
-        <template v-slot:cell(Confidence)="data">
+        <template #cell(Confidence)="data">
           {{ (data.item.Confidence * 1).toFixed(2) }}
         </template>
       </b-table>

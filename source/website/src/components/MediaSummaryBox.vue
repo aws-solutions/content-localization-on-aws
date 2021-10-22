@@ -6,11 +6,11 @@
     >
       <b-col>
         <label>
-          <router-link :to="{ name: 'upload', query: { asset: this.$route.params.asset_id, mediaType: mediaType, s3key: s3Uri}}">Perform Additional Analysis</router-link>
+          <router-link :to="{ name: 'upload', query: { asset: $route.params.asset_id, mediaType: mediaType, s3key: s3Uri}}">Perform Additional Analysis</router-link>
         </label>
         <br>
         <label>Asset ID:</label>
-        {{ this.$route.params.asset_id }}
+        {{ $route.params.asset_id }}
         <br>
         <label>Filename:&nbsp;</label>
         <a

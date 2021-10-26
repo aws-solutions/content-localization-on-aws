@@ -234,7 +234,7 @@ jobs:
         run: |
           DATETIME=$(date '+%s')
           echo "DIST_OUTPUT_BUCKET=micl-dev" >> $GITHUB_ENV
-          echo "TEMPLATE_OUTPUT_BUCKET=aws-content-localization-$DATETIME" >> $GITHUB_ENV
+          echo "TEMPLATE_OUTPUT_BUCKET=content-localization-on-aws-$DATETIME" >> $GITHUB_ENV
       - name: Run build script
         run: |
           cd deployment

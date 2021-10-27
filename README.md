@@ -36,9 +36,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -111,7 +111,7 @@ git clone https://github.com/aws-samples/aws-media-insights-content-localization
 cd aws-media-insights-content-localization
 cd deployment
 DATETIME=$(date '+%s')
-DIST_OUTPUT_BUCKET=aws-content-localization--frontend-$DATETIME
+DIST_OUTPUT_BUCKET=content-localization-on-aws--frontend-$DATETIME
 aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
 aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
 ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
@@ -196,7 +196,7 @@ The front-end Javascript components in this application use the [Amplify Framewo
 
 ## User account management
 
-All the necessary Cognito resources for this solution are configured in the [deployment/aws-content-localization-auth.yaml](deployment/aws-content-localization-auth.yaml) CloudFormation template and it includes an initial administration account. A temporary password for this account will be sent to the email address specified during the CloudFormation deployment. This administration account can be used to create additional user accounts for the application. 
+All the necessary Cognito resources for this solution are configured in the [deployment/content-localization-on-aws-auth.yaml](deployment/content-localization-on-aws-auth.yaml) CloudFormation template and it includes an initial administration account. A temporary password for this account will be sent to the email address specified during the CloudFormation deployment. This administration account can be used to create additional user accounts for the application. 
 
 Follow this procedure to create new user accounts:
 
@@ -279,7 +279,7 @@ Example data:
 }
 ```
 
-To opt out of this reporting, edit [deployment/aws-content-localization.yaml](deployment/aws-content-localization.yaml) and change `AnonymousUsage` in the `Mappings` section from:
+To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymousUsage` in the `Mappings` section from:
 
 ```
 "Send" : {

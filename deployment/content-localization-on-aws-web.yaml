@@ -21,8 +21,8 @@ Mappings:
   SourceCode:
     General:
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
-      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
-      WebsitePrefix: "aws-content-localization/%%VERSION%%/website"
+      CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
+      WebsitePrefix: "content-localization-on-aws/%%VERSION%%/website"
 
 Resources:
   # Web application resources

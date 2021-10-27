@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "(SO0164) Content Localization on AWS - Deploys the Content Localization on AWS Application"
+Description: "(SO0164) Content Localization on AWS Version %%VERSION%% - Deploys the Content Localization on AWS Application"
 
 Parameters:
   AdminEmail:
@@ -28,9 +28,9 @@ Mappings:
   Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
-      TemplateKeyPrefix: "aws-content-localization/%%VERSION%%"
+      TemplateKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
-      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
+      CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       Version: "%%VERSION%%"
   AnonymousData:
     SendAnonymousData:
@@ -76,7 +76,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-opensearch.template"
+          - "/content-localization-on-aws-opensearch.template"
       Parameters:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
@@ -99,7 +99,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-auth.template"
+          - "/content-localization-on-aws-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
         WorkflowApiId: !GetAtt MieStack.Outputs.WorkflowApiRestID
@@ -123,7 +123,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-web.template"
+          - "/content-localization-on-aws-web.template"
       Parameters:
         DataplaneEndpoint: !GetAtt MieStack.Outputs.DataplaneApiEndpoint
         WorkflowEndpoint: !GetAtt MieStack.Outputs.WorkflowApiEndpoint
@@ -150,7 +150,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-video-workflow.template"
+          - "/content-localization-on-aws-video-workflow.template"
       Parameters:
         WorkflowCustomResourceArn:
           Fn::GetAtt:

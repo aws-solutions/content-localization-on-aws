@@ -202,12 +202,12 @@ echo "CloudFormation Templates"
 echo "------------------------------------------------------------------------------"
 echo ""
 echo "Preparing template files:"
-cp "$build_dir/aws-content-localization-auth.yaml" "$global_dist_dir/aws-content-localization-auth.template"
-cp "$build_dir/aws-content-localization-opensearch.yaml" "$global_dist_dir/aws-content-localization-opensearch.template"
-cp "$build_dir/aws-content-localization-web.yaml" "$global_dist_dir/aws-content-localization-web.template"
-cp "$build_dir/aws-content-localization-use-existing-mie-stack.yaml" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
-cp "$build_dir/aws-content-localization-video-workflow.yaml" "$global_dist_dir/aws-content-localization-video-workflow.template"
-cp "$build_dir/aws-content-localization.yaml" "$global_dist_dir/aws-content-localization.template"
+cp "$build_dir/content-localization-on-aws-auth.yaml" "$global_dist_dir/content-localization-on-aws-auth.template"
+cp "$build_dir/content-localization-on-aws-opensearch.yaml" "$global_dist_dir/content-localization-on-aws-opensearch.template"
+cp "$build_dir/content-localization-on-aws-web.yaml" "$global_dist_dir/content-localization-on-aws-web.template"
+cp "$build_dir/content-localization-on-aws-use-existing-mie-stack.yaml" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
+cp "$build_dir/content-localization-on-aws-video-workflow.yaml" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
+cp "$build_dir/content-localization-on-aws.yaml" "$global_dist_dir/content-localization-on-aws.template"
 find "$global_dist_dir"
 echo "Updating template source bucket in template files with '$global_bucket'"
 echo "Updating code source bucket in template files with '$regional_bucket'"
@@ -216,24 +216,24 @@ new_global_bucket="s/%%GLOBAL_BUCKET_NAME%%/$global_bucket/g"
 new_regional_bucket="s/%%REGIONAL_BUCKET_NAME%%/$regional_bucket/g"
 new_version="s/%%VERSION%%/$version/g"
 # Update templates in place. Copy originals to [filename].orig
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-auth.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-auth.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-auth.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-opensearch.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-opensearch.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-web.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-web.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-web.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-use-existing-mie-stack.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization-video-workflow.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization-video-workflow.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization-video-workflow.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/aws-content-localization.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/aws-content-localization.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/aws-content-localization.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-auth.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-auth.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-auth.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-opensearch.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-opensearch.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-opensearch.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-web.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-web.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-web.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
+sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws.template"
+sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws.template"
+sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws.template"
 
 
 echo "------------------------------------------------------------------------------"
@@ -287,7 +287,7 @@ echo "--------------------------------------------------------------------------
 # order to use the least privileges for deploying the webapp.
 #
 # Details: The website_helper.py Lambda function needs this list in order to copy
-# files from $regional_dist_dir/website to the ContentAnalysisWebsiteBucket (see aws-content-localization-web.yaml).  Since the manifest file is computed during build
+# files from $regional_dist_dir/website to the ContentAnalysisWebsiteBucket (see content-localization-on-aws-web.yaml).  Since the manifest file is computed during build
 # time, the website_helper.py Lambda can use that to figure out what files to copy
 # instead of doing a list bucket operation, which would require ListBucket permission.
 # Furthermore, the S3 bucket used to host AWS solutions (s3://solutions-reference)
@@ -343,8 +343,8 @@ cp "./dist/anonymous-data-logger.zip" "$regional_dist_dir/anonymous-data-logger.
 
 # Skip copy dist to S3 if building for solution builder because
 # that pipeline takes care of copying the dist in another script.
-if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solutions-test-reference" ]; then
-
+if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solutions-test-reference" ] &&  [ "$global_bucket" != "solutions-features-reference" ]; then
+  
   echo "------------------------------------------------------------------------------"
   echo "Copy dist to S3"
   echo "------------------------------------------------------------------------------"
@@ -370,11 +370,11 @@ if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solut
   # Copy deployment assets to distribution buckets
   cd "$build_dir"/ || exit 1
   echo "Copying the prepared distribution to:"
-  echo "s3://$global_bucket/aws-content-localization/$version/"
-  echo "s3://${regional_bucket}-${region}/aws-content-localization/$version/"
+  echo "s3://$global_bucket/content-localization-on-aws/$version/"
+  echo "s3://${regional_bucket}-${region}/content-localization-on-aws/$version/"
   set -x
-  aws s3 sync $global_dist_dir s3://$global_bucket/aws-content-localization/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
-  aws s3 sync $regional_dist_dir s3://${regional_bucket}-${region}/aws-content-localization/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
+  aws s3 sync $global_dist_dir s3://$global_bucket/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
+  aws s3 sync $regional_dist_dir s3://${regional_bucket}-${region}/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
   set +x
 
   echo "------------------------------------------------------------------------------"
@@ -385,12 +385,12 @@ if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solut
   echo "Template to deploy:"
   echo ""
   echo "With existing MIE deployment:"
-  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization-use-existing-mie-stack.template"'"
+  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws-use-existing-mie-stack.template"'"
   echo "Without existing MIE deployment:"
-  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization.template"'"
+  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws.template"'"
 
-  echo "https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization.template" > template_url_that_deploys_mie_as_nested_stack.txt
-  echo "https://"$global_bucket"."$s3domain"/aws-content-localization/"$version"/aws-content-localization-use-existing-mie-stack.template" > template_url_that_uses_an_existing_mie_stack.txt
+  echo "https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws.template" > template_url_that_deploys_mie_as_nested_stack.txt
+  echo "https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws-use-existing-mie-stack.template" > template_url_that_uses_an_existing_mie_stack.txt
 
 fi
 

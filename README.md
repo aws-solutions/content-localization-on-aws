@@ -11,7 +11,6 @@ Localization is the process of taking video content that was created for audienc
 Content Localization workflows can make use of advanced customization features provided by Amazon Transcribe and Amazon Translate:
 
 * [Amazon Transcribe Custom Vocabulary](https://docs.aws.amazon.com/transcribe/latest/dg/how-vocabulary.html) - you provide Amazon Transcribe with a list of terms that are specific to your content and how you want the terms to be displayed in transcipts.
-* [Amazon Transcribe Custom Language Models](https://docs.aws.amazon.com/transcribe/latest/dg/custom-language-models.html) - allows you to leverage pre-existing data to build a custom speech engine tailored for your transcription use case. It capitalizes on text data you already possess, such as website content, instruction manuals, and other assets that represent your domain of operation. 
 * [Amazon Translate Custom Terminologies](https://docs.aws.amazon.com/translate/latest/dg/how-custom-terminology.html)- you provide Amazon Translate with a list of terms or phrases in the source language content and specify how you want them to appear in the translated result.
 * [Amazon Translate Parallel Data for Active Custom Translation](https://docs.aws.amazon.com/translate/latest/dg/customizing-translations-parallel-data.html) - you provide Amazon Translate with a list of parallel phrases: the source language and the pharase tranlated the way you want it.  The Parallel Data customizes Amazon Translate models so they create more contectual translations based on the sample you provide.
 
@@ -37,9 +36,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/aws-content-localization/v0.1.0/aws-content-localization.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -112,7 +111,7 @@ git clone https://github.com/aws-samples/aws-media-insights-content-localization
 cd aws-media-insights-content-localization
 cd deployment
 DATETIME=$(date '+%s')
-DIST_OUTPUT_BUCKET=aws-content-localization--frontend-$DATETIME
+DIST_OUTPUT_BUCKET=content-localization-on-aws--frontend-$DATETIME
 aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
 aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
 ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
@@ -197,7 +196,7 @@ The front-end Javascript components in this application use the [Amplify Framewo
 
 ## User account management
 
-All the necessary Cognito resources for this solution are configured in the [deployment/aws-content-localization-auth.yaml](deployment/aws-content-localization-auth.yaml) CloudFormation template and it includes an initial administration account. A temporary password for this account will be sent to the email address specified during the CloudFormation deployment. This administration account can be used to create additional user accounts for the application. 
+All the necessary Cognito resources for this solution are configured in the [deployment/content-localization-on-aws-auth.yaml](deployment/content-localization-on-aws-auth.yaml) CloudFormation template and it includes an initial administration account. A temporary password for this account will be sent to the email address specified during the CloudFormation deployment. This administration account can be used to create additional user accounts for the application. 
 
 Follow this procedure to create new user accounts:
 
@@ -256,7 +255,9 @@ aws s3 rb s3://<bucket-name> --force
 
 ## Collection of operational metrics
 
-This solution includes an option to send anonymous operational metrics to AWS. Solution developers use this data to help improve the quality of the solution. When enabled, the following information is collected and sent to AWS:
+This solution collects anonymous operational metrics to help AWS improve the quality of features of the solution. For more information, including how to disable this capability, please see the [implementation guide](_https://docs.aws.amazon.com/solutions/latest/<content-localization-on-aws>/collection-of-operational-metrics.html_).
+
+When enabled, the following information is collected and sent to AWS:
 
 * **Solution ID:** the AWS solution ID (`SO0164`)
 * **Unique ID (UUID):** a randomly generated, unique identifier for each deployment
@@ -278,7 +279,7 @@ Example data:
 }
 ```
 
-To opt out of this reporting, edit [deployment/aws-content-localization.yaml](deployment/aws-content-localization.yaml) and change `AnonymousUsage` in the `Mappings` section from:
+To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymousUsage` in the `Mappings` section from:
 
 ```
 "Send" : {
@@ -322,5 +323,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 
 
-Architecture
 

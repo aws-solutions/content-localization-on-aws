@@ -81,24 +81,24 @@
                     :current-page="currentPage"
                     :per-page="perPage"
                   >
-                    <template v-slot:cell(Thumbnail)="data">
+                    <template #cell(Thumbnail)="data">
                       <VideoThumbnail
                         :thumbnail-i-d="data.item.thumbnailID"
                         :signed-url="data.item.signedUrl"
                       />
                     </template>
-                    <template v-slot:cell(Created)="data">
+                    <template #cell(Created)="data">
                       {{ data.item.Created.toLocaleDateString() }}<br>
                       {{ data.item.Created.toLocaleTimeString() }}
                     </template>
-                    <template v-slot:cell(status)="data">
+                    <template #cell(status)="data">
                       <!-- open link in new tab -->
                       <a v-if="data.item.status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
                       <div v-if="data.item.status === 'Queued'">
                         {{ data.item.status }}
                       </div>
                     </template>
-                    <template v-slot:cell(Actions)="data">
+                    <template #cell(Actions)="data">
                       <b-link
                         :href="(`/analysis/${data.item.asset_id}`)"
                       >

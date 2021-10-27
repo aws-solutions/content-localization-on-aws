@@ -417,7 +417,6 @@ export default {
       id: 0,
       transcript: "",
       isSaving: false,
-      noTranscript: false
     }
   },
   computed: {
@@ -558,6 +557,7 @@ export default {
   deactivated: function () {
     console.log('deactivated component:', this.operator)
     this.selected_lang_code = ""
+    this.noTranslation = false
     clearInterval(this.workflow_status_polling)
   },
   activated: function () {
@@ -1447,7 +1447,6 @@ export default {
             console.log(response.data.Message);
             console.log("Response: " + response.status);
             this.isBusy = false
-            this.noTranscript = true
           }
           console.log("response.data")
           console.log(response.data)

@@ -65,7 +65,8 @@ def stack_resources(testing_env_variables):
     outputs = response['Stacks'][0]['Outputs']
 
     for output in outputs:
-        resources[output["OutputKey"]] = output["OutputValue"]
+        if (output["OutputKey"] != 'TestStack'):
+            resources[output["OutputKey"]] = output["OutputValue"]
 
     assert "WorkflowApiEndpoint" in resources
     assert "DataplaneApiEndpoint" in resources
@@ -78,11 +79,12 @@ def stack_resources(testing_env_variables):
     response = client.describe_stacks(
         StackName=resources["OperatorLibraryStack"])
     outputs = response['Stacks'][0]['Outputs']
+
     for output in outputs:
         # These tests don't depend on TestStack.  They should pass whether it is deployed or not
-        if (output["OutputValue"] != 'TestStack'):
+        
             resources[output["OutputKey"]] = output["OutputValue"]
-
+    
     expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
     
     assert set(resources.keys()) == set(expected_resources)

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - Opensearch Consumer stack"
+Description: "Content Localization on AWS - Opensearch Consumer stack"
 
 Parameters:
   NodeType:
@@ -30,7 +30,7 @@ Mappings:
   SourceCode:
     General:
       RegionalS3Bucket: '%%REGIONAL_BUCKET_NAME%%'
-      KeyPrefix: "aws-content-localization/%%VERSION%%"
+      KeyPrefix: "content-localization-on-aws/%%VERSION%%"
 
 Resources:
   # Opensearch cluster

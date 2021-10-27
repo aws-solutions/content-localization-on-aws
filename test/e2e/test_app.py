@@ -93,17 +93,17 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
     # Configure translate language to en-ES
     
-    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div[2]/div[1]/p/input")
+    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
     assert translate_languages_box.get_attribute("textContent") == ""
     # Select spanish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[2]/p/span[44]").click() 
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[43]").click() 
 
     # Check that spanish badge is in the input box
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
 
     # click the Swedish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[2]/p/span[45]").click()
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[2]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click()
+    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
     
      ####### Collection View
      # Navigate to Collection view
@@ -120,14 +120,11 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     #Analyze
     #browser.find_element_by_link_text("Analyze").click()
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
-    time.sleep(2)
-    #Speech Recognition
-    #browser.find_element_by_link_text("Speech Recognition").click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
-    time.sleep(2)
+    time.sleep(5)
+    #Speech Recognition is the default tab
     #Transcript
     #browser.find_element_by_link_text("Transcript").click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[1]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[1]/a").click()
     time.sleep(8)
 
     # Check the text for some keywords from the test video
@@ -160,7 +157,7 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     ####### SUBTITLES COMPONENT
     # Navigate to subtitles
     #browser.find_elements_by_link_text("Subtitles")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
@@ -212,7 +209,7 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
      ####### TRANSLATE COMPONENT
      # Navigate to translation
     #browser.find_elements_by_link_text("Translation")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[3]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[3]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 

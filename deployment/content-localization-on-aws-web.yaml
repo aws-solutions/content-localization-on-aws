@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - Deploys the AWS Content Localization website resources"
+Description: "Content Localization on AWS - Deploys the Content Localization on AWS website resources"
 
 Parameters:
   DataplaneEndpoint:
@@ -21,8 +21,8 @@ Mappings:
   SourceCode:
     General:
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
-      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
-      WebsitePrefix: "aws-content-localization/%%VERSION%%/website"
+      CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
+      WebsitePrefix: "content-localization-on-aws/%%VERSION%%/website"
 
 Resources:
   # Web application resources

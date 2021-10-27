@@ -514,14 +514,15 @@ export default {
 
                     // AJAX search
                     if (this.typeaheadUrl.length > 0) {
-                        this.existingTags.splice();
+                        // Commented out to resolve lint warning:
+                        // this.existingTags.slice();
                         const xhttp = new XMLHttpRequest();
                         const that = this;
 
                         xhttp.onreadystatechange = function () {
                             if (this.readyState == 4 && this.status == 200) {
-                                that.existingTags = JSON.parse(xhttp.responseText);
-
+                                // Commented out to resolve lint warning:
+                                // that.existingTags = JSON.parse(xhttp.responseText);
                                 that.doSearch(searchQuery);
                             }
                         }

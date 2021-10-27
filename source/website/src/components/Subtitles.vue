@@ -83,7 +83,7 @@
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
-        <template v-slot:thead-top="data">
+        <template #default>
           <b-tr>
             <b-th colspan="1"></b-th>
             <b-th colspan="4" variant="secondary" class="text-center">
@@ -91,7 +91,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-th>
           </b-tr>
         </template>
-        <template v-slot:cell(original_phrase)="row">
+        <template #cell(original_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -103,7 +103,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(new_phrase)="row">
+        <template #cell(new_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -115,7 +115,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(sounds_like)="row">
+        <template #cell(sounds_like)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -127,7 +127,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(IPA)="row">
+        <template #cell(IPA)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -139,7 +139,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(display_as)="row">
+        <template #cell(display_as)="row">
           <b-row no-gutters>
             <b-col cols="9">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -212,7 +212,7 @@ to highlight the fields in the custom vocab schema. -->
           :fields="webCaptions_fields"
         >
           <!-- adjust column width for captions -->
-          <template v-slot:table-colgroup="scope">
+          <template #table-colgroup="scope">
             <col
               v-for="field in scope.fields"
               :key="field.key"
@@ -221,11 +221,11 @@ to highlight the fields in the custom vocab schema. -->
           </template>
           <!-- reformat timestamp to hh:mm:ss and -->
           <!-- disable timestamp edits if workflow status is not Complete -->
-          <template v-slot:cell(timeslot)="data">
+          <template #cell(timeslot)="data">
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height start-time-field " :value="toHHMMSS(data.item.start)" @change="new_time => changeStartTime(new_time, data.index)" />
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height stop-time-field " :value="toHHMMSS(data.item.end)" @change="new_time => changeEndTime(new_time, data.index)" />
           </template>
-          <template v-slot:cell(caption)="data">
+          <template #cell(caption)="data">
             <b-container class="p-0">
               <b-row no-gutters>
                 <b-col cols="10">
@@ -487,8 +487,8 @@ export default {
   methods: {
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
-        
-        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)  
+
+        console.log("Getting failed vocabulary details for " + this.customVocabularySelected)
 
         let apiName = 'mieWorkflowApi'
         let path = 'service/transcribe/get_vocabulary'
@@ -500,10 +500,10 @@ export default {
             body: body,
             response: true
         };
-        
+
         try {
           let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-          
+
           if (response.status === 200) {
             console.log("Failed vocabulary details:")
             console.log(response.data)
@@ -519,7 +519,7 @@ export default {
               this.customVocabularyFailedReason = ''
             }
           }
-          
+
         } catch (error) {
           this.customVocabularyFailedReason = ""
           console.log(error)
@@ -732,7 +732,7 @@ export default {
       } catch (error) {
         console.log(error)
       }
-      
+
     },
     getAssetWorkflowStatus: async function() {
       let apiName = 'mieWorkflowApi'
@@ -773,7 +773,7 @@ export default {
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
-      
+
       } catch (error) {
         console.log("ERROR: Failed to get transcribe language");
         console.log(error)
@@ -807,7 +807,7 @@ export default {
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
             this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
-          }       
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to get vocabularies."
@@ -849,7 +849,7 @@ export default {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
-          }      
+          }
       } catch (error) {
         alert(
           "ERROR: Failed to restart workflow."
@@ -915,7 +915,7 @@ export default {
           body: data,
           queryStringParameters: {} // optional
       };
-      
+
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         //console.log("Media assigned asset id: " + asset_id);
@@ -1068,7 +1068,7 @@ export default {
             'Content-Type': 'application/json'
           },
           body: {
-            "S3Bucket": this.DATAPLANE_BUCKET, 
+            "S3Bucket": this.DATAPLANE_BUCKET,
             "S3Key":this.customVocabularyName
             },
           response: true
@@ -1128,11 +1128,11 @@ export default {
       console.log("this.webCaptions")
       console.log(JSON.stringify(this.webCaptions))
       let data={
-        "OperatorName": operator_name, 
-        "Results": webCaptions, 
+        "OperatorName": operator_name,
+        "Results": webCaptions,
         "WorkflowId": this.workflow_id
       }
-      
+
       let apiName = 'mieDataplaneApi'
       let path = 'metadata/' + this.asset_id
       let requestOpts = {

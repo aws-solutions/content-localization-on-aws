@@ -777,7 +777,7 @@ export default {
       // WebToSRTCaptions and WebToVTTCaptions operator configurations if the user
       // enabled Translate but then disabled it before running the workflow.
       const vm = this
-      if (this.enabledOperators.includes("Translate") ) {
+      if (!this.enabledOperators.includes("Translate") ) {
         vm.selectedTranslateLanguages = [];
       }
     },

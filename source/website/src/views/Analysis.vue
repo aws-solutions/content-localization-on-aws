@@ -121,7 +121,9 @@
               v-if="
                 videoOptions.sources[0].src === '' ||
                   (videoOptions.captions.length > 0 &&
-                    videoOptions.captions.length !== num_caption_tracks)
+                    videoOptions.captions.length !== num_caption_tracks) ||
+                  (videoOptions.captions.length > 0 &&
+                    videoOptions.captions[0].lang === '')
               "
             >
               <Loading />

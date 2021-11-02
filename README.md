@@ -257,48 +257,6 @@ To delete an S3 bucket using AWS CLI, run the following command:
 aws s3 rb s3://<bucket-name> --force
 ```
 
-## Collection of operational metrics
-
-This solution collects anonymous operational metrics to help AWS improve the quality of features of the solution. For more information, including how to disable this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/collection-of-operational-metrics.html).
-
-When enabled, the following information is collected and sent to AWS:
-
-* **Solution ID:** the AWS solution ID (`SO0164`)
-* **Unique ID (UUID):** a randomly generated, unique identifier for each deployment
-* **Timestamp:** data-collection timestamp
-* **Version:** The version of the solution that was deployed
-* **CFTemplate:** The CloudFormation action that activated the metric report.
-
-Example data:
-
-```
-{
-    "Solution": "SO0164",
-    "UUID": "d84a0bd5-7483-494e-8ab1-fdfaa7e97687",
-    "TimeStamp": "2021-03-01T20:03:05.798545",
-    "Data": {
-        "Version": "v2.0.0",
-        "CFTemplate": "Created"
-    }
-}
-```
-
-To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymousUsage` in the `Mappings` section from:
-
-```
-"Send" : {
-"AnonymousUsage" : { "Data" : "Yes" }
-},
-```
-
-to:
-
-```
-"Send" : {
-"AnonymousUsage" : { "Data" : "No" }
-},
-```
-
 # Help
 
 Join our Gitter chat at https://gitter.im/awslabs/aws-media-insights-engine. This public chat forum was created to foster communication between MIE developers worldwide.

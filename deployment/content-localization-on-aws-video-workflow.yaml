@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS - Deploys video processing workflow"
+Description: "Content Localization on AWS%%VERSION%% - Deploys video processing workflow"
 
 Parameters:
   WorkflowCustomResourceArn:

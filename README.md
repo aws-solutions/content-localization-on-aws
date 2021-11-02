@@ -141,6 +141,10 @@ TEMPLATE=[copy "Without existing MIE deployment" link from output of build scrip
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
 
+### Tests
+
+See the [tests README document](test/README.md) for information on how to run tests for this project.
+
 # Advanced Usage
 
 ## Adding new operators and extending data stream consumers:
@@ -255,7 +259,9 @@ aws s3 rb s3://<bucket-name> --force
 
 ## Collection of operational metrics
 
-This solution collects anonymous operational metrics to help AWS improve the quality of features of the solution. For more information, including how to disable this capability, please see the [implementation guide](_https://docs.aws.amazon.com/solutions/latest/<content-localization-on-aws>/collection-of-operational-metrics.html_).
+This solution collects anonymous operational metrics to help AWS improve the
+quality of features of the solution. For more information, including how to disable
+this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/<solution-trademark-name>/collection-of-operational-metrics.html).
 
 When enabled, the following information is collected and sent to AWS:
 
@@ -273,7 +279,7 @@ Example data:
     "UUID": "d84a0bd5-7483-494e-8ab1-fdfaa7e97687",
     "TimeStamp": "2021-03-01T20:03:05.798545",
     "Data": {
-        "Version": "v2.0.0",
+        "Version": "v1.0.0",
         "CFTemplate": "Created"
     }
 }

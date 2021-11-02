@@ -229,7 +229,7 @@ Resources:
     Properties:
       ServiceToken: !GetAtt AnonymousDataCustomResource.Arn
       Resource: AnonymousMetric
-      SolutionId: "SO0042"
+      SolutionId: "SO0164"
       UUID: !GetAtt AnonymousDataUuid.UUID
       Version: !FindInMap ["Application", "SourceCode", "Version"]
 

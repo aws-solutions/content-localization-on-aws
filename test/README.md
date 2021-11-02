@@ -6,7 +6,7 @@ Content Localization has the following types of tests:
 
 *End to End:* Tests of each functional component of the framework with each other and all dependencies. Scope is the ensure all components work successfully to perform the expected function, e.g. ensure the workflowapi can successfully communicate with the dataplaneapi and successfully complete a workflow
 
-*These tests require MIE to be deployed. 
+**These tests require MIE to be deployed.**
 
 
 You can find each of these within the `test` directory of the project

@@ -312,35 +312,6 @@ mkdir -p dist
 zip -q -g ./dist/websitehelper.zip ./website_helper.py webapp-manifest.json
 cp "./dist/websitehelper.zip" "$regional_dist_dir/websitehelper.zip"
 
-echo "------------------------------------------------------------------------------"
-echo "Creating deployment package for anonymous data logger"
-echo "------------------------------------------------------------------------------"
-
-echo "Building anonymous data logger"
-cd "$source_dir/anonymous-data-logger" || exit 1
-[ -e dist ] && rm -rf dist
-mkdir -p dist
-[ -e package ] && rm -rf package
-mkdir -p package
-echo "create requirements for lambda"
-# Make lambda package
-pushd package || exit 1
-echo "create lambda package"
-# Handle distutils install errors
-touch ./setup.cfg
-echo "[install]" > ./setup.cfg
-echo "prefix= " >> ./setup.cfg
-pip3 install --quiet -r ../requirements.txt --target .
-cp -R ../lib .
-if ! [ -d ../dist/anonymous-data-logger.zip ]; then
-  zip -q -r9 ../dist/anonymous-data-logger.zip .
-elif [ -d ../dist/anonymous-data-logger.zip ]; then
-  echo "Package already present"
-fi
-popd || exit 1
-zip -q -g ./dist/anonymous-data-logger.zip ./anonymous-data-logger.py
-cp "./dist/anonymous-data-logger.zip" "$regional_dist_dir/anonymous-data-logger.zip"
-
 # Skip copy dist to S3 if building for solution builder because
 # that pipeline takes care of copying the dist in another script.
 if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solutions-test-reference" ] &&  [ "$global_bucket" != "solutions-features-reference" ]; then

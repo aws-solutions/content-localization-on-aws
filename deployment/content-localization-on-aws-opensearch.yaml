@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS - Opensearch Consumer stack"
+Description: "Content Localization on AWS %%VERSION%% - Opensearch Consumer stack"
 
 Parameters:
   NodeType:
@@ -96,7 +96,7 @@ Resources:
         Variables:
           EsEndpoint: !GetAtt OpensearchServiceDomain.DomainEndpoint
           DataplaneBucket: !Ref MieDataplaneBucket
-          botoConfig: '{"user_agent_extra": "AwsSolution/SO0042/%%VERSION%%"}'
+          botoConfig: '{"user_agent_extra": "AwsSolution/SO0164/%%VERSION%%"}'
 
   # stream event mapping for lambda
 

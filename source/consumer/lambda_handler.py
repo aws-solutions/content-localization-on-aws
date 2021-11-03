@@ -21,7 +21,7 @@ s3 = boto3.client('s3', config=config)
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
 supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "face_search", "contentmoderation", "facedetection", "key_phrases", "entities", "webcaptions", "shotdetection", "technicalcuedetection"]
 
-def normalize_confidence(confidence_value):  
+def normalize_confidence(confidence_value):
     converted = float(confidence_value) * 100
     return str(converted)
 
@@ -701,7 +701,7 @@ def process_entities(asset, workflow, results):
 
         entity["Workflow"] = workflow
         entity["Operator"] = "entities"
-        
+
         del entity["Type"]
         del entity["Text"]
         del entity["Score"]
@@ -735,6 +735,11 @@ def process_keyphrases(asset, workflow, results):
         formatted_phrases.append(phrase)
 
     bulk_index(es, asset, "key_phrases", formatted_phrases)
+
+
+def process_initialization(asset, results):
+    es = connect_es(es_endpoint)
+    bulk_index(es, asset, "initialization", [results])
 
 
 def connect_es(endpoint):
@@ -900,7 +905,21 @@ def lambda_handler(event, context):
         if action is None:
             print("Unable to determine action type")
         elif action == "INSERT":
-            print("Not handling INSERT actions")
+            # The initial insert action will contain the filename and timestamp.
+            # Persist the filename and timestamp to Elasticsearch so users can find
+            # assets by searching those fields.
+            try:
+                # Get filename and timestamp from the payload of the stream message
+                s3_key = payload['S3Key']
+                filename = s3_key.split("/")[-1]
+                created = payload['Created']
+                extracted_items = []
+                metadata = {"filename": filename, "created": created}
+                extracted_items.append(metadata)
+                # Save the filename and timestamp to Elasticsearch
+                process_initialization(asset_id, metadata)
+            except KeyError as e:
+                print("Missing required keys in kinesis payload:", e)
         elif action == "MODIFY":
             try:
                 operator = payload['Operator']

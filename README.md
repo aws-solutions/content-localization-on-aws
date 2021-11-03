@@ -261,7 +261,7 @@ aws s3 rb s3://<bucket-name> --force
 
 This solution collects anonymous operational metrics to help AWS improve the
 quality of features of the solution. For more information, including how to disable
-this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/<solution-trademark-name>/collection-of-operational-metrics.html).
+this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/collection-of-operational-metrics.html).
 
 When enabled, the following information is collected and sent to AWS:
 

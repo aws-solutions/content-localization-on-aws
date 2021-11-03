@@ -36,9 +36,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v0.1.0/content-localization-on-aws.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -140,6 +140,10 @@ Use these commands to deploy the demo app over a new MIE stack:
 TEMPLATE=[copy "Without existing MIE deployment" link from output of build script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
+
+### Tests
+
+See the [tests README document](test/README.md) for information on how to run tests for this project.
 
 # Advanced Usage
 
@@ -255,7 +259,9 @@ aws s3 rb s3://<bucket-name> --force
 
 ## Collection of operational metrics
 
-This solution collects anonymous operational metrics to help AWS improve the quality of features of the solution. For more information, including how to disable this capability, please see the [implementation guide](_https://docs.aws.amazon.com/solutions/latest/<content-localization-on-aws>/collection-of-operational-metrics.html_).
+This solution collects anonymous operational metrics to help AWS improve the
+quality of features of the solution. For more information, including how to disable
+this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/collection-of-operational-metrics.html).
 
 When enabled, the following information is collected and sent to AWS:
 
@@ -273,7 +279,7 @@ Example data:
     "UUID": "d84a0bd5-7483-494e-8ab1-fdfaa7e97687",
     "TimeStamp": "2021-03-01T20:03:05.798545",
     "Data": {
-        "Version": "v2.0.0",
+        "Version": "v1.0.0",
         "CFTemplate": "Created"
     }
 }

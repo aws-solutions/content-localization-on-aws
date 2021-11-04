@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS - user authentication infrastructure"
+Description: "Content Localization on AWS %%VERSION%% - user authentication infrastructure"
 
 Parameters:
   AdminEmail:

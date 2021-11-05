@@ -85,11 +85,11 @@ Users can enable or disable operators in the upload view shown below:
 
 # Search Capabilities:
 
-The search field in the Collection view searches the full media content database in Amazon OpenSearch. Everything you see in the analysis page is searchable. Even data that is excluded by the threshold you set in the Confidence slider is searchable. Search queries must use valid Lucene syntax.
+The search field in the Collection view provides the ability to find media assets that contain specified metadata terms. Search queries are executed by Amazon OpenSearch, which uses full-text search techniques to examine all the words in every metadata document in its database. Everything you see in the analysis page is searchable. Even data that is excluded by the threshold you set in the Confidence slider is searchable. Search queries must use valid Lucene syntax.
 
 Here are some sample searches:
 
-
+* Search for filenames containing the suffix ".mp4" with, `*.mp4` or `filename:*.mp4`
 * Since Content Moderation returns a "Violence" label when it detects violence in a video, you can search for any video containing violence simply with: `Violence`
 * Search for videos containing violence with a 80% confidence threshold: `Violence AND Confidence:>80` 
 * The previous queries may match videos whose transcript contains the word "Violence". You can restrict your search to only Content Moderation results, like this: `Operator:content_moderation AND (Name:Violence AND Confidence:>80)`

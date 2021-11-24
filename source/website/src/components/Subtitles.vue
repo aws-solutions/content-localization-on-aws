@@ -1046,7 +1046,7 @@ export default {
           body: {
             "vocabulary_name":customVocabularyName,
             "s3uri": s3uri,
-            "language_code": this.transcribe_language_code
+            "language_code": this.vocabulary_language_code
           },
           response: true
       };

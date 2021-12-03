@@ -1,6 +1,15 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
 
 import pytest
 import boto3
@@ -65,7 +74,8 @@ def stack_resources(testing_env_variables):
     outputs = response['Stacks'][0]['Outputs']
 
     for output in outputs:
-        resources[output["OutputKey"]] = output["OutputValue"]
+        if (output["OutputKey"] != 'TestStack'):
+            resources[output["OutputKey"]] = output["OutputValue"]
 
     assert "WorkflowApiEndpoint" in resources
     assert "DataplaneApiEndpoint" in resources
@@ -78,11 +88,14 @@ def stack_resources(testing_env_variables):
     response = client.describe_stacks(
         StackName=resources["OperatorLibraryStack"])
     outputs = response['Stacks'][0]['Outputs']
+
     for output in outputs:
-        resources[output["OutputKey"]] = output["OutputValue"]
-
-    expected_resources = ['WorkflowApiRestID', 'TestStack', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
-
+        # These tests don't depend on TestStack.  They should pass whether it is deployed or not
+        
+            resources[output["OutputKey"]] = output["OutputValue"]
+    
+    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
+    
     assert set(resources.keys()) == set(expected_resources)
 
     return resources
@@ -161,6 +174,14 @@ class WorkflowAPI:
             self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/create_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
 
         return create_vocabulary_response
+
+    def get_vocabulary_request(self, body):
+        headers = {"Content-Type": "application/json"}
+        print("POST /service/transcribe/get_vocabulary")
+        get_vocabulary_response = requests.post(
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+
+        return get_vocabulary_response
 
     def delete_terminology_request(self, body):
         headers = {"Content-Type": "application/json"}
@@ -252,8 +273,30 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
     assert create_vocabulary_request.status_code == 200
 
     # wait for vocabulary to complete
-    # FIXME - should us a polling loop here
-    time.sleep(60)
+
+    processing = True
+
+    while processing:
+        body = {'vocabulary_name': testing_env_variables['SAMPLE_VOCABULARY_FILE']}
+        get_vocabulary_response = workflow_api.get_vocabulary_request(body)
+
+        assert get_vocabulary_response.status_code == 200
+
+        response = get_vocabulary_response.json()
+
+        json.dumps(response)
+        status = response["VocabularyState"]
+
+        allowed_statuses = ['PENDING','READY']
+
+        assert status in allowed_statuses
+
+        if status == "READY":
+            processing = False
+        else:
+            print('Sleeping for 30 seconds before retrying')
+            time.sleep(30)
+
     yield create_vocabulary_body
     delete_vocabulary_body = {
         "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
@@ -335,9 +378,6 @@ def workflow_config(all_operators):
             "MediaType": "Video",
             "Enabled": False
         },
-        "GenericDataLookup": {
-            "Enabled": False
-        },
         "TranscribeVideo": {
             "Enabled": True,
             "TranscribeLanguage": "en-US",
@@ -378,7 +418,7 @@ def workflow_config(all_operators):
             "SourceLanguageCode": "en"
         }
     }
-    WebCaptionsStage2 = {
+    WebCaptions = {
         "WebCaptions": {
             "MediaType": "MetadataOnly",
             "SourceLanguageCode": "en",
@@ -408,7 +448,7 @@ def workflow_config(all_operators):
     workflow["Configuration"]["PreprocessVideo"] = PreprocessVideo
     workflow["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
     workflow["Configuration"]["TransformText"] = TransformText
-    workflow["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
+    workflow["Configuration"]["WebCaptions"] = WebCaptions
     workflow["Configuration"]["Translate"] = Translate
     workflow["Configuration"]["AnalyzeText"] = AnalyzeText
     return workflow

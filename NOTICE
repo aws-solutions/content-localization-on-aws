@@ -1,1 +1,49 @@
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Content Localization on AWS
+
+**********************
+THIRD PARTY COMPONENTS
+**********************
+This software includes third party software subject to the following copyrights:
+
+aws-amplify under the Apache License Version 2.0
+aws-amplify-vue under the Apache License Version 2.0
+aws_xray_sdk under the Apache License Version 2.0
+axios under the Massachusetts Institute of Technology license
+bad-words under the Massachusetts Institute of Technology license
+bootstrap under the Massachusetts Institute of Technology license
+bootstrap-vue under the Massachusetts Institute of Technology license
+boto3 under the Apache License Version 2.0
+botocore under the Apache License Version 2.0
+cfn-lint under the Massachusetts Institute of Technology license
+cfnresponse under the Apache License Version 2.0
+chalice under the Apache License Version 2.0
+char.js under the Massachusetts Institute of Technology license
+diff under the BSD with attribution (BSD-3) license
+dropzone under the Massachusetts Institute of Technology license
+elasticsearch-py under the Apache License Version 2.0
+jquery under the Massachusetts Institute of Technology license
+jwt-decode under the Massachusetts Institute of Technology license
+latest-version under the Massachusetts Institute of Technology license
+lodash under the Massachusetts Institute of Technology license
+number-to-words under the Massachusetts Institute of Technology license
+pytest under the Massachusetts Institute of Technology license
+register-service-worker under the Massachusetts Institute of Technology license
+requests under the Apache License Version 2.0
+requests_aws4auth under the Massachusetts Institute of Technology license
+routerjs under the Massachusetts Institute of Technology license
+selenium under the Apache License Version 2.0
+urllib3 under the Massachusetts Institute of Technology license
+videojs under the Apache License Version 2.0
+videojs-flash under the Apache License Version 2.0
+videojs-hotkeys under the Apache License Version 2.0
+videojs-markers under the Massachusetts Institute of Technology license
+voerro-vue-tagsinput under the Massachusetts Institute of Technology license
+vue under the Massachusetts Institute of Technology license
+vue-highlightjs under the Massachusetts Institute of Technology license
+vue-router under the Massachusetts Institute of Technology license
+vuex under the Massachusetts Institute of Technology license
+vuex-persistedstate under the Massachusetts Institute of Technology license
+wavesurfer.js under the Creative Commons Attribution 3.0 Unported License
+webdriver_manager under the Apache License Version 2.0

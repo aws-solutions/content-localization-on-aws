@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - Deploys video processing workflow"
+Description: "Content Localization on AWS %%VERSION%% - Deploys video processing workflow"
 
 Parameters:
   WorkflowCustomResourceArn:
@@ -19,7 +19,7 @@ Resources:
     Properties:
       ServiceToken: !Ref WorkflowCustomResourceArn
       ResourceType: "Stage"
-      Name: "WebCaptionsStage2"
+      Name: "WebCaptions"
       Operations:
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:WebCaptions"
@@ -65,8 +65,6 @@ Resources:
       ResourceType: "Stage"
       Name: "AnalyzeVideo"
       Operations:
-        - Fn::ImportValue:
-            Fn::Sub: "${OperatorLibraryStack}:GenericDataLookup"
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:CelebRecognition"
         - Fn::ImportValue:

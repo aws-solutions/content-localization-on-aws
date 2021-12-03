@@ -1,3 +1,17 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
 <template>
   <div>
     <Header />
@@ -18,8 +32,40 @@
                 fill
               >
                 <b-tab
-                  title="ML Vision"
+                  v-if="mediaType !== 'image'"
+                  title="Speech Recognition"
                   active
+                  @click="currentView = 'Transcript'; speechTabs = 0"
+                >
+                  <b-tabs
+                    v-model="speechTabs"
+                    content-class="mt-3"
+                    fill
+                  >
+                    <b-tab
+                      title="Transcript"
+                      @click="currentView = 'Transcript'"
+                    />
+                    <b-tab
+                      title="Subtitles"
+                      @click="currentView = 'Subtitles'"
+                    />
+                    <b-tab
+                      title="Translation"
+                      @click="currentView = 'Translation'"
+                    />
+                    <b-tab
+                      title="KeyPhrases"
+                      @click="currentView = 'KeyPhrases'"
+                    />
+                    <b-tab
+                      title="Entities"
+                      @click="currentView = 'Entities'"
+                    />
+                  </b-tabs>
+                </b-tab>
+                <b-tab
+                  title="ML Vision"
                   @click="currentView = 'LabelObjects'; mlTabs = 0"
                 >
                   <b-container fluid>
@@ -63,38 +109,6 @@
                     </b-row>
                   </b-container>
                 </b-tab>
-                <b-tab
-                  v-if="mediaType !== 'image'"
-                  title="Speech Recognition"
-                  @click="currentView = 'Transcript'; speechTabs = 0"
-                >
-                  <b-tabs
-                    v-model="speechTabs"
-                    content-class="mt-3"
-                    fill
-                  >
-                    <b-tab
-                      title="Transcript"
-                      @click="currentView = 'Transcript'"
-                    />
-                    <b-tab
-                      title="Subtitles"
-                      @click="currentView = 'Subtitles'"
-                    />
-                    <b-tab
-                      title="Translation"
-                      @click="currentView = 'Translation'"
-                    />
-                    <b-tab
-                      title="KeyPhrases"
-                      @click="currentView = 'KeyPhrases'"
-                    />
-                    <b-tab
-                      title="Entities"
-                      @click="currentView = 'Entities'"
-                    />
-                  </b-tabs>
-                </b-tab>
               </b-tabs>
             </b-row>
           </div>
@@ -120,8 +134,8 @@
             <div
               v-if="
                 videoOptions.sources[0].src === '' ||
-                (videoOptions.captions.length > 0 &&
-                  videoOptions.captions.length !== num_caption_tracks)
+                  (videoOptions.captions.length > 0 &&
+                    videoOptions.captions.length !== num_caption_tracks)
               "
             >
               <Loading />
@@ -131,10 +145,10 @@
               <div
                 v-if="
                   currentView === 'Transcript' ||
-                  currentView === 'Subtitles' ||
-                  currentView === 'Translation' ||
-                  currentView === 'KeyPhrases' ||
-                  currentView === 'Entities'
+                    currentView === 'Subtitles' ||
+                    currentView === 'Translation' ||
+                    currentView === 'KeyPhrases' ||
+                    currentView === 'Entities'
                 "
               >
                 <br />
@@ -292,7 +306,7 @@
       return {
         s3_uri: '',
         filename: '',
-        currentView: 'LabelObjects',
+        currentView: 'Transcript',
         showElasticSearchAlert: false,
         mlTabs: 0,
         speechTabs: 0,
@@ -347,7 +361,7 @@
           if (response.data.results) {
             this.num_caption_tracks = response.data.results.CaptionsCollection.length;
             for (const item of response.data.results.CaptionsCollection) {
-    
+
               // TODO: map the language code to a language label
 
               const bucket = item.Results.S3Bucket;
@@ -359,7 +373,7 @@
                 headers: {
                 },
                 body: {
-                  "S3Bucket": bucket, 
+                  "S3Bucket": bucket,
                   "S3Key": key
                   },
                 response: true,
@@ -373,14 +387,15 @@
                 }
               } catch (error) {
                 console.log(error)
-              }   
+              }
             }
             this.videoOptions.captions = captions_collection;
           } else {
             this.videoOptions.captions = []
           }
-          
+
         } catch (error) {
+          this.videoOptions.captions = []
           console.log(error)
         }
       },
@@ -422,11 +437,11 @@
         let input_file = "";
         let proxy_file = "";
 
-       
+
         input_file = s3uri.split("/").slice(-1)[0]
         proxy_file = input_file.split(".")[0]+"_proxy.mp4";
         proxy_key = "private/assets/"+asset_id+"/"+proxy_file
-        
+
         const data = { "S3Bucket": bucket, "S3Key": proxy_key };
 
         // get presigned URL to video file in S3

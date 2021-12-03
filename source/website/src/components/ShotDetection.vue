@@ -1,3 +1,17 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
 <template>
   <div>
     <div
@@ -20,8 +34,8 @@
         :fields="fields"
         :sort-by="sortBy"
       >
-        <template v-slot:cell(Index)="data">
-          <b-button variant="link" @click="setPlayerTime(data.item.EndTimestamp, data.item.StartTimestamp)"> 
+        <template #cell(Index)="data">
+          <b-button variant="link" @click="setPlayerTime(data.item.EndTimestamp, data.item.StartTimestamp)">
             {{ data.item.Index }}
           </b-button>
         </template>
@@ -77,13 +91,13 @@
             }
           },
           {
-            'EndTimecodeSMPTE': { 
+            'EndTimecodeSMPTE': {
               label: 'End',
-              sortable: false 
+              sortable: false
               }
           },
           {
-            'DurationSMPTE': { 
+            'DurationSMPTE': {
               label: 'Duration',
               sortable: true
               }
@@ -142,7 +156,7 @@
       },
       async fetchAssetData () {
           let query = 'AssetId:'+this.$route.params.asset_id+' Operator:'+this.operator;
-          let apiName = 'contentAnalysisElasticsearch';
+          let apiName = 'search';
           let path = '/_search';
           let apiParams = {
             headers: {'Content-Type': 'application/json'},

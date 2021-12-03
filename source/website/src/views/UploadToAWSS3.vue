@@ -1,3 +1,17 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
 <template>
   <div>
     <Header :is-upload-active="true" />
@@ -43,14 +57,15 @@
         Upload and Run Workflow
       </b-button>
       <br>
-      <!-- TODO: add a drop-down option in this modal to choose update workflow, then update workflowConfigWithInput to include the appropriate workflow config -->
       <b-button
-          :pressed="false"
-          size="sm"
-          variant="link"
-          class="text-decoration-none"
-          @click="showExecuteApi = true"
-      ></b-button>
+        :pressed="false"
+        size="sm"
+        variant="link"
+        class="text-decoration-none"
+        @click="showExecuteApi = true"
+      >
+        Show API request to run workflow
+      </b-button>
       <b-modal
           v-model="showExecuteApi"
           scrollable
@@ -98,7 +113,8 @@
                   </b-form-checkbox>
                   <div v-if="enabledOperators.includes('Transcribe')">
                     <label>Source Language</label>
-                    <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages"></b-form-select>
+                    <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages">
+                    </b-form-select>
                     <br>
                     Custom Vocabulary
                     <b-form-select
@@ -159,48 +175,108 @@
             <b-card header="Text Operators">
               <b-form-group>
                 <b-form-checkbox-group
-                    id="checkbox-group-3"
-                    v-model="enabledOperators"
-                    :options="textOperators"
-                    name="flavour-3"
-                ></b-form-checkbox-group>
+                  id="checkbox-group-3"
+                  v-model="enabledOperators"
+                  name="textOperators"
+                >
+                  <b-form-checkbox value="ComprehendEntities">
+                    Comprehend Entities
+                  </b-form-checkbox>
+                  <b-form-checkbox value="ComprehendKeyPhrases">
+                    Comprehend Key Phrases
+                  </b-form-checkbox>
+                  <b-form-checkbox value="Translate">
+                    Translate
+                  </b-form-checkbox>
+                  <b-form-checkbox value="Polly">
+                    Generate audio translations with Amazon Polly
+                  </b-form-checkbox>
+                </b-form-checkbox-group>
+                <div v-if="pollyFormError" style="color:red">
+                  {{ pollyFormError }}
+                </div>
+                <b-form-checkbox
+                  v-if="enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases')"
+                  v-model="ComprehendEncryption"
+                >
+                  Encrypt Comprehend Job
+                </b-form-checkbox>
+                <b-form-input
+                  v-if="ComprehendEncryption && (enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases'))"
+                  v-model="kmsKeyId"
+                  placeholder="Enter KMS key ID"
+                ></b-form-input>
                 <div v-if="enabledOperators.includes('Translate')">
-                  <!-- && customTerminologyList.length > 0"> -->
-                  <!-- && customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0"> -->
-                  <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <div v-else><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
-                  <b-form-select
+                  <!-- Show only those custom terminologies whose source language match
+                   the source language that the user specified for Transcribe. -->
+                  <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
+                    <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
+                    <b-form-select
                       v-model="customTerminology"
-                      :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
                       multiple
-                  >
-                  </b-form-select>
+                    >
+                    </b-form-select>
+                  </div>
+                  <!-- If the user specified auto-detect for the Transcribe source
+                   language then show all custom terminologies. -->
+                  <div v-else-if="sourceLanguageCode === 'auto' && customTerminologyList.length > 0">
+                    <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
+                    <b-form-select
+                      v-model="customTerminology"
+                      :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
+                    >
+                    </b-form-select>
+                  </div>
+                  <div v-else>
+                    <b>Custom Terminologies:</b>
+                    (none available)
+                  </div>
                   <div v-if="overlappingTerminologies.length > 0" style="color:red">
                     You must not select terminologies that define translations for the same language. The following terminologies overlap:
                     <ul id="overlapping_terminologies">
-                      <li v-for="terminology in overlappingTerminologies">
+                      <li v-for="terminology in overlappingTerminologies" :key="terminology">
                         {{ terminology }}
                       </li>
                     </ul>
                   </div>
-                  <div v-if="parallelDataList.length > 0"><b>Parallel Data:</b> ({{ parallelData.length }} selected)
+                  <!-- Show only those parallel data sets whose source language match
+                   the source language that the user specified for Transcribe. -->
+                  <div v-if="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
+                    <b>Parallel Data:</b> ({{ parallelData.length }} selected)
                     <b-form-select
-                        v-model="parallelData"
-                        :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="parallelData"
+                      :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
-                    <div v-if="overlappingParallelData.length > 0" style="color:red">
-                      You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
-                      <ul id="overlapping_parallel_data">
-                        <li v-for="parallel_data in overlappingParallelData">
-                          {{ parallel_data }}
-                        </li>
-                      </ul>
-                    </div>
+                  </div>
+                  <!-- If the user specified auto-detect for the Transcribe source
+                   language then show all parallel data sets. -->
+                  <div v-else-if="sourceLanguageCode === 'auto' && parallelDataList.length > 0">
+                    <b>Parallel Data:</b> ({{ parallelData.length }} selected)
+                    <b-form-select
+                      v-model="parallelData"
+                      :options="parallelDataList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
+                    >
+                    </b-form-select>
+                  </div>
+                  <div v-else>
+                    <b>Parallel Data:</b>
+                    (none available)
+                  </div>
+                  <div v-if="overlappingParallelData.length > 0" style="color:red">
+                    You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
+                    <ul id="overlapping_parallel_data">
+                      <li v-for="parallel_data in overlappingParallelData" :key="parallel_data">
+                        {{ parallel_data }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
-                <div v-if="enabledOperators.includes('Translate')" >
+                <div v-if="enabledOperators.includes('Translate')">
                   <b-form-group>
                     <b>Target Languages:</b>
                     <div v-if="textFormError" style="color:red">
@@ -251,7 +327,7 @@
           fixed
           :items="executed_assets"
       >
-        <template v-slot:cell(workflow_status)="data">
+        <template #cell(workflow_status)="data">
           <a v-if="data.item.workflow_status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.workflow_status }}</a>
           <div v-if="data.item.workflow_status === 'Queued'">
             {{ data.item.workflow_status }}
@@ -349,8 +425,7 @@ export default {
         { text: "Celebrity Recognition", value: "celebrityRecognition" },
         { text: "Face Detection", value: "faceDetection" },
         { text: "Word Detection", value: "textDetection" },
-        { text: "Face Search", value: "faceSearch" },
-        { text: "Generic Data Lookup (video only)", value: "genericDataLookup" }
+        { text: "Face Search", value: "faceSearch" }
       ],
       audioOperators: [
         { text: "Transcribe", value: "Transcribe" },
@@ -362,7 +437,6 @@ export default {
         { text: "Translate", value: "Translate" }
       ],
       faceCollectionId: "",
-      genericDataFilename: "",
       ComprehendEncryption: false,
       kmsKeyId: "",
       customVocabulary: null,
@@ -549,14 +623,7 @@ export default {
     // for the voerro-tags-input. The flipping is done in here as a computed property.
     translateLanguageTags() {
       return this.translateLanguages
-          .map(x => {return {"text": x.value, "value": x.text}})
-      //FIXME: filtering source languge from language tag list doesn't refresh
-      // tag picker in UI.  So, if source language is English to start, English is
-      // removed from the translation target languages.  When source language
-      // is changed to Spanish, Engish is added back to the tags on the Vue
-      // Translation component but Engish tag is still missing on the tag
-      // picker.  For now, leave the source language in the list.
-      //.filter(x => x.text !== this.sourceLanguageCode)
+        .map(x => {return {"text": x.value, "value": x.text}}).filter(x => x.text !== this.sourceLanguageCode)
     },
     ...mapState(['execution_history']),
     sourceLanguageCode() {
@@ -565,6 +632,12 @@ export default {
     textFormError() {
       if (this.enabledOperators.includes("Translate") && this.selectedTranslateLanguages.length === 0) {
         return "Choose at least one language.";
+      }
+      return "";
+    },
+    pollyFormError() {
+      if (this.enabledOperators.includes("Polly") && !this.enabledOperators.includes("Translate")) {
+        return "Translate must be enabled if Polly is enabled.";
       }
       return "";
     },
@@ -596,20 +669,6 @@ export default {
           return "Face collection name must have fewer than 255 characters.";
         }
       }
-      if (this.enabledOperators.includes("genericDataLookup")) {
-        // Validate that the collection ID is defined
-        if (this.genericDataFilename === "") {
-          return "Data filename is required.";
-        }
-        // Validate that the collection ID matches required regex
-        else if (!new RegExp("^.+\\.json$").test(this.genericDataFilename)) {
-          return "Data filename must have .json extension.";
-        }
-        // Validate that the data filename is not too long
-        else if (this.genericDataFilename.length > 255) {
-          return "Data filename must have fewer than 255 characters.";
-        }
-      }
       return "";
     },
     validForm() {
@@ -617,6 +676,7 @@ export default {
       if (
           this.invalid_file_types ||
           this.textFormError ||
+          this.pollyFormError ||
           this.audioFormError ||
           this.videoFormError ||
           this.overlappingTerminologies.length > 0 ||
@@ -673,20 +733,12 @@ export default {
           MediaType: "Video",
           Enabled: false
         },
-        GenericDataLookup: {
-          Enabled: this.enabledOperators.includes("genericDataLookup"),
-          Bucket: this.DATAPLANE_BUCKET,
-          Key:
-              this.genericDataFilename === ""
-                  ? "undefined"
-                  : this.genericDataFilename
-        },
         TranscribeVideo: {
           Enabled: this.enabledOperators.includes("Transcribe"),
           TranscribeLanguage: this.transcribeLanguage,
           MediaType: "Audio"
         }
-      }     
+      }
       const AnalyzeText = {
         ComprehendEntities: {
           MediaType: "Text",
@@ -705,20 +757,20 @@ export default {
         WebToSRTCaptions: {
           MediaType: "MetadataOnly",
           TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
-          Enabled: this.enabledOperators.includes("Translate")
+          Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         WebToVTTCaptions: {
           MediaType: "MetadataOnly",
           TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
-          Enabled: this.enabledOperators.includes("Translate")
+          Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         PollyWebCaptions: {
           MediaType:"MetadataOnly",
-          Enabled: this.enabledOperators.includes("Translate"),
+          Enabled: this.enabledOperators.includes("Polly"),
           SourceLanguageCode: this.sourceLanguageCode
         }
       }
-      const WebCaptionsStage2 = {
+      const WebCaptions = {
         WebCaptions: {
           MediaType: "MetadataOnly",
           SourceLanguageCode: this.sourceLanguageCode,
@@ -745,7 +797,7 @@ export default {
       workflow_config["Configuration"]["PreprocessVideo"] = PreprocessVideo
       workflow_config["Configuration"]["AnalyzeVideo"] = AnalyzeVideo
       workflow_config["Configuration"]["TransformText"] = TransformText
-      workflow_config["Configuration"]["WebCaptionsStage2"] = WebCaptionsStage2
+      workflow_config["Configuration"]["WebCaptions"] = WebCaptions
       workflow_config["Configuration"]["Translate"] = Translate
       workflow_config["Configuration"]["AnalyzeText"] = AnalyzeText
       return workflow_config
@@ -753,7 +805,7 @@ export default {
     workflowConfigWithInput() {
       // This function is just used to pretty print the rest api
       // for workflow execution in a popup modal
-      let data = JSON.parse(JSON.stringify(this.workflow_config));
+      let data = JSON.parse(JSON.stringify(this.videoWorkflowConfig));
       data["Input"] = {
         "Media": {
           "Video": {
@@ -811,21 +863,21 @@ export default {
         "celebrityRecognition",
         "faceDetection",
         "thumbnail",
-        "TranscribeVideo",
+        "Transcribe",
         "Translate",
+        "Polly",
         "Subtitles",
         "ComprehendKeyPhrases",
         "ComprehendEntities",
         "technicalCueDetection",
         "shotDetection"
       ];
-      console.log(this.enabledOperators)
     },
     clearAll: function() {
       this.enabledOperators = [];
     },
     openWindow: function(url) {
-      window.open(url);
+      window.open(url, "noopener,noreferer");
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
@@ -922,24 +974,15 @@ export default {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
           if (this.existingSubtitlesFilename == "") {
-            if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions){
-              delete this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject
+            if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
+                delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
             }
           }
           else {
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject = {}
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject = {}
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
+            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
-
-
-          // Add input parameter to workflow config:
-
-        } else if (media_type === "application/json") {
-          // JSON files may be uploaded for the genericDataLookup operator, but
-          // we won't run a workflow for json file types.
-          console.log("Data file has been uploaded to s3://" + s3key);
-          return;
         } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() == 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.

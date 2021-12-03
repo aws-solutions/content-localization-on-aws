@@ -28,8 +28,8 @@ jobs:
         run: |
           echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
           DATETIME=$(date '+%s')
-          echo "DIST_OUTPUT_BUCKET=aws-content-localization-$DATETIME-dist" >> $GITHUB_ENV
-          echo "TEMPLATE_OUTPUT_BUCKET=aws-content-localization-$DATETIME" >> $GITHUB_ENV
+          echo "DIST_OUTPUT_BUCKET=content-localization-on-aws-$DATETIME-dist" >> $GITHUB_ENV
+          echo "TEMPLATE_OUTPUT_BUCKET=content-localization-on-aws-$DATETIME" >> $GITHUB_ENV
 
       - name: Run build script
         run: |
@@ -78,7 +78,7 @@ jobs:
           VERSION="pr${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-us-west-2
-          ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
+          echo y | ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           echo "Templates artifact:"
           cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'
@@ -186,7 +186,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=sample@example.com
           REGION=us-west-2
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
@@ -212,7 +212,6 @@ jobs:
           aws cloudformation create-stack --stack-name $MIE_STACK_NAME --template-url $MIE_TEMPLATE --region $REGION --parameters ParameterKey=DeployTestResources,ParameterValue=true ParameterKey=MaxConcurrentWorkflows,ParameterValue=10 ParameterKey=DeployAnalyticsPipeline,ParameterValue=true ParameterKey=EnableXrayTrace,ParameterValue=true --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $MIE_STACK_NAME
           exit 0
-
 
   deploy-content-localization-dev-us-west-2:
     needs:
@@ -266,9 +265,9 @@ jobs:
             fi
           fi
 
-          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
 
-          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=ElasticSearchNodeSize,ParameterValue=t3.small.elasticsearch --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $CLO_TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
 

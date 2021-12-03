@@ -1,3 +1,18 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
+
 <template>
   <b-container fluid>
     <b-col>
@@ -223,7 +238,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "red";  
+        ctx.strokeStyle = "red";
         ctx.font = "15px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -283,7 +298,7 @@
       },
       async fetchAssetData () {
           let query = 'AssetId:'+this.$route.params.asset_id+' Confidence:>'+this.Confidence+' Operator:'+this.operator;
-          let apiName = 'contentAnalysisElasticsearch';
+          let apiName = 'search';
           let path = '/_search';
           let apiParams = {
             headers: {'Content-Type': 'application/json'},
@@ -407,7 +422,7 @@
             if (record.DetectedText === this.selectedWord) {
                   saveTimestamp(millisecond);
             }
-          } 
+          }
           else {
             // No word has been selected, so enumerate timestamps for all word names.
             // Iterate through bounding boxes if present.

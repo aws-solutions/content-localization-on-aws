@@ -1,5 +1,18 @@
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
 import pytest
 import time
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -19,7 +32,7 @@ def browser():
     chrome_options.add_argument("--start-maximized")
     ####### TESTING - remove headless to see browser actions
     
-    browser = webdriver.Chrome(chrome_options=chrome_options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
     return browser
 
 # Test the happy path through the app by loading and verifying data after a successful workflow run.  No
@@ -47,14 +60,13 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
 
     # Analyze view
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
-    # Speech recognition
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
+    # Speech recognition is the default tab
     time.sleep(5)
                                    
     ####### SUBTITLES COMPONENT
     # Navigate to subtitles and wait for them to load
     #browser.find_elements_by_link_text("Subtitles")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 
@@ -108,12 +120,11 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     # Reload the page and check for the edits
     # Analyze view
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
-    # Speech recognition
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[1]/ul/li[2]/a").click()
-    time.sleep(5)
+    # Speech recognition is the default tab
+    time.sleep(10)
     # Navigate to subtitles
     #browser.find_elements_by_link_text("Subtitles")[0].click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[2]/div/div[1]/ul/li[2]/a").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[1]/div/div/div[2]/div[1]/div/div[1]/ul/li[2]/a").click()
     wait = WebDriverWait(browser, 120)
     wait.until(EC.presence_of_element_located((By.ID, "caption0")))
 

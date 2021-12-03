@@ -1,5 +1,15 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 import base64
@@ -642,9 +652,11 @@ def process_webcaptions(asset, workflow, results, language_code):
     metadata_type = "webcaptions"+"_"+language_code
 
     webcaptions = metadata
-    webcaptions["workflow"] = workflow
+    webcaptions["Workflow"] = workflow
+    webcaptions["Operator"] = metadata_type
     es = connect_es(es_endpoint)
     index_document(es, asset, metadata_type, webcaptions)
+
 
 def process_transcribe(asset, workflow, results, type):
     metadata = json.loads(results)
@@ -673,7 +685,8 @@ def process_transcribe(asset, workflow, results, type):
 
         item["confidence"] = confidence
         item["content"] = content
-        item["workflow"] = workflow
+        item["Workflow"] = workflow
+        item["Operator"] = "transcribe"
 
         transcribe_items.append(item)
 

@@ -1,3 +1,17 @@
+/*
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+*/
 import Vue from 'vue'
 import VueHighlightJS from 'vue-highlightjs'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
@@ -35,8 +49,8 @@ getRuntimeConfig().then(function(json) {
     API: {
       endpoints: [
         {
-          name: "contentAnalysisElasticsearch",
-          endpoint: json.ELASTICSEARCH_ENDPOINT,
+          name: "search",
+          endpoint: json.SEARCH_ENDPOINT,
           service: "es",
           region: json.AWS_REGION
         },
@@ -62,7 +76,7 @@ getRuntimeConfig().then(function(json) {
     data() {
       return {
         // Distribute runtime configs into every Vue component
-        ELASTICSEARCH_ENDPOINT: json.ELASTICSEARCH_ENDPOINT,
+        SEARCH_ENDPOINT: json.SEARCH_ENDPOINT,
         DATAPLANE_API_ENDPOINT: json.DATAPLANE_API_ENDPOINT,
         DATAPLANE_BUCKET: json.DATAPLANE_BUCKET,
         WORKFLOW_API_ENDPOINT: json.WORKFLOW_API_ENDPOINT,

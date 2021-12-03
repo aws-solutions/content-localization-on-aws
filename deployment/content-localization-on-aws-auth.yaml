@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - user authentication infrastructure"
+Description: "Content Localization on AWS %%VERSION%% - user authentication infrastructure"
 
 Parameters:
   AdminEmail:
@@ -11,8 +11,8 @@ Parameters:
   DataplaneApiId:
     Description: REST API ID of the MIE Dataplane API
     Type: String
-  ElasticDomainArn:
-    Description: ARN of the Content Localization ES Domain
+  SearchDomainArn:
+    Description: ARN of the Opensearch Domain
     Type: String
   DataplaneBucket:
     Description: Name of the MIE dataplane bucket
@@ -37,7 +37,7 @@ Resources:
               "#/stacks/stackinfo?stackId=",
               Ref: ParentStackName
           ]]
-          EmailSubject: "Welcome to AWS Content Localization"
+          EmailSubject: "Welcome to Content Localization on AWS"
       EmailConfiguration:
         EmailSendingAccount: 'COGNITO_DEFAULT'
       AutoVerifiedAttributes: ['email']
@@ -206,8 +206,8 @@ Resources:
   ContentAnalysisAdminGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      Description: 'User group for AWS Content Localization Admins'
-      RoleArn: !GetAtt ContentAnalysisAdminRole.Arn
+      Description: 'User group for Content Localization on AWS Admins'
+      RoleArn: !GetAtt ContentLocalizationAdminRole.Arn
       UserPoolId: !Ref ContentAnalysisUserPool
       GroupName: !Sub "${AWS::StackName}-Admins"
 
@@ -221,7 +221,7 @@ Resources:
       UserPoolId: !Ref ContentAnalysisUserPool
 
   # TODO: Need to add S3 put access to dataplane bucket on public/upload/*
-  ContentAnalysisAdminRole:
+  ContentLocalizationAdminRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -269,10 +269,11 @@ Resources:
                   },
                   {
                     "Action": [
-                      "es:*"
+                      "es:ESHttpPost",
+                      "es:ESHttpGet"
                     ],
                     "Effect": "Allow",
-                    "Resource": "${esdomain}/*"
+                    "Resource": "${searchdomain}/*"
                   }
                 ]
               }
@@ -281,7 +282,7 @@ Resources:
               account: !Ref "AWS::AccountId",
               wfapi: !Ref WorkflowApiId,
               dataapi: !Ref DataplaneApiId,
-              esdomain: !Ref ElasticDomainArn,
+              searchdomain: !Ref SearchDomainArn,
               dataplanebucket: !Ref DataplaneBucket
             }
 
@@ -295,7 +296,7 @@ Resources:
 
 Outputs:
   AdminRoleArn:
-    Value: !GetAtt ContentAnalysisAdminRole.Arn
+    Value: !GetAtt ContentLocalizationAdminRole.Arn
   UserPoolId:
     Value: !Ref ContentAnalysisUserPool
   IdentityPoolId:

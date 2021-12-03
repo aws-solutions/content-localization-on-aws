@@ -1,3 +1,17 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
 <template>
   <div>
     <div class="headerTextBackground">
@@ -81,24 +95,24 @@
                     :current-page="currentPage"
                     :per-page="perPage"
                   >
-                    <template v-slot:cell(Thumbnail)="data">
+                    <template #cell(Thumbnail)="data">
                       <VideoThumbnail
                         :thumbnail-i-d="data.item.thumbnailID"
                         :signed-url="data.item.signedUrl"
                       />
                     </template>
-                    <template v-slot:cell(Created)="data">
+                    <template #cell(Created)="data">
                       {{ data.item.Created.toLocaleDateString() }}<br>
                       {{ data.item.Created.toLocaleTimeString() }}
                     </template>
-                    <template v-slot:cell(status)="data">
+                    <template #cell(status)="data">
                       <!-- open link in new tab -->
                       <a v-if="data.item.status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.status }}</a>
                       <div v-if="data.item.status === 'Queued'">
                         {{ data.item.status }}
                       </div>
                     </template>
-                    <template v-slot:cell(Actions)="data">
+                    <template #cell(Actions)="data">
                       <b-link
                         :href="(`/analysis/${data.item.asset_id}`)"
                       >
@@ -117,7 +131,7 @@
                     v-if="noAssets"
                   >
                     <p>
-                      Looks like no assets have been uploaded! Try uploading <a href="upload">here</a>.
+                      Looks like no assets have been uploaded! Try uploading <a href="upload" rel="noopener noreferrer">here</a>.
                     </p>
                   </div>
                   <div
@@ -227,7 +241,7 @@
     },
     methods: {
       openWindow: function (url) {
-        window.open(url);
+        window.open(url, "_blank", "noopener,noreferer");
       },
       async deleteAsset(assetId) {
         let apiName = 'mieDataplaneApi'
@@ -246,7 +260,7 @@
         }
       },
       async elasticsearchQuery (query) {
-            let apiName = 'contentAnalysisElasticsearch';
+            let apiName = 'search';
             let path = '/_search';
             let apiParams = {
               headers: {'Content-Type': 'application/json'},

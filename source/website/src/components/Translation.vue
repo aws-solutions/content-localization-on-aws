@@ -1,3 +1,18 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
+
 <template>
   <div>
     <div v-if="noTranslation === true">
@@ -33,7 +48,7 @@
       <b-form-group>
         <b-form-radio-group
           v-model="selected_lang_code"
-          :options="translationsCollection"
+          :options="alphabetized_language_collection"
           @change="getWebCaptions"
         ></b-form-radio-group>
       </b-form-group>
@@ -49,7 +64,7 @@
           :fields="webCaptions_fields"
         >
           <!-- adjust column width for captions -->
-          <template v-slot:table-colgroup="scope">
+          <template #table-colgroup="scope">
             <col
               v-for="field in scope.fields"
               :key="field.key"
@@ -58,11 +73,11 @@
           </template>
           <!-- reformat timestamp to hh:mm:ss and -->
           <!-- disable timestamp edits if workflow status is not Complete -->
-          <template v-slot:cell(timeslot)="data">
+          <template #cell(timeslot)="data">
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height start-time-field " :value="toHHMMSS(data.item.start)" @change="new_time => changeStartTime(new_time, data.index)" />
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height stop-time-field " :value="toHHMMSS(data.item.end)" @change="new_time => changeEndTime(new_time, data.index)" />
           </template>
-          <template v-slot:cell(caption)="data">
+          <template #cell(caption)="data">
             <b-container class="p-0">
               <b-row no-gutters>
                 <b-col cols="10">
@@ -137,11 +152,12 @@
         <p>Are you sure you want to permanently delete the custom terminology <b>{{ customTerminologySelected }}</b>?</p>
       </b-modal>
       <b-modal
-          ref="terminology-modal"
-          size="lg"
-          title="Custom Terminology Editor"
-          :ok-disabled="validTerminologyName === false || (customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
-          @cancel="customTerminologySelected=[]; customTerminologySaved=[];">
+        ref="terminology-modal"
+        size="lg"
+        title="Custom Terminology Editor"
+        :ok-disabled="validTerminologyName === false || (customTerminologyCreateNew === '') || customTerminologyUnion.length === 0 || validCSV === false" ok-title="Save" @ok="saveTerminology()"
+        @cancel="customTerminologySelected=[]; customTerminologySaved=[];"
+      >
         <div v-if="customTerminologyList.length > 0">
           Load an existing terminology:
         </div>
@@ -199,11 +215,11 @@
           small
           show-empty
         >
-          <template #empty="scope">
+          <template #default>
             No data
           </template>
           <!-- Here we define the cell contents for the terminology table: -->
-          <template v-slot:cell()="{ item, index, field: { key } }">
+          <template #cell()="{ item, index, field: { key } }">
             <!-- The v-if/else here is used to show the add / delete row buttons
             only in the right-most column. -->
             <div v-if="key === customTerminologyLastTableField">
@@ -244,9 +260,9 @@
             </div>
           </template>
           <!-- Here we show buttons to add / remove languages from custom terminology: -->
-          <template v-slot:table-caption>
+          <template #table-caption>
             <span style="position:absolute; right: 10px">
-<!--
+              <!--
 Uncomment the following buttons to get options for adding or removing languages to the terminology table:
 -->
               <b-button v-if="customTerminologySelected !== ''" v-b-tooltip.hover.top title="Add a new language" variant="outline-secondary" class="btn-xs" @click="add_language()">Add Language</b-button>&nbsp;
@@ -257,7 +273,7 @@ Uncomment the following buttons to get options for adding or removing languages 
         <div v-if="validTerminologyName === false" style="color:red">
           Invalid terminology name. Valid characters are a-z, A-Z, and 0-9. Max length is 200.
         </div>
-        <div v-else-if="(customTerminologyUnsaved.length !== 0 || customTerminologySaved.length !== 0)  && customTerminologyCreateNew === ''" style="color:red">
+        <div v-else-if="(customTerminologyUnsaved.length !== 0 || customTerminologySaved.length !== 0) && customTerminologyCreateNew === ''" style="color:red">
           Specify a terminology name to save as.<br>
         </div>
         <div v-else-if="validCSV === false" style="color:red">
@@ -270,10 +286,10 @@ Uncomment the following buttons to get options for adding or removing languages 
       <b-modal ref="add-language-modal" title="Add Language" ok-title="Save" :ok-disabled="newLanguageCode === ''" @ok="add_language_request()">
         <p>Select language to add:</p>
         <b-form-select
-            v-model="newLanguageCode"
-            placeholder="language code"
-            :options="translateLanguages"
-            size="sm"
+          v-model="newLanguageCode"
+          placeholder="language code"
+          :options="translateLanguages"
+          size="sm"
         />
       </b-modal>
       <b-modal ref="remove-language-modal" title="Remove Language" ok-title="Remove" :ok-disabled="removeLanguageCode === ''" @ok="remove_language_request()">
@@ -457,6 +473,8 @@ export default {
     customTerminologyName: function () {
       if (this.customTerminologyCreateNew !== "")
         return this.customTerminologyCreateNew
+      else
+        return null
     },
     inputListeners: function () {
       var vm = this
@@ -646,6 +664,8 @@ export default {
           "ERROR: Failed to get languages."
         );
         console.log(error)
+        this.noTranslation = true
+        this.isBusy = false
       }
 
     },
@@ -1070,7 +1090,7 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
-        this.sourceLanguageCode = response.data.Configuration.WebCaptionsStage2.WebCaptions.SourceLanguageCode
+        this.sourceLanguageCode = response.data.Configuration.WebCaptions.WebCaptions.SourceLanguageCode
         this.terminology_used = response.data.Configuration.Translate.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
         this.parallel_data_used = response.data.Configuration.Translate.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow
@@ -1444,6 +1464,8 @@ export default {
             this.isBusy = false
             this.noTranscript = true
           }
+          console.log("response.data")
+          console.log(response.data)
           if (response.data.results) {
             cursor = response.data.cursor;
             this.webCaptions = response.data.results["WebCaptions"]
@@ -1457,6 +1479,7 @@ export default {
       } catch (error) {
         this.showDataplaneAlert = true
         console.log(error)
+        this.isBusy = false
       }
     },
     add_row(index) {

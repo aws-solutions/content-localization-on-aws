@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Content Localization - Deploys the AWS Content Localization website resources"
+Description: "Content Localization on AWS %%VERSION%% - Deploys the Content Localization on AWS website resources"
 
 Parameters:
   DataplaneEndpoint:
     Type: String
   WorkflowEndpoint:
     Type: String
-  ElasticEndpoint:
+  SearchEndpoint:
     Type: String
   DataplaneBucket:
     Type: String
@@ -21,8 +21,8 @@ Mappings:
   SourceCode:
     General:
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
-      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
-      WebsitePrefix: "aws-content-localization/%%VERSION%%/website"
+      CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
+      WebsitePrefix: "content-localization-on-aws/%%VERSION%%/website"
 
 Resources:
   # Web application resources
@@ -127,7 +127,9 @@ Resources:
           - Effect: Deny
             Principal: "*"
             Action: "*"
-            Resource: !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
+            Resource:
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}"
             Condition:
               Bool:
                 aws:SecureTransport: false
@@ -294,7 +296,7 @@ Resources:
         Variables:
           DataplaneEndpoint: !Ref DataplaneEndpoint
           WorkflowEndpoint: !Ref WorkflowEndpoint
-          ElasticEndpoint: !Ref ElasticEndpoint
+          SearchEndpoint: !Ref SearchEndpoint
           DataplaneBucket: !Ref DataplaneBucket
           UserPoolId: !Ref UserPoolId
           IdentityPoolId: !Ref IdentityPoolId

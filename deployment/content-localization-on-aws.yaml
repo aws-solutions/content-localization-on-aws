@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "(SO0164) AWS Content Localization - Deploys the AWS Content Localization Application"
+Description: "(SO0164) Content Localization on AWS Version %%VERSION%% - Deploys the Content Localization on AWS Application"
 
 Parameters:
   AdminEmail:
-    Description: "Email address of the AWS Content Localization administrator"
+    Description: "Email address of the Content Localization on AWS administrator"
     Type: String
-  ElasticSearchNodeSize:
-    Description: "The node type to be provisioned for the Elasticsearch cluster"
+  OpensearchNodeSize:
+    Description: "The node type to be provisioned for the Opensearch cluster"
     Type: String
-    Default: "t3.small.elasticsearch"
+    Default: "t3.small.search"
     AllowedValues:
-      - "t3.small.elasticsearch"
-      - "m4.large.elasticsearch"
-      - "m4.xlarge.elasticsearch"
-      - "c4.large.elasticsearch"
-      - "c4.xlarge.elasticsearch"
-      - "r4.large.elasticsearch"
-      - "r4.xlarge.elasticsearch"
+      - "t3.small.search"
+      - "m4.large.search"
+      - "m4.xlarge.search"
+      - "c4.large.search"
+      - "c4.xlarge.search"
+      - "r4.large.search"
+      - "r4.xlarge.search"
 
 Conditions:
   EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], Yes]
@@ -28,9 +28,9 @@ Mappings:
   Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
-      TemplateKeyPrefix: "aws-content-localization/%%VERSION%%"
+      TemplateKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
-      CodeKeyPrefix: "aws-content-localization/%%VERSION%%"
+      CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       Version: "%%VERSION%%"
   AnonymousData:
     SendAnonymousData:
@@ -56,12 +56,12 @@ Resources:
         MaxConcurrentWorkflows: 5
         EnableXrayTrace: Yes
         SendAnonymousData: !FindInMap [AnonymousData,SendAnonymousData,Data]
-        SolutionId: SO0042
+        SolutionId: SO0164
         SolutionVersion: "%%VERSION%%"
 
-  # Deploy Elasticsearch
+  # Deploy Opensearch
 
-  ElasticsearchStack:
+  OpensearchStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
@@ -76,11 +76,11 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-elasticsearch.template"
+          - "/content-localization-on-aws-opensearch.template"
       Parameters:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
-        NodeType: !Ref ElasticSearchNodeSize
+        NodeType: !Ref OpensearchNodeSize
 
   # Deploy Auth stack
 
@@ -99,12 +99,12 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-auth.template"
+          - "/content-localization-on-aws-auth.template"
       Parameters:
         AdminEmail: !Ref AdminEmail
         WorkflowApiId: !GetAtt MieStack.Outputs.WorkflowApiRestID
         DataplaneApiId: !GetAtt MieStack.Outputs.DataplaneApiRestID
-        ElasticDomainArn: !GetAtt ElasticsearchStack.Outputs.DomainArn
+        SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainArn
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         ParentStackName: !Ref MieStack
 
@@ -123,11 +123,11 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-web.template"
+          - "/content-localization-on-aws-web.template"
       Parameters:
         DataplaneEndpoint: !GetAtt MieStack.Outputs.DataplaneApiEndpoint
         WorkflowEndpoint: !GetAtt MieStack.Outputs.WorkflowApiEndpoint
-        ElasticEndpoint: !GetAtt ElasticsearchStack.Outputs.ElasticEndpoint
+        SearchEndpoint: !GetAtt OpensearchStack.Outputs.DomainEndpoint
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         UserPoolId: !GetAtt AuthStack.Outputs.UserPoolId
         IdentityPoolId: !GetAtt AuthStack.Outputs.IdentityPoolId
@@ -150,7 +150,7 @@ Resources:
             - Application
             - SourceCode
             - TemplateKeyPrefix
-          - "/aws-content-localization-video-workflow.template"
+          - "/content-localization-on-aws-video-workflow.template"
       Parameters:
         WorkflowCustomResourceArn:
           Fn::GetAtt:

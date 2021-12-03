@@ -57,7 +57,6 @@
         Upload and Run Workflow
       </b-button>
       <br>
-      <!-- TODO: add a drop-down option in this modal to choose update workflow, then update workflowConfigWithInput to include the appropriate workflow config -->
       <b-button
           :pressed="false"
           size="sm"
@@ -158,7 +157,7 @@
                 </b-form-checkbox-group>
                 <div v-if="compatibleLanguageModels.length > 0 && enabledOperators.includes('Transcribe')"><b>Language Models:</b>
                   <b-form-select
-                      v-model="languageModel"
+                      v-model="customLanguageModel"
                       :options="compatibleLanguageModels"
                   >
                     <template v-slot:first>
@@ -209,12 +208,13 @@
                 ></b-form-input>
                 <div v-if="enabledOperators.includes('Translate')">
                   <!-- Show only those custom terminologies whose source language match
-                   the source language that the user specified for Transcribe. -->
+ the source language that the user specified for Transcribe. -->
                   <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
-                    <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
+                    <div v-if="customTerminology.length > 0"><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
+                    <div v-else><b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)</div>
                     <b-form-select
                         v-model="customTerminology"
-                        :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                        :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')'  , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
                         multiple
                     >
                     </b-form-select>
@@ -271,13 +271,13 @@
                   <div v-if="overlappingParallelData.length > 0" style="color:red">
                     You must not select Parallel Data that define translations for the same language. The following Parallel Data overlap:
                     <ul id="overlapping_parallel_data">
-                      <li v-for="parallel_data in overlappingParallelData" :key="parallel_data">
+                      <li v-for="parallel_data in overlappingParallelData">
                         {{ parallel_data }}
                       </li>
                     </ul>
                   </div>
                 </div>
-                <div v-if="enabledOperators.includes('Translate')">
+                <div v-if="enabledOperators.includes('Translate')" >
                   <b-form-group>
                     <b>Target Languages:</b>
                     <div v-if="textFormError" style="color:red">
@@ -448,26 +448,21 @@ export default {
       customLanguageModel: null,
       customLanguageModelList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "auto",
+      transcribeLanguage: "en-US",
       transcribeLanguages: [
-        {text: '(auto detect)', value: 'auto'},
-        {text: 'Afrikaans', value: 'af-ZA'},
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
-        {text: 'Chinese, Mandarin (China)', value: 'zh-CN'},
-        {text: 'Chinese, Mandarin (Taiwan)', value: 'zh-TW'},
-        {text: 'Danish', value: 'da-DK'},
+        {text: 'Chinese Mandarin', value: 'zh-CN'},
         {text: 'Dutch', value: 'nl-NL'},
         {text: 'English, Australian', value: 'en-AU'},
         {text: 'English, British', value: 'en-GB'},
         {text: 'English, Indian-accented', value: 'en-IN'},
         {text: 'English, Irish', value: 'en-IE'},
-        {text: 'English, New Zealand', value: 'en-NZ'},
         {text: 'English, Scottish', value: 'en-AB'},
-        {text: 'English, South African', value: 'en-ZA'},
         {text: 'English, US', value: 'en-US'},
         {text: 'English, Welsh', value: 'en-WL'},
-        {text: 'Farsi', value: 'fa-IR'},
+        // Disabled until 'fa' supported by AWS Translate
+        // {text: 'Farsi', value: 'fa-IR'},
         {text: 'French', value: 'fr-FR'},
         {text: 'French, Canadian', value: 'fr-CA'},
         {text: 'German', value: 'de-DE'},
@@ -485,8 +480,8 @@ export default {
         {text: 'Spanish', value: 'es-ES'},
         {text: 'Spanish, US', value: 'es-US'},
         {text: 'Tamil', value: 'ta-IN'},
-        {text: 'Telugu', value: 'te-IN'},
-        {text: 'Thai', value: 'th-th'},
+        // Disabled until 'te' supported by AWS Translate
+        // {text: 'Telugu', value: 'te-IN'},
         {text: 'Turkish', value: 'tr-TR'},
       ],
       translateLanguages: [
@@ -494,14 +489,13 @@ export default {
         {text: 'Albanian', value: 'sq'},
         {text: 'Amharic', value: 'am'},
         {text: 'Arabic', value: 'ar'},
-        {text: 'Armenian', value: 'hy'},
         {text: 'Azerbaijani', value: 'az'},
         {text: 'Bengali', value: 'bn'},
         {text: 'Bosnian', value: 'bs'},
         {text: 'Bulgarian', value: 'bg'},
-        {text: 'Catalan', value: 'ca'},
         {text: 'Chinese (Simplified)', value: 'zh'},
-        {text: 'Chinese (Traditional)', value: 'zh-TW'},
+        // AWS Translate does not support translating from zh to zh-TW
+        // {text: 'Chinese (Traditional)', value: 'zh-TW'},
         {text: 'Croatian', value: 'hr'},
         {text: 'Czech', value: 'cs'},
         {text: 'Danish', value: 'da'},
@@ -509,60 +503,43 @@ export default {
         {text: 'Dutch', value: 'nl'},
         {text: 'English', value: 'en'},
         {text: 'Estonian', value: 'et'},
-        {text: 'Farsi (Persian)', value: 'fa'},
-        {text: 'Filipino (Tagalog)', value: 'tl'},
         {text: 'Finnish', value: 'fi'},
         {text: 'French', value: 'fr'},
         {text: 'French (Canadian)', value: 'fr-CA'},
         {text: 'Georgian', value: 'ka'},
         {text: 'German', value: 'de'},
         {text: 'Greek', value: 'el'},
-        {text: 'Gujarati', value: 'gu'},
-        {text: 'Haitian Creole', value: 'ht'},
         {text: 'Hausa', value: 'ha'},
         {text: 'Hebrew', value: 'he'},
         {text: 'Hindi', value: 'hi'},
         {text: 'Hungarian', value: 'hu'},
-        {text: 'Icelandic', value: 'is'},
         {text: 'Indonesian', value: 'id'},
         {text: 'Italian', value: 'it'},
-        {text: 'Irish', value: 'ga'},
         {text: 'Japanese', value: 'ja'},
-        {text: 'Kannada', value: 'kn'},
-        {text: 'Kazakh', value: 'kk'},
         {text: 'Korean', value: 'ko'},
         {text: 'Latvian', value: 'lv'},
         {text: 'Malay', value: 'ms'},
-        {text: 'Malayalam', value: 'ml'},
-        {text: 'Maltese', value: 'mt'},
-        {text: 'Marathi', value: 'mr'},
-        {text: 'Mongolian', value: 'mn'},
         {text: 'Norwegian', value: 'no'},
+        {text: 'Persian', value: 'fa'},
         {text: 'Pashto', value: 'ps'},
         {text: 'Polish', value: 'pl'},
         {text: 'Portuguese', value: 'pt'},
-        {text: 'Portuguese (Portugal)', value: 'pt-PT'},
-        {text: 'Punjabi', value: 'pa'},
         {text: 'Romanian', value: 'ro'},
         {text: 'Russian', value: 'ru'},
         {text: 'Serbian', value: 'sr'},
-        {text: 'Sinhala', value: 'si'},
         {text: 'Slovak', value: 'sk'},
         {text: 'Slovenian', value: 'sl'},
         {text: 'Somali', value: 'so'},
         {text: 'Spanish', value: 'es'},
-        {text: 'Spanish (Mexico)', value: 'es-MX'},
         {text: 'Swahili', value: 'sw'},
         {text: 'Swedish', value: 'sv'},
+        {text: 'Tagalog', value: 'tl'},
         {text: 'Tamil', value: 'ta'},
-        {text: 'Telugu', value: 'te'},
         {text: 'Thai', value: 'th'},
         {text: 'Turkish', value: 'tr'},
         {text: 'Ukrainian', value: 'uk'},
         {text: 'Urdu', value: 'ur'},
-        {text: 'Uzbek', value: 'uz'},
         {text: 'Vietnamese', value: 'vi'},
-        {text: 'Welsh', value: 'cy'},
       ],
       selectedTranslateLanguages: [],
       uploadErrorMessage: "",
@@ -780,12 +757,12 @@ export default {
       const TransformText = {
         WebToSRTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         WebToVTTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         PollyWebCaptions: {
@@ -829,7 +806,7 @@ export default {
     workflowConfigWithInput() {
       // This function is just used to pretty print the rest api
       // for workflow execution in a popup modal
-      let data = JSON.parse(JSON.stringify(this.videoWorkflowConfig));
+      let data = JSON.parse(JSON.stringify(this.workflow_config));
       data["Input"] = {
         "Media": {
           "Video": {
@@ -842,17 +819,7 @@ export default {
     }
   },
   watch: {
-    enabledOperators() {
-      // This function will clear the target languages selected in the voerro-tags-input.
-      // We need to do this in order to ensure no target languages are specified in the
-      // WebToSRTCaptions and WebToVTTCaptions operator configurations if the user
-      // enabled Translate but then disabled it before running the workflow.
-      const vm = this
-      if (!this.enabledOperators.includes("Translate") ) {
-        vm.selectedTranslateLanguages = [];
-      }
-    },
-    transcribeLanguage() {
+    transcribeLanguage: function() {
       // Transcribe will fail if the custom vocabulary language
       // or custom language model does not match the transcribe job language.
       // So, this function prevents users from selecting vocabularies
@@ -906,7 +873,6 @@ export default {
         "technicalCueDetection",
         "shotDetection"
       ];
-      console.log(this.enabledOperators)
     },
     clearAll: function() {
       this.enabledOperators = [];
@@ -927,7 +893,7 @@ export default {
     {
       let errorMessage = '';
       console.log(file.type)
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -945,7 +911,7 @@ export default {
     fileRemoved: function( file )
     {
       let errorMessage = '';
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -994,6 +960,7 @@ export default {
             }
           }
 
+
           // Add optional parameters to workflow config:
           if (this.customVocabulary !== null) {
             this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocabulary
@@ -1006,9 +973,6 @@ export default {
           }
           if (this.parallelData != null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
-          }
-          if (this.customVocab !== null) {
-            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
@@ -1186,7 +1150,6 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        console.log(response)
         this.parallelDataList  = response.data['ParallelDataPropertiesList'].map(parallel_data => {
           return {
             'Name': parallel_data.Name,
@@ -1221,6 +1184,7 @@ export default {
             notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
           }
         })
+
       } catch (error) {
         console.log("ERROR: Failed to get language models. Check Workflow API logs.");
         console.log(error)

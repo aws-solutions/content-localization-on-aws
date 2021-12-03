@@ -15,19 +15,22 @@
 
 <template>
   <div>
+    <div v-if="noTranscript === true">
+      No transcript found for this asset
+    </div>
     <b-alert
-        v-model="showSaveNotification"
-        variant="success"
-        dismissible
-        fade
+      v-model="showSaveNotification"
+      variant="success"
+      dismissible
+      fade
     >
       {{ saveNotificationMessage }}
     </b-alert>
     <b-alert
-        v-model="showVocabularyNotification"
-        :variant="vocabularyNotificationStatus"
-        dismissible
-        fade
+      v-model="showVocabularyNotification"
+      :variant="vocabularyNotificationStatus"
+      dismissible
+      fade
     >
       {{ vocabularyNotificationMessage }}
     </b-alert>
@@ -37,14 +40,14 @@
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
             <b-form-radio-group
-                id="custom-vocab-selection"
-                v-model="customVocabularySelected"
-                name="custom-vocab-list"
-                :options="customVocabularyList"
-                text-field="name_and_status"
-                value-field="name"
-                disabled-field="notEnabled"
-                stacked
+              id="custom-vocab-selection"
+              v-model="customVocabularySelected"
+              name="custom-vocab-list"
+              :options="customVocabularyList"
+              text-field="name_and_status"
+              value-field="name"
+              disabled-field="notEnabled"
+              stacked
             >
             </b-form-radio-group>
           </b-form-group>
@@ -64,9 +67,9 @@
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
           <b-form-select
-              v-model="vocabulary_language_code"
-              :options="transcribeLanguages"
-              size="sm"
+            v-model="vocabulary_language_code"
+            :options="transcribeLanguages"
+            size="sm"
           />
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
@@ -85,17 +88,17 @@
         </div>
       </div>
       <b-table
-          :items="customVocabularyUnion"
-          :fields="customVocabularyFields"
-          selectable
-          select-mode="single"
-          fixed responsive="sm"
-          bordered
-          small
+        :items="customVocabularyUnion"
+        :fields="customVocabularyFields"
+        selectable
+        select-mode="single"
+        fixed responsive="sm"
+        bordered
+        small
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
-        <template #default>
+        <template v-slot:thead-top="data">
           <b-tr>
             <b-th colspan="1"></b-th>
             <b-th colspan="4" variant="secondary" class="text-center">
@@ -103,7 +106,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-th>
           </b-tr>
         </template>
-        <template #cell(original_phrase)="row">
+        <template v-slot:cell(original_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -115,7 +118,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template #cell(new_phrase)="row">
+        <template v-slot:cell(new_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -127,7 +130,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template #cell(sounds_like)="row">
+        <template v-slot:cell(sounds_like)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -139,7 +142,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template #cell(IPA)="row">
+        <template v-slot:cell(IPA)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -151,7 +154,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template #cell(display_as)="row">
+        <template v-slot:cell(display_as)="row">
           <b-row no-gutters>
             <b-col cols="9">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -198,8 +201,8 @@ to highlight the fields in the custom vocab schema. -->
     </b-modal>
     <div v-if="isBusy">
       <b-spinner
-          variant="secondary"
-          label="Loading..."
+        variant="secondary"
+        label="Loading..."
       />
       <p class="text-muted">
         (Loading...)
@@ -221,7 +224,7 @@ to highlight the fields in the custom vocab schema. -->
           :fields="webCaptions_fields"
         >
           <!-- adjust column width for captions -->
-          <template #table-colgroup="scope">
+          <template v-slot:table-colgroup="scope">
             <col
               v-for="field in scope.fields"
               :key="field.key"
@@ -230,11 +233,11 @@ to highlight the fields in the custom vocab schema. -->
           </template>
           <!-- reformat timestamp to hh:mm:ss and -->
           <!-- disable timestamp edits if workflow status is not Complete -->
-          <template #cell(timeslot)="data">
+          <template v-slot:cell(timeslot)="data">
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height start-time-field " :value="toHHMMSS(data.item.start)" @change="new_time => changeStartTime(new_time, data.index)" />
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height stop-time-field " :value="toHHMMSS(data.item.end)" @change="new_time => changeEndTime(new_time, data.index)" />
           </template>
-          <template #cell(caption)="data">
+          <template v-slot:cell(caption)="data">
             <b-container class="p-0">
               <b-row no-gutters>
                 <b-col cols="10">
@@ -346,6 +349,7 @@ export default {
       customVocabularyCreateNew: "",
       transcribe_language_code: "",
       vocabulary_language_code: "",
+      language_model_used: "",
       vocabulary_used: "",
       vocabulary_uri: null,
       webCaptions: [],
@@ -875,6 +879,10 @@ export default {
             operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
           }
         }
+        this.language_model_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.LanguageModelName
+        if (this.language_model_used) {
+          operator_info.push({"name": "Custom Language Model", "value": this.language_model_used})
+        }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
         this.getVttCaptions()
@@ -902,11 +910,12 @@ export default {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if(response.status == 200) {
             // save phrases from the currently selected vocabulary
-            this.customVocabularySaved = response.data.vocabulary.map(item => ({
+            this.customVocabularySaved = response.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
               original_phrase: "",
-              new_phrase: item["Phrase"],
-              sounds_like: item["SoundsLike"],
-              display_as: item["DisplayAs\r"]
+              new_phrase: Phrase,
+              sounds_like: SoundsLike,
+              IPA: IPA,
+              display_as: DisplayAs
             }));
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
@@ -953,7 +962,7 @@ export default {
             console.log("Workflow resumed")
             this.saveNotificationMessage += " and workflow resumed"
             this.pollWorkflowStatus()
-          }
+          }      
       } catch (error) {
         alert(
           "ERROR: Failed to restart workflow."

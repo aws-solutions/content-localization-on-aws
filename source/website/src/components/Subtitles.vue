@@ -762,8 +762,8 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         console.log(response.data)
-        this.sourceLanguageCode = response.data.Configuration.TranslateStage2.TranslateWebCaptions.SourceLanguageCode
-        this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.TranscribeVideo.TranscribeLanguage
+        this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
+        this.transcribe_language_code = response.data.Configuration.AnalyzeVideo.TranscribeVideo.TranscribeLanguage
         this.vocabulary_language_code = this.transcribe_language_code
         this.vocabulary_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName
         this.language_model_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.LanguageModelName
@@ -863,9 +863,9 @@ export default {
       }
     },
     disableUpstreamStages()  {
-      // This function disables all the operators in stages above TranslateStage2
+      // This function disables all the operators in stages above Translate
       let data = {
-        "Name": "VODSubtitlesVideoWorkflow",
+        "Name": "ContentLocalizationWorkflow",
         "Configuration": this.workflow_config
       }
       data["Input"] = {
@@ -882,8 +882,8 @@ export default {
         if ("End" in stage && stage["End"] == true){
               end = true
           }
-          // If the current stage is TranslateStage2 then end the loop.
-          else if (stage_name == "TranslateStage2") {
+          // If the current stage is Translate then end the loop.
+          else if (stage_name == "Translate") {
               end = true
           }
           // For all other stages disable all the operators in the stage
@@ -906,9 +906,9 @@ export default {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
       console.log(data)
-      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-      data["Configuration"]["TranslateStage2"]["TranslateWebCaptions"].Enabled = true;
-      data["Configuration"]["defaultPrelimVideoStage2"]["Thumbnail"].Enabled = true;
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].Enabled = true;
+      data["Configuration"]["PreprocessVideo"]["Thumbnail"].Enabled = true;
 
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'

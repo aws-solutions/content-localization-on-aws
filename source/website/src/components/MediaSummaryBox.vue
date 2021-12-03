@@ -69,8 +69,10 @@
                 {{ encoded_date }}
               </div>
               <div v-for="property in operator_info" :key="property.name">
-                <label>{{ property.name }}:</label>
-                {{ property.value }}
+                <div v-if="property.value !== ''">
+                  <label>{{ property.name }}:</label>
+                  {{ property.value }}
+                </div>
               </div>
             </b-col>
           </b-row>

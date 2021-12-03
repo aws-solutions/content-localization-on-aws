@@ -328,6 +328,7 @@ export default {
       customVocabularyCreateNew: "",
       transcribe_language_code: "",
       vocabulary_language_code: "",
+      language_model_used: "",
       vocabulary_used: "",
       vocabulary_uri: null,
       webCaptions: [],
@@ -765,11 +766,15 @@ export default {
         this.transcribe_language_code = response.data.Configuration.defaultAudioStage2.TranscribeVideo.TranscribeLanguage
         this.vocabulary_language_code = this.transcribe_language_code
         this.vocabulary_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName
+        this.language_model_used = response.data.Configuration.defaultAudioStage2.TranscribeVideo.LanguageModelName
         const operator_info = []
         const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
         operator_info.push({"name": "Source Language", "value": transcribe_language})
         if (this.vocabulary_used) {
           operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
+        }
+        if (this.language_model_used) {
+          operator_info.push({"name": "Custom Language Model", "value": this.language_model_used})
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()

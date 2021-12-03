@@ -102,14 +102,29 @@
                     <br>
                     Custom Vocabulary
                     <b-form-select
-                        v-model="customVocab"
+                        v-model="customVocabulary"
                         :options="customVocabularyList"
                         text-field="name_and_status"
                         value-field="name"
                         disabled-field="notEnabled"
                     >
                       <template v-slot:first>
-                        <b-form-select-option :value="null" disabled>
+                        <b-form-select-option :value="null">
+                          (optional)
+                        </b-form-select-option>
+                      </template>
+                    </b-form-select>
+                    <br>
+                    Custom Language Models
+                    <b-form-select
+                        v-model="customLanguageModel"
+                        :options="customLanguageModelList"
+                        text-field="name_and_status"
+                        value-field="Name"
+                        disabled-field="notEnabled"
+                    >
+                      <template v-slot:first>
+                        <b-form-select-option :value="null">
                           (optional)
                         </b-form-select-option>
                       </template>
@@ -126,7 +141,7 @@
                 </b-form-checkbox-group>
                 <div v-if="compatibleLanguageModels.length > 0 && enabledOperators.includes('Transcribe')"><b>Language Models:</b>
                   <b-form-select
-                      v-model="languageModel"
+                      v-model="customLanguageModel"
                       :options="compatibleLanguageModels"
                   >
                     <template v-slot:first>
@@ -350,13 +365,13 @@ export default {
       genericDataFilename: "",
       ComprehendEncryption: false,
       kmsKeyId: "",
-      customVocab: null,
+      customVocabulary: null,
       customTerminology: [],
       customTerminologyList: [],
       parallelData: [],
       parallelDataList: [],
-      languageModel: null,
-      languageModelsList: [],
+      customLanguageModel: null,
+      customLanguageModelList: [],
       existingSubtitlesFilename: "",
       transcribeLanguage: "en-US",
       transcribeLanguages: [
@@ -483,7 +498,7 @@ export default {
   computed: {
     compatibleLanguageModels() {
       // This function returns a list of language models that can be used for the language specified as the source language for Transcribe
-      return this.languageModelsList.filter(x => x.LanguageCode === this.transcribeLanguage).map( x => { return {'text': x.Name, 'value': {'Name': x.Name}}})
+      return this.customLanguageModelList.filter(x => x.LanguageCode === this.transcribeLanguage).map( x => { return {'text': x.Name, 'value': {'Name': x.Name}}})
     },
 
     overlappingTerminologies() {
@@ -756,10 +771,13 @@ export default {
   watch: {
     transcribeLanguage: function() {
       // Transcribe will fail if the custom vocabulary language
-      // does not match the transcribe job language.
+      // or custom language model does not match the transcribe job language.
       // So, this function prevents users from selecting vocabularies
-      // which don't match the selected Transcribe source language.
+      // or CLMs which don't match the selected Transcribe source language.
       this.customVocabularyList.map(item => {
+        item.notEnabled=(item.language_code !== this.transcribeLanguage)
+      })
+      this.customLanguageModelList.map(item => {
         item.notEnabled=(item.language_code !== this.transcribeLanguage)
       })
     }
@@ -894,15 +912,17 @@ export default {
 
 
           // Add optional parameters to workflow config:
+          if (this.customVocabulary !== null) {
+            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocabulary
+          }
+          if (this.customLanguageModel !== null) {
+            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.LanguageModelName = this.customLanguageModel
+          }
           if (this.customTerminology !== null) {
             this.workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
           if (this.parallelData != null) {
             this.workflow_config.Configuration.TranslateStage2.TranslateWebCaptions.ParallelDataNames = this.parallelData
-          }
-          if (this.customVocab !== null) {
-            //workflow_config.Configuration.defaultAudioStage2.Transcribe.VocabularyName = this.customVocab
-            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptionsStage2.WebCaptions){
@@ -1033,13 +1053,6 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.customTerminologyList  = response.data['TerminologyPropertiesList']
-        // .map(terminology => {
-        //   return {
-        //     'Name': terminology.Name,
-        //     'SourceLanguageCode': terminology.SourceLanguageCode,
-        //     'TargetLanguageCodes': terminology.TargetLanguageCodes
-        //   }
-        // })
       } catch (error) {
         alert(
             "ERROR: Failed to start workflow. Check Workflow API logs."
@@ -1119,14 +1132,18 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        this.languageModelsList  = response.data['Models'].map(models => {
+        this.customLanguageModelList = response.data["Models"].map(models => {
           return {
-            'Name': models.ModelName,
-            'LanguageCode': models.LanguageCode,
-            'ModelStatus': models.ModelStatus,
-            'FailureReason': models.FailureReason,
+            name: models.ModelName,
+            status: models.ModelStatus,
+            language_code: models.LanguageCode,
+            name_and_status: models.ModelStatus === "COMPLETED" ?
+                models.ModelName + " (" + models.LanguageCode + ")" :
+                models.ModelName + " [" + models.ModelStatus + "]",
+            notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
           }
         })
+
       } catch (error) {
         console.log("ERROR: Failed to get language models. Check Workflow API logs.");
         console.log(error)

@@ -52,9 +52,10 @@
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
-            Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-            Delete
-          </b-button>
+            Delete the selected vocabulary (optional): 
+            <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
+              Delete
+            </b-button>
           </div>
         </b-col>
         <b-col>
@@ -98,7 +99,7 @@
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
-        <template v-slot:thead-top="data">
+        <template #thead-top="">
           <b-tr>
             <b-th colspan="1"></b-th>
             <b-th colspan="4" variant="secondary" class="text-center">
@@ -106,7 +107,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-th>
           </b-tr>
         </template>
-        <template v-slot:cell(original_phrase)="row">
+        <template #cell(original_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -118,7 +119,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(new_phrase)="row">
+        <template #cell(new_phrase)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -130,7 +131,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(sounds_like)="row">
+        <template #cell(sounds_like)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -142,7 +143,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(IPA)="row">
+        <template #cell(IPA)="row">
           <b-row no-gutters>
             <b-col cols="10">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -154,7 +155,7 @@ to highlight the fields in the custom vocab schema. -->
             </b-col>
           </b-row>
         </template>
-        <template v-slot:cell(display_as)="row">
+        <template #cell(display_as)="row">
           <b-row no-gutters>
             <b-col cols="9">
               <div v-if="row.index < customVocabularyUnsaved.length">
@@ -224,7 +225,7 @@ to highlight the fields in the custom vocab schema. -->
           :fields="webCaptions_fields"
         >
           <!-- adjust column width for captions -->
-          <template v-slot:table-colgroup="scope">
+          <template #table-colgroup="scope">
             <col
               v-for="field in scope.fields"
               :key="field.key"
@@ -233,11 +234,11 @@ to highlight the fields in the custom vocab schema. -->
           </template>
           <!-- reformat timestamp to hh:mm:ss and -->
           <!-- disable timestamp edits if workflow status is not Complete -->
-          <template v-slot:cell(timeslot)="data">
+          <template #cell(timeslot)="data">
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height start-time-field " :value="toHHMMSS(data.item.start)" @change="new_time => changeStartTime(new_time, data.index)" />
             <b-form-input :disabled="workflow_status !== 'Complete'" class="compact-height stop-time-field " :value="toHHMMSS(data.item.end)" @change="new_time => changeEndTime(new_time, data.index)" />
           </template>
-          <template v-slot:cell(caption)="data">
+          <template #cell(caption)="data">
             <b-container class="p-0">
               <b-row no-gutters>
                 <b-col cols="10">

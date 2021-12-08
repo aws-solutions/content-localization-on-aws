@@ -142,3 +142,9 @@ Resources:
           TranslateStage: !GetAtt TranslateStage.Name,
           TransformTextStage: !GetAtt TransformTextStage.Name
         }
+
+Outputs:
+  StateMachineArn:
+    Value: !GetAtt ContentLocalizationWorkflow.StateMachineArn
+  StateMachineName:
+    Value: !GetAtt ContentLocalizationWorkflow.Name

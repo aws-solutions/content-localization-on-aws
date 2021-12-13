@@ -132,7 +132,7 @@ class WorkflowAPI:
 
     def get_workflow_request(self, workflow):
         get_workflow_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/'+workflow, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/'+workflow, verify=True, auth=self.auth)
         return get_workflow_response
 
     # Workflow execution methods
@@ -141,21 +141,21 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /workflow/execution")
         create_workflow_execution_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_workflow_execution_response
 
     def get_workflow_execution_request(self, id):
         print("GET /workflow/execution/{}".format(id))
         get_workflow_execution_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=True, auth=self.auth)
 
         return get_workflow_execution_response
 
     def get_workflow_execution_request(self, id):
         print("GET /workflow/execution/{}".format(id))
         get_workflow_execution_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=True, auth=self.auth)
 
         return get_workflow_execution_response
 
@@ -163,7 +163,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/create_terminology")
         create_terminology_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/create_terminology', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/create_terminology', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_terminology_response
 
@@ -171,7 +171,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/create_vocabulary")
         create_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/create_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/create_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_vocabulary_response
 
@@ -179,7 +179,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/get_vocabulary")
         get_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
 
         return get_vocabulary_response
 
@@ -187,7 +187,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/delete_terminology")
         create_terminology_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_terminology_response
 
@@ -195,7 +195,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/delete_vocabulary")
         create_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_vocabulary_response
 
@@ -230,7 +230,7 @@ class DataplaneAPI:
         print(
             "GET /metadata/{asset}/{operator}".format(asset=asset_id, operator=operator))
         single_metadata_response = requests.get(
-            url, headers=headers, verify=False, auth=self.auth)
+            url, headers=headers, verify=True, auth=self.auth)
         return single_metadata_response
 
     def delete_asset(self, asset_id):
@@ -239,7 +239,7 @@ class DataplaneAPI:
         headers = {"Content-Type": "application/json"}
         print("DELETE /metadata/{asset}".format(asset=asset_id))
         delete_asset_response = requests.delete(
-            url, headers=headers, verify=False, auth=self.auth)
+            url, headers=headers, verify=True, auth=self.auth)
         return delete_asset_response
 
 # Dataplane API Fixture

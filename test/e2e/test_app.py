@@ -153,7 +153,7 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/button").click()
    
     # Pause
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/div[12]/button").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
     # Play
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
     # Speed 1.5x

@@ -402,6 +402,7 @@ def workflow_config(all_operators):
                 "en",
                 "es"
                 ],
+            "SourceLanguageCode": "en",
             "Enabled": True
             },
         "WebToVTTCaptions": {
@@ -410,6 +411,7 @@ def workflow_config(all_operators):
                 "en",
                 "es"
                 ],
+            "SourceLanguageCode": "en",
             "Enabled": True
         },
         "PollyWebCaptions": {

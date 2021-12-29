@@ -439,7 +439,7 @@
 
 
         input_file = s3uri.split("/").slice(-1)[0]
-        proxy_file = input_file.split(".")[0]+"_proxy.mp4";
+        proxy_file = input_file.split(".").slice(0,-1).join('.')+"_proxy.mp4";
         proxy_key = "private/assets/"+asset_id+"/"+proxy_file
 
         const data = { "S3Bucket": this.DATAPLANE_BUCKET, "S3Key": proxy_key };

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS - Deploys the Content Localization on AWS website resources"
+Description: "Content Localization on AWS %%VERSION%% - Deploys the Content Localization on AWS website resources"
 
 Parameters:
   DataplaneEndpoint:

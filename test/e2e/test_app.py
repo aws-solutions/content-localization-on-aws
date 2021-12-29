@@ -1,3 +1,16 @@
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+
 import pytest
 import time
 import json
@@ -140,7 +153,7 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/button").click()
    
     # Pause
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/div[12]/button").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
     # Play
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
     # Speed 1.5x

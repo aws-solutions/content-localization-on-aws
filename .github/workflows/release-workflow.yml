@@ -56,7 +56,7 @@ jobs:
           VERSION=v${{ github.event.inputs.version }}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-${{ env.REGION }}
-          ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
+          echo y | ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           echo "Templates artifact:"
           cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'
@@ -147,7 +147,7 @@ jobs:
           VERSION=v${{ github.event.inputs.version }}
           DIST_OUTPUT_BUCKET=micl-dev
           TEMPLATE_OUTPUT_BUCKET=micl-dev-${{ env.REGION }}
-          ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
+          echo y | ./build-s3-dist.sh --no-layer --template-bucket $TEMPLATE_OUTPUT_BUCKET --code-bucket $DIST_OUTPUT_BUCKET --version $VERSION --region $REGION
           echo "Templates artifact:"
           cat ./templateUrl.txt
       - name: 'Upload MIE One-click Deployment Artifact'

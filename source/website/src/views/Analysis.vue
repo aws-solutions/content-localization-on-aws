@@ -1,3 +1,17 @@
+<!-- 
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+-->
 <template>
   <div>
     <Header />
@@ -428,7 +442,7 @@
         proxy_file = input_file.split(".").slice(0,-1).join('.')+"_proxy.mp4";
         proxy_key = "private/assets/"+asset_id+"/"+proxy_file
 
-        const data = { "S3Bucket": bucket, "S3Key": proxy_key };
+        const data = { "S3Bucket": this.DATAPLANE_BUCKET, "S3Key": proxy_key };
 
         // get presigned URL to video file in S3
 

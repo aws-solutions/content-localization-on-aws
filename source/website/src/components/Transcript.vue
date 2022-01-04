@@ -62,6 +62,7 @@ export default {
   },
   deactivated: function () {
     this.transcript = ""
+    this.noTranscript = false
     console.log('deactivated component:', this.operator)
   },
   activated: function () {
@@ -97,7 +98,7 @@ export default {
               this.transcript = this.transcript.concat(data[i]._source.transcript + " ")
               this.noTranscript = false;
             }
-            
+
           }
         }
         this.isBusy = false

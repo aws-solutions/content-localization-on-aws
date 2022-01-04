@@ -15,22 +15,19 @@
 
 <template>
   <div>
-    <div v-if="noTranscript === true">
-      No transcript found for this asset
-    </div>
     <b-alert
-      v-model="showSaveNotification"
-      variant="success"
-      dismissible
-      fade
+        v-model="showSaveNotification"
+        variant="success"
+        dismissible
+        fade
     >
       {{ saveNotificationMessage }}
     </b-alert>
     <b-alert
-      v-model="showVocabularyNotification"
-      :variant="vocabularyNotificationStatus"
-      dismissible
-      fade
+        v-model="showVocabularyNotification"
+        :variant="vocabularyNotificationStatus"
+        dismissible
+        fade
     >
       {{ vocabularyNotificationMessage }}
     </b-alert>
@@ -40,21 +37,21 @@
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
             <b-form-radio-group
-              id="custom-vocab-selection"
-              v-model="customVocabularySelected"
-              name="custom-vocab-list"
-              :options="customVocabularyList"
-              text-field="name_and_status"
-              value-field="name"
-              disabled-field="notEnabled"
-              stacked
+                id="custom-vocab-selection"
+                v-model="customVocabularySelected"
+                name="custom-vocab-list"
+                :options="customVocabularyList"
+                text-field="name_and_status"
+                value-field="name"
+                disabled-field="notEnabled"
+                stacked
             >
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
             Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-              Delete
-            </b-button>
+            Delete
+          </b-button>
           </div>
         </b-col>
         <b-col>
@@ -67,9 +64,9 @@
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
           <b-form-select
-            v-model="vocabulary_language_code"
-            :options="transcribeLanguages"
-            size="sm"
+              v-model="vocabulary_language_code"
+              :options="transcribeLanguages"
+              size="sm"
           />
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
@@ -88,13 +85,13 @@
         </div>
       </div>
       <b-table
-        :items="customVocabularyUnion"
-        :fields="customVocabularyFields"
-        selectable
-        select-mode="single"
-        fixed responsive="sm"
-        bordered
-        small
+          :items="customVocabularyUnion"
+          :fields="customVocabularyFields"
+          selectable
+          select-mode="single"
+          fixed responsive="sm"
+          bordered
+          small
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
@@ -199,15 +196,17 @@ to highlight the fields in the custom vocab schema. -->
     <b-modal ref="delete-vocab-modal" ok-title="Confirm" ok-variant="danger" title="Delete Vocabulary?" @ok="deleteVocabularyRequest(customVocabularyName=customVocabularySelected)">
       <p>Are you sure you want to permanently delete the custom vocabulary <b>{{ customVocabularySelected }}</b>?</p>
     </b-modal>
-
     <div v-if="isBusy">
       <b-spinner
-        variant="secondary"
-        label="Loading..."
+          variant="secondary"
+          label="Loading..."
       />
       <p class="text-muted">
         (Loading...)
       </p>
+    </div>
+    <div v-else-if="noSubtitles === true">
+      No transcript found for this asset
     </div>
     <div v-else>
       <div v-if="isProfane">
@@ -367,7 +366,7 @@ export default {
       isBusy: false,
       isSaving: false,
       operator: "transcript",
-      noTranscript: false,
+      noSubtitles: false,
       transcribeLanguages: [
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
@@ -494,6 +493,7 @@ export default {
     }
   },
   deactivated: function () {
+    this.noSubtitles = false;
     console.log('deactivated component:', this.operator)
   },
   activated: function () {
@@ -866,8 +866,8 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         console.log(response.data)
-        this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
-        this.transcribe_language_code = response.data.Configuration.AnalyzeVideo.TranscribeVideo.TranscribeLanguage
+        this.sourceLanguageCode = response.data.Globals.MetaData.TranscribeSourceLanguage.split('-')[0]
+        this.transcribe_language_code = response.data.Globals.MetaData.TranscribeSourceLanguage
         this.vocabulary_language_code = this.transcribe_language_code
         this.vocabulary_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName
         const operator_info = []
@@ -1269,7 +1269,6 @@ export default {
           console.log("Response: " + response.status);
         }
       } catch (error) {
-        this.showDataplaneAlert = true
         console.log(error)
       }
     },
@@ -1323,7 +1322,7 @@ export default {
             console.log(response.data.Message);
             console.log("Response: " + response.status);
             this.isBusy = false
-            this.noTranscript = true
+            this.noSubtitles = true
           }
           if (response.data.results) {
             cursor = response.data.cursor;
@@ -1352,7 +1351,8 @@ export default {
             this.videoOptions.captions = []
           }
       } catch (error) {
-        this.showDataplaneAlert = true
+        this.noSubtitles = true
+        this.isBusy = false
         console.log(error)
       }
     },

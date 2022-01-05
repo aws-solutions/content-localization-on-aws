@@ -271,9 +271,17 @@ to highlight the fields in the custom vocab schema. -->
       <!--        <b-icon icon="upload" color="white"></b-icon> Upload JSON-->
       <!--      </b-button> &nbsp;-->
       <!-- this is the download button -->
-      <b-button v-if="webCaptions.length > 0" id="downloadCaptionsVTT" size="sm" class="mb-2" @click="downloadCaptionsVTT()">
-        <b-icon icon="download" color="white"></b-icon> Download VTT
-      </b-button> &nbsp;
+      <b-dropdown v-if="webCaptions.length > 0" id="download-dropdown" text="Download VTT/SRT" class="mb-2" size="sm" dropup no-caret>
+        <template slot="button-content">
+          <b-icon icon="download" color="white"></b-icon> Download
+        </template>
+        <b-dropdown-item :href="vtt_url">
+          Download VTT
+        </b-dropdown-item>
+        <b-dropdown-item :href="srt_url">
+          Download SRT
+        </b-dropdown-item>
+      </b-dropdown>&nbsp;
       <!-- this is the save vocabulary button -->
       <b-button id="saveVocabulary" v-b-tooltip.hover title="Save vocabulary will open a window where you can create or modify custom vocabularies for AWS Transcribe" size="sm" class="mb-2" @click="showVocabConfirmation()">
         <b-icon icon="card-text" color="white"></b-icon>
@@ -346,6 +354,8 @@ export default {
       vocabulary_uri: null,
       webCaptions: [],
       webCaptions_vtt: '',
+      vtt_url: null,
+      srt_url: null,
       webCaptions_fields: [
         {key: 'timeslot', label: 'timeslot', tdClass: this.tdClassFunc},
         {key: 'caption', label: 'caption'}
@@ -500,6 +510,86 @@ export default {
     clearInterval(this.vocab_status_polling)
   },
   methods: {
+    getVttCaptions: async function () {
+      const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/WebToVTTCaptions'
+      let requestOpts = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        response: true
+      };
+      try {
+        let transcribed_language = this.transcribe_language_code.split('-')[0]
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        let source_language_caption = response.data.results.CaptionsCollection.filter(item => {return item.LanguageCode === transcribed_language;})[0];
+        const bucket = source_language_caption.Results.S3Bucket;
+        const key = source_language_caption.Results.S3Key;
+        // get URL to captions file in S3
+        path = 'download'
+        requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            "S3Bucket": bucket,
+            "S3Key": key
+          },
+          response: true,
+          responseType: 'text'
+        };
+
+        try {
+          let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+          // record the signed urls in an array
+          this.vtt_url = res.data
+        } catch  (error){
+          console.error(error)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getSrtCaptions: async function () {
+      const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/WebToSRTCaptions'
+      let requestOpts = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        response: true
+      };
+      try {
+        let transcribed_language = this.transcribe_language_code.split('-')[0]
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        let source_language_caption = response.data.results.CaptionsCollection.filter(item => {return item.LanguageCode === transcribed_language;})[0];
+        const bucket = source_language_caption.Results.S3Bucket;
+        const key = source_language_caption.Results.S3Key;
+        // get URL to captions file in S3
+        path = 'download'
+        requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            "S3Bucket": bucket,
+            "S3Key": key
+          },
+          response: true,
+          responseType: 'text'
+        };
+        try {
+          let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+          this.srt_url = res.data
+        } catch  (error){
+          console.error(error)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
 
@@ -788,7 +878,8 @@ export default {
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
-
+        this.getVttCaptions()
+        this.getSrtCaptions()
       } catch (error) {
         console.log("ERROR: Failed to get transcribe language");
         console.log(error)
@@ -1180,17 +1271,6 @@ export default {
       } catch (error) {
         console.log(error)
       }
-    },
-    downloadCaptionsVTT() {
-      this.webToVtt()
-      const blob = new Blob([this.webCaptions_vtt], {type: 'text/plain', endings:'native'});
-      const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
-      a.download = "WebCaptions.vtt";
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      a.dispatchEvent(e);
     },
     // Uncomment to enable Upload button
     // showModal() {

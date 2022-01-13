@@ -418,8 +418,9 @@ export default {
       parallelData: [],
       parallelDataList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "en-US",
+      transcribeLanguage: "auto",
       transcribeLanguages: [
+        {text: '(auto detect)', value: 'auto'},
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
         {text: 'Chinese Mandarin', value: 'zh-CN'},
@@ -722,12 +723,12 @@ export default {
       const TransformText = {
         WebToSRTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         WebToVTTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         PollyWebCaptions: {
@@ -784,7 +785,17 @@ export default {
     }
   },
   watch: {
-    transcribeLanguage: function() {
+    enabledOperators() {
+      // This function will clear the target languages selected in the voerro-tags-input.
+      // We need to do this in order to ensure no target languages are specified in the
+      // WebToSRTCaptions and WebToVTTCaptions operator configurations if the user
+      // enabled Translate but then disabled it before running the workflow.
+      const vm = this
+      if (!this.enabledOperators.includes("Translate") ) {
+        vm.selectedTranslateLanguages = [];
+      }
+    },
+    transcribeLanguage() {
       // Transcribe will fail if the custom vocabulary language
       // does not match the transcribe job language.
       // So, this function prevents users from selecting vocabularies
@@ -854,7 +865,7 @@ export default {
     {
       let errorMessage = '';
       console.log(file.type)
-      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -872,7 +883,7 @@ export default {
     fileRemoved: function( file )
     {
       let errorMessage = '';
-      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else

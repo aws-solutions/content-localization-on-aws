@@ -103,20 +103,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     subtitles_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[4]/input")
     subtitles_box.send_keys("test.vtt")
     assert subtitles_box.get_attribute("value") == "test.vtt"
-
-    # Configure translate language to en-ES
-    
-    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
-    assert translate_languages_box.get_attribute("textContent") == ""
-    # Select spanish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[43]").click() 
-
-    # Check that spanish badge is in the input box
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
-
-    # click the Swedish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click()
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
     
      ####### Collection View
      # Navigate to Collection view

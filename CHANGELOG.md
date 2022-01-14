@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add missing option to download SRT formatted subtitles
 * Fix broken video player for S3 triggered workflows (#271)
 * Use the correct source language when saving a new or updated custom vocabulary (#258)
-
+* Removed profanity checker due to insufficient support for non-english languages (#256) 
 
 ## [1.0.0] - 2021-11-3
 ### Added

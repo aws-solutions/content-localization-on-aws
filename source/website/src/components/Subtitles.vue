@@ -209,11 +209,6 @@ to highlight the fields in the custom vocab schema. -->
       No transcript found for this asset
     </div>
     <div v-else>
-      <div v-if="isProfane">
-        <span style="color:red">WARNING: Transcript contains potentially offensive words.</span>
-        <br>
-        <br>
-      </div>
       <div id="event-line-editor" class="event-line-editor">
         <b-table
           ref="selectableTable"
@@ -463,11 +458,6 @@ export default {
       )
     },
     ...mapState(['player', 'waveform_seek_position', 'unsaved_custom_vocabularies']),
-    isProfane() {
-      const Filter = require('bad-words');
-      const profanityFilter = new Filter({ placeHolder: '_' });
-      return profanityFilter.isProfane(this.transcript);
-    },
   },
   watch: {
     // When user moves the cursor on the waveform

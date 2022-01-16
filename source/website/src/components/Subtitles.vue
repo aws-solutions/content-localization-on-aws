@@ -875,13 +875,6 @@ export default {
             operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
           }
         }
-        // else if ("Translate" in response.data.Configuration) {
-        //   // Transcribe will be skipped when user clicks Save Edits.
-        //   // In this case, we won't have any information about the Transcribe config used in the prior workflow Globals and we'll need to get the source language code from the Translate configuration instead. 
-        //   this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
-        //   const transcribe_language = this.sourceLanguageCode;
-        //   operator_info.push({"name": "Source Language", "value": transcribe_language})
-        // }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
         this.getVttCaptions()

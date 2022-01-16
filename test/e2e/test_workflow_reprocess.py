@@ -102,7 +102,7 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
 
     iterations = 0
 
-    while workflow_status != "Complete" and iterations < 20:
+    while workflow_status != "Complete" and iterations < 60:
         print('Sleeping for 60 seconds before retrying')
         iterations = iterations + 1
         time.sleep(55)

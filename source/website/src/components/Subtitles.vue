@@ -323,6 +323,7 @@ export default {
     return {
       asset_id: this.$route.params.asset_id,
       workflow_id: "",
+      original_workflow_id: "",
       workflow_status: "",
       waiting_stage: "",
       sourceLanguageCode: "",
@@ -817,10 +818,16 @@ export default {
 
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        this.workflow_id = response.data[0].Id
-        this.workflow_status = response.data[0].Status
-        if ("CurrentStage" in response.data[0])
-          this.waiting_stage = response.data[0].CurrentStage
+        const workflows = response.data;
+        // The original workflow is the oldest one. This is the one that has results
+        // from Transcibe and Caption operators.
+        const original_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;})[0];
+        const latest_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;}).slice(-1)[0];
+        this.original_workflow_id = original_workflow.Id
+        this.workflow_id = latest_workflow.Id
+        this.workflow_status = latest_workflow.Status
+        if ("CurrentStage" in latest_workflow)
+          this.waiting_stage = latest_workflow.CurrentStage
         this.getTranscribeLanguage()
         // get workflow config, needed for edit captions button
         this.getWorkflowConfig();
@@ -847,7 +854,7 @@ export default {
     },
     getTranscribeLanguage: async function() {
       let apiName = 'mieWorkflowApi'
-      let path =  "workflow/execution/" + this.workflow_id
+      let path =  "workflow/execution/" + this.original_workflow_id
       let requestOpts = {
         headers: {},
         response: true,
@@ -856,16 +863,25 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         console.log(response.data)
-        this.sourceLanguageCode = response.data.Globals.MetaData.TranscribeSourceLanguage.split('-')[0]
-        this.transcribe_language_code = response.data.Globals.MetaData.TranscribeSourceLanguage
-        this.vocabulary_language_code = this.transcribe_language_code
-        this.vocabulary_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName
         const operator_info = []
-        const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
-        operator_info.push({"name": "Source Language", "value": transcribe_language})
-        if (this.vocabulary_used) {
-          operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
+        if ("TranscribeSourceLanguage" in response.data.Globals.MetaData) { 
+          this.sourceLanguageCode = response.data.Globals.MetaData.TranscribeSourceLanguage.split('-')[0]
+          this.transcribe_language_code = response.data.Globals.MetaData.TranscribeSourceLanguage
+          this.vocabulary_language_code = this.transcribe_language_code
+          this.vocabulary_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName
+          const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
+          operator_info.push({"name": "Source Language", "value": transcribe_language})
+          if (this.vocabulary_used) {
+            operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
+          }
         }
+        // else if ("Translate" in response.data.Configuration) {
+        //   // Transcribe will be skipped when user clicks Save Edits.
+        //   // In this case, we won't have any information about the Transcribe config used in the prior workflow Globals and we'll need to get the source language code from the Translate configuration instead. 
+        //   this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
+        //   const transcribe_language = this.sourceLanguageCode;
+        //   operator_info.push({"name": "Source Language", "value": transcribe_language})
+        // }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
         this.getVttCaptions()
@@ -995,10 +1011,16 @@ export default {
     rerunWorkflow: async function () {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
-      console.log(data)
       data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
       data["Configuration"]["Translate"]["TranslateWebCaptions"].Enabled = true;
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["PreprocessVideo"]["Thumbnail"].Enabled = true;
+      // The Transcribe operator sets the TranscribeSourceLanguage metadata in Globals, 
+      // which is used when loading subtitles from this component. However, when we resume
+      // to populate subtitle changes to downstream operators (e.g. translate), then the
+      // Globals will be erased. So, we'll initialize TranscribeSourceLanguage in Globals here:
+      data["Globals"] = {"MetaData": {"TranscribeSourceLanguage": this.sourceLanguageCode}};
+      console.log(JSON.stringify(data));
 
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'

@@ -18,33 +18,33 @@
     <br>
     <b-container>
       <b-alert
-          :show="dismissCountDown"
-          dismissible
-          variant="danger"
-          @dismissed="dismissCountDown=0"
-          @dismiss-count-down="countDownChanged"
+        :show="dismissCountDown"
+        dismissible
+        variant="danger"
+        @dismissed="dismissCountDown=0"
+        @dismiss-count-down="countDownChanged"
       >
         {{ uploadErrorMessage }}
       </b-alert>
       <b-alert
-          :show="showInvalidFile"
-          variant="danger"
+        :show="showInvalidFile"
+        variant="danger"
       >
         {{ invalidFileMessages[invalidFileMessages.length-1] }}
       </b-alert>
       <h1>Upload Content</h1>
       <p>{{ description }}</p>
       <vue-dropzone
-          id="dropzone"
-          ref="myVueDropzone"
-          :awss3="awss3"
-          :options="dropzoneOptions"
-          @vdropzone-s3-upload-error="s3UploadError"
-          @vdropzone-file-added="fileAdded"
-          @vdropzone-removed-file="fileRemoved"
-          @vdropzone-success="runWorkflow"
-          @vdropzone-sending="upload_in_progress=true"
-          @vdropzone-queue-complete="upload_in_progress=false"
+        id="dropzone"
+        ref="myVueDropzone"
+        :awss3="awss3"
+        :options="dropzoneOptions"
+        @vdropzone-s3-upload-error="s3UploadError"
+        @vdropzone-file-added="fileAdded"
+        @vdropzone-removed-file="fileRemoved"
+        @vdropzone-success="runWorkflow"
+        @vdropzone-sending="upload_in_progress=true"
+        @vdropzone-queue-complete="upload_in_progress=false"
       />
       <br>
       <b-button v-b-toggle.collapse-2 class="m-1">
@@ -57,20 +57,21 @@
         Upload and Run Workflow
       </b-button>
       <br>
+      <!-- TODO: add a drop-down option in this modal to choose update workflow, then update workflowConfigWithInput to include the appropriate workflow config -->
       <b-button
-          :pressed="false"
-          size="sm"
-          variant="link"
-          class="text-decoration-none"
-          @click="showExecuteApi = true"
+        :pressed="false"
+        size="sm"
+        variant="link"
+        class="text-decoration-none"
+        @click="showExecuteApi = true"
       >
         Show API request to run workflow
       </b-button>
       <b-modal
-          v-model="showExecuteApi"
-          scrollable
-          title="REST API"
-          ok-only
+        v-model="showExecuteApi"
+        scrollable
+        title="REST API"
+        ok-only
       >
         <label>Request URL:</label>
         <pre v-highlightjs><code class="bash">POST {{ WORKFLOW_API_ENDPOINT }}workflow/execution</code></pre>
@@ -92,10 +93,10 @@
             <b-card header="Video Operators">
               <b-form-group>
                 <b-form-checkbox-group
-                    id="checkbox-group-1"
-                    v-model="enabledOperators"
-                    :options="videoOperators"
-                    name="flavour-1"
+                  id="checkbox-group-1"
+                  v-model="enabledOperators"
+                  :options="videoOperators"
+                  name="flavour-1"
                 ></b-form-checkbox-group>
                 <label>Thumbnail position: </label>
                 <b-form-input v-model="thumbnail_position" type="range" min="1" max="20" step="1"></b-form-input> {{ thumbnail_position }} sec
@@ -118,13 +119,13 @@
                     <br>
                     Custom Vocabulary
                     <b-form-select
-                        v-model="customVocabulary"
-                        :options="customVocabularyList"
-                        text-field="name_and_status"
-                        value-field="name"
-                        disabled-field="notEnabled"
+                      v-model="customVocabulary"
+                      :options="customVocabularyList"
+                      text-field="name_and_status"
+                      value-field="name"
+                      disabled-field="notEnabled"
                     >
-                      <template v-slot:first>
+                      <template #first>
                         <b-form-select-option :value="null">
                           (optional)
                         </b-form-select-option>
@@ -133,13 +134,13 @@
                     <br>
                     Custom Language Models
                     <b-form-select
-                        v-model="customLanguageModel"
-                        :options="customLanguageModelList"
-                        text-field="name_and_status"
-                        value-field="Name"
-                        disabled-field="notEnabled"
+                      v-model="customLanguageModel"
+                      :options="customLanguageModelList"
+                      text-field="name_and_status"
+                      value-field="Name"
+                      disabled-field="notEnabled"
                     >
-                      <template v-slot:first>
+                      <template #first>
                         <b-form-select-option :value="null">
                           (optional)
                         </b-form-select-option>
@@ -157,10 +158,10 @@
                 </b-form-checkbox-group>
                 <div v-if="compatibleLanguageModels.length > 0 && enabledOperators.includes('Transcribe')"><b>Language Models:</b>
                   <b-form-select
-                      v-model="customLanguageModel"
-                      :options="compatibleLanguageModels"
+                    v-model="customLanguageModel"
+                    :options="compatibleLanguageModels"
                   >
-                    <template v-slot:first>
+                    <template #first>
                       <b-form-select-option :value="null" disabled>
                         (optional)
                       </b-form-select-option>
@@ -175,9 +176,9 @@
             <b-card header="Text Operators">
               <b-form-group>
                 <b-form-checkbox-group
-                    id="checkbox-group-3"
-                    v-model="enabledOperators"
-                    name="textOperators"
+                  id="checkbox-group-3"
+                  v-model="enabledOperators"
+                  name="textOperators"
                 >
                   <b-form-checkbox value="ComprehendEntities">
                     Comprehend Entities
@@ -196,26 +197,21 @@
                   {{ pollyFormError }}
                 </div>
                 <b-form-checkbox
-                    v-if="enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases')"
-                    v-model="ComprehendEncryption"
+                  v-if="enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases')"
+                  v-model="ComprehendEncryption"
                 >
                   Encrypt Comprehend Job
                 </b-form-checkbox>
                 <b-form-input
-                    v-if="ComprehendEncryption && (enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases'))"
-                    v-model="kmsKeyId"
-                    placeholder="Enter KMS key ID"
+                  v-if="ComprehendEncryption && (enabledOperators.includes('ComprehendEntities') || enabledOperators.includes('ComprehendKeyPhrases'))"
+                  v-model="kmsKeyId"
+                  placeholder="Enter KMS key ID"
                 ></b-form-input>
                 <div v-if="enabledOperators.includes('Translate')">
                   <!-- Show only those custom terminologies whose source language match
- the source language that the user specified for Transcribe. -->
+                   the source language that the user specified for Transcribe. -->
                   <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
-                    <div v-if="customTerminology.length > 0">
-                      <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
-                    </div>
-                    <div v-else>
-                      <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
-                    </div>
+                    <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <b-form-select
                       v-model="customTerminology"
                       :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
@@ -228,9 +224,9 @@
                   <div v-else-if="sourceLanguageCode === 'auto' && customTerminologyList.length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <b-form-select
-                        v-model="customTerminology"
-                        :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                        multiple
+                      v-model="customTerminology"
+                      :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
+                      multiple
                     >
                     </b-form-select>
                   </div>
@@ -281,26 +277,26 @@
                     </ul>
                   </div>
                 </div>
-                <div v-if="enabledOperators.includes('Translate')" >
+                <div v-if="enabledOperators.includes('Translate')">
                   <b-form-group>
                     <b>Target Languages:</b>
                     <div v-if="textFormError" style="color:red">
                       {{ textFormError }}
                     </div>
                     <voerro-tags-input
-                        v-model="selectedTranslateLanguages"
-                        element-id="target_language_tags"
-                        :limit="10"
-                        :hide-input-on-limit="true"
-                        :existing-tags="translateLanguageTags"
-                        :only-existing-tags="true"
-                        :add-tags-on-space="true"
-                        :add-tags-on-comma="true"
-                        :add-tags-on-blur="true"
-                        :sort-search-results="true"
-                        :typeahead-always-show="true"
-                        :typeahead-hide-discard="true"
-                        :typeahead="true"
+                      v-model="selectedTranslateLanguages"
+                      element-id="target_language_tags"
+                      :limit="10"
+                      :hide-input-on-limit="true"
+                      :existing-tags="translateLanguageTags"
+                      :only-existing-tags="true"
+                      :add-tags-on-space="true"
+                      :add-tags-on-comma="true"
+                      :add-tags-on-blur="true"
+                      :sort-search-results="true"
+                      :typeahead-always-show="true"
+                      :typeahead-hide-discard="true"
+                      :typeahead="true"
                     />
                   </b-form-group>
                 </div>
@@ -323,16 +319,16 @@
         Execution History
       </label>
       <b-table
-          :fields="fields"
-          bordered
-          hover
-          small
-          responsive
-          show-empty
-          fixed
-          :items="executed_assets"
+        :fields="fields"
+        bordered
+        hover
+        small
+        responsive
+        show-empty
+        fixed
+        :items="executed_assets"
       >
-        <template v-slot:cell(workflow_status)="data">
+        <template #cell(workflow_status)="data">
           <a v-if="data.item.workflow_status !== 'Queued'" href="" @click.stop.prevent="openWindow(data.item.state_machine_console_link)">{{ data.item.workflow_status }}</a>
           <div v-if="data.item.workflow_status === 'Queued'">
             {{ data.item.workflow_status }}
@@ -344,18 +340,18 @@
       </b-button>
       <br>
       <b-button
-          :pressed="false"
-          size="sm"
-          variant="link"
-          class="text-decoration-none"
-          @click="showWorkflowStatusApi = true"
+        :pressed="false"
+        size="sm"
+        variant="link"
+        class="text-decoration-none"
+        @click="showWorkflowStatusApi = true"
       >
         Show API request to get execution history
       </b-button>
       <b-modal
-          v-model="showWorkflowStatusApi"
-          title="REST API"
-          ok-only
+        v-model="showWorkflowStatusApi"
+        title="REST API"
+        ok-only
       >
         <label>Request URL:</label>
         <pre v-highlightjs><code class="bash">GET {{ WORKFLOW_API_ENDPOINT }}workflow/execution/asset/{asset_id}</code></pre>
@@ -452,21 +448,26 @@ export default {
       customLanguageModel: null,
       customLanguageModelList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "en-US",
+      transcribeLanguage: "auto",
       transcribeLanguages: [
+        {text: '(auto detect)', value: 'auto'},
+        {text: 'Afrikaans', value: 'af-ZA'},
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
-        {text: 'Chinese Mandarin', value: 'zh-CN'},
+        {text: 'Chinese, Mandarin (China)', value: 'zh-CN'},
+        {text: 'Chinese, Mandarin (Taiwan)', value: 'zh-TW'},
+        {text: 'Danish', value: 'da-DK'},
         {text: 'Dutch', value: 'nl-NL'},
         {text: 'English, Australian', value: 'en-AU'},
         {text: 'English, British', value: 'en-GB'},
         {text: 'English, Indian-accented', value: 'en-IN'},
         {text: 'English, Irish', value: 'en-IE'},
+        {text: 'English, New Zealand', value: 'en-NZ'},
         {text: 'English, Scottish', value: 'en-AB'},
+        {text: 'English, South African', value: 'en-ZA'},
         {text: 'English, US', value: 'en-US'},
         {text: 'English, Welsh', value: 'en-WL'},
-        // Disabled until 'fa' supported by AWS Translate
-        // {text: 'Farsi', value: 'fa-IR'},
+        {text: 'Farsi', value: 'fa-IR'},
         {text: 'French', value: 'fr-FR'},
         {text: 'French, Canadian', value: 'fr-CA'},
         {text: 'German', value: 'de-DE'},
@@ -484,8 +485,8 @@ export default {
         {text: 'Spanish', value: 'es-ES'},
         {text: 'Spanish, US', value: 'es-US'},
         {text: 'Tamil', value: 'ta-IN'},
-        // Disabled until 'te' supported by AWS Translate
-        // {text: 'Telugu', value: 'te-IN'},
+        {text: 'Telugu', value: 'te-IN'},
+        {text: 'Thai', value: 'th-th'},
         {text: 'Turkish', value: 'tr-TR'},
       ],
       translateLanguages: [
@@ -493,13 +494,14 @@ export default {
         {text: 'Albanian', value: 'sq'},
         {text: 'Amharic', value: 'am'},
         {text: 'Arabic', value: 'ar'},
+        {text: 'Armenian', value: 'hy'},
         {text: 'Azerbaijani', value: 'az'},
         {text: 'Bengali', value: 'bn'},
         {text: 'Bosnian', value: 'bs'},
         {text: 'Bulgarian', value: 'bg'},
+        {text: 'Catalan', value: 'ca'},
         {text: 'Chinese (Simplified)', value: 'zh'},
-        // AWS Translate does not support translating from zh to zh-TW
-        // {text: 'Chinese (Traditional)', value: 'zh-TW'},
+        {text: 'Chinese (Traditional)', value: 'zh-TW'},
         {text: 'Croatian', value: 'hr'},
         {text: 'Czech', value: 'cs'},
         {text: 'Danish', value: 'da'},
@@ -507,43 +509,60 @@ export default {
         {text: 'Dutch', value: 'nl'},
         {text: 'English', value: 'en'},
         {text: 'Estonian', value: 'et'},
+        {text: 'Farsi (Persian)', value: 'fa'},
+        {text: 'Filipino (Tagalog)', value: 'tl'},
         {text: 'Finnish', value: 'fi'},
         {text: 'French', value: 'fr'},
         {text: 'French (Canadian)', value: 'fr-CA'},
         {text: 'Georgian', value: 'ka'},
         {text: 'German', value: 'de'},
         {text: 'Greek', value: 'el'},
+        {text: 'Gujarati', value: 'gu'},
+        {text: 'Haitian Creole', value: 'ht'},
         {text: 'Hausa', value: 'ha'},
         {text: 'Hebrew', value: 'he'},
         {text: 'Hindi', value: 'hi'},
         {text: 'Hungarian', value: 'hu'},
+        {text: 'Icelandic', value: 'is'},
         {text: 'Indonesian', value: 'id'},
         {text: 'Italian', value: 'it'},
+        {text: 'Irish', value: 'ga'},
         {text: 'Japanese', value: 'ja'},
+        {text: 'Kannada', value: 'kn'},
+        {text: 'Kazakh', value: 'kk'},
         {text: 'Korean', value: 'ko'},
         {text: 'Latvian', value: 'lv'},
         {text: 'Malay', value: 'ms'},
+        {text: 'Malayalam', value: 'ml'},
+        {text: 'Maltese', value: 'mt'},
+        {text: 'Marathi', value: 'mr'},
+        {text: 'Mongolian', value: 'mn'},
         {text: 'Norwegian', value: 'no'},
-        {text: 'Persian', value: 'fa'},
         {text: 'Pashto', value: 'ps'},
         {text: 'Polish', value: 'pl'},
         {text: 'Portuguese', value: 'pt'},
+        {text: 'Portuguese (Portugal)', value: 'pt-PT'},
+        {text: 'Punjabi', value: 'pa'},
         {text: 'Romanian', value: 'ro'},
         {text: 'Russian', value: 'ru'},
         {text: 'Serbian', value: 'sr'},
+        {text: 'Sinhala', value: 'si'},
         {text: 'Slovak', value: 'sk'},
         {text: 'Slovenian', value: 'sl'},
         {text: 'Somali', value: 'so'},
         {text: 'Spanish', value: 'es'},
+        {text: 'Spanish (Mexico)', value: 'es-MX'},
         {text: 'Swahili', value: 'sw'},
         {text: 'Swedish', value: 'sv'},
-        {text: 'Tagalog', value: 'tl'},
         {text: 'Tamil', value: 'ta'},
+        {text: 'Telugu', value: 'te'},
         {text: 'Thai', value: 'th'},
         {text: 'Turkish', value: 'tr'},
         {text: 'Ukrainian', value: 'uk'},
         {text: 'Urdu', value: 'ur'},
+        {text: 'Uzbek', value: 'uz'},
         {text: 'Vietnamese', value: 'vi'},
+        {text: 'Welsh', value: 'cy'},
       ],
       selectedTranslateLanguages: [],
       uploadErrorMessage: "",
@@ -823,7 +842,17 @@ export default {
     }
   },
   watch: {
-    transcribeLanguage: function() {
+    enabledOperators() {
+      // This function will clear the target languages selected in the voerro-tags-input.
+      // We need to do this in order to ensure no target languages are specified in the
+      // WebToSRTCaptions and WebToVTTCaptions operator configurations if the user
+      // enabled Translate but then disabled it before running the workflow.
+      const vm = this
+      if (!this.enabledOperators.includes("Translate") ) {
+        vm.selectedTranslateLanguages = [];
+      }
+    },
+    transcribeLanguage() {
       // Transcribe will fail if the custom vocabulary language
       // or custom language model does not match the transcribe job language.
       // So, this function prevents users from selecting vocabularies
@@ -897,7 +926,7 @@ export default {
     {
       let errorMessage = '';
       console.log(file.type)
-      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -915,7 +944,7 @@ export default {
     fileRemoved: function( file )
     {
       let errorMessage = '';
-      if (!(file.type).match(/image\/.+|video\/.+|application\/mxf|application\/json/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -964,7 +993,6 @@ export default {
             }
           }
 
-
           // Add optional parameters to workflow config:
           if (this.customVocabulary !== null) {
             this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocabulary
@@ -977,6 +1005,9 @@ export default {
           }
           if (this.parallelData != null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
+          }
+          if (this.customVocabulary !== null) {
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocabulary
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
@@ -1188,7 +1219,6 @@ export default {
             notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
           }
         })
-
       } catch (error) {
         console.log("ERROR: Failed to get language models. Check Workflow API logs.");
         console.log(error)

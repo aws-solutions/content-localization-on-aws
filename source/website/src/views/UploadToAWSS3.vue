@@ -116,37 +116,40 @@
                     <label>Source Language</label>
                     <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages">
                     </b-form-select>
-                    <br>
-                    Custom Vocabulary
-                    <b-form-select
-                      v-model="customVocabulary"
-                      :options="customVocabularyList"
-                      text-field="name_and_status"
-                      value-field="name"
-                      disabled-field="notEnabled"
-                    >
-                      <template #first>
-                        <b-form-select-option :value="null">
-                          (optional)
-                        </b-form-select-option>
-                      </template>
-                    </b-form-select>
-                    <br>
-                    Custom Language Models
-                    <b-form-select
-                      v-model="customLanguageModel"
-                      :options="customLanguageModelList"
-                      text-field="name_and_status"
-                      value-field="Name"
-                      disabled-field="notEnabled"
-                    >
-                      <template #first>
-                        <b-form-select-option :value="null">
-                          (optional)
-                        </b-form-select-option>
-                      </template>
-                    </b-form-select>
-                    <br>
+                    <!-- Unsure if you can use custom vocab and CLM when source language 
+                    autodetect is enabled, so disabling that option for now. -->
+                    <div v-if="transcribeLanguage !== 'auto'">
+                      Custom Vocabulary
+                      <b-form-select
+                        v-model="customVocabulary"
+                        :options="customVocabularyList"
+                        text-field="name_and_status"
+                        value-field="name"
+                        disabled-field="notEnabled"
+                      >
+                        <template #first>
+                          <b-form-select-option :value="null">
+                            (optional)
+                          </b-form-select-option>
+                        </template>
+                      </b-form-select>
+                      <br>
+                      Custom Language Models
+                      <b-form-select
+                        v-model="customLanguageModel"
+                        :options="customLanguageModelList"
+                        text-field="name_and_status"
+                        value-field="name"
+                        disabled-field="notEnabled"
+                      >
+                        <template #first>
+                          <b-form-select-option :value="null">
+                            (optional)
+                          </b-form-select-option>
+                        </template>
+                      </b-form-select>
+                      <br>
+                    </div>
                   </div>
                   <b-form-checkbox value="Subtitles">
                     Subtitles
@@ -156,18 +159,6 @@
                     <b-form-input v-model="existingSubtitlesFilename" placeholder="(optional) Enter .vtt filename"></b-form-input>
                   </div>
                 </b-form-checkbox-group>
-                <div v-if="compatibleLanguageModels.length > 0 && enabledOperators.includes('Transcribe')"><b>Language Models:</b>
-                  <b-form-select
-                    v-model="customLanguageModel"
-                    :options="compatibleLanguageModels"
-                  >
-                    <template #first>
-                      <b-form-select-option :value="null" disabled>
-                        (optional)
-                      </b-form-select-option>
-                    </template>
-                  </b-form-select>
-                </div>
               </b-form-group>
               <div v-if="audioFormError" style="color:red">
                 {{ audioFormError }}
@@ -448,7 +439,7 @@ export default {
       customLanguageModel: null,
       customLanguageModelList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "auto",
+      transcribeLanguage: "en-US",
       transcribeLanguages: [
         {text: '(auto detect)', value: 'auto'},
         {text: 'Afrikaans', value: 'af-ZA'},
@@ -594,11 +585,10 @@ export default {
     }
   },
   computed: {
-    compatibleLanguageModels() {
-      // This function returns a list of language models that can be used for the language specified as the source language for Transcribe
-      return this.customLanguageModelList.filter(x => x.LanguageCode === this.transcribeLanguage).map( x => { return {'text': x.Name, 'value': {'Name': x.Name}}})
-    },
-
+    // compatibleLanguageModels() {
+    //   // This function returns a list of language models that can be used for the language specified as the source language for Transcribe
+    //   return this.customLanguageModelList.filter(x => x.LanguageCode === this.transcribeLanguage).map( x => { return {'text': x.Name, 'value': {'Name': x.Name}}})
+    // },
     overlappingTerminologies() {
       // This function returns a list of terminologies that contain the translations for the same language.
       // flatten the array of TargetLanguageCodes arrays
@@ -995,11 +985,14 @@ export default {
 
           // Add optional parameters to workflow config:
           if (this.customVocabulary !== null) {
-            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.VocabularyName = this.customVocabulary
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocabulary
           }
+          console.log("iantest")
+          console.log(this.customLanguageModel)
           if (this.customLanguageModel !== null) {
-            this.workflow_config.Configuration.defaultAudioStage2.TranscribeVideo.LanguageModelName = this.customLanguageModel
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.LanguageModelName = this.customLanguageModel
           }
+          console.log(this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.LanguageModelName)
           if (this.customTerminology !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }

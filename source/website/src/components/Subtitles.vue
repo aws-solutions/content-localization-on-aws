@@ -323,7 +323,6 @@ export default {
     return {
       asset_id: this.$route.params.asset_id,
       workflow_id: "",
-      original_workflow_id: "",
       workflow_status: "",
       waiting_stage: "",
       sourceLanguageCode: "",
@@ -823,14 +822,14 @@ export default {
         // from Transcibe and Caption operators.
         const original_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;})[0];
         const latest_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;}).slice(-1)[0];
-        this.original_workflow_id = original_workflow.Id
+        const original_workflow_id = original_workflow.Id
         this.workflow_id = latest_workflow.Id
         this.workflow_status = latest_workflow.Status
         if ("CurrentStage" in latest_workflow)
           this.waiting_stage = latest_workflow.CurrentStage
-        this.getTranscribeLanguage()
+        this.getTranscribeLanguage(original_workflow_id)
         // get workflow config, needed for edit captions button
-        this.getWorkflowConfig();
+        this.getWorkflowConfig(original_workflow_id);
       } catch (error) {
         console.log(error)
       }
@@ -852,9 +851,9 @@ export default {
         console.log(error)
       }
     },
-    getTranscribeLanguage: async function() {
+    getTranscribeLanguage: async function(workflow_id) {
       let apiName = 'mieWorkflowApi'
-      let path =  "workflow/execution/" + this.original_workflow_id
+      let path =  "workflow/execution/" + workflow_id
       let requestOpts = {
         headers: {},
         response: true,
@@ -919,16 +918,16 @@ export default {
         console.log(error)
       }
     },
-    getWorkflowConfig: async function() {
+    getWorkflowConfig: async function(workflow_id) {
       let apiName = 'mieWorkflowApi'
-      let path = 'workflow/execution/' + this.workflow_id
+      let path = 'workflow/execution/' + workflow_id
       let requestOpts = {
         response: true,
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
-            this.workflow_definition = response.data.Workflow
+        this.workflow_definition = response.data.Workflow
       } catch (error) {
         console.log(error)
       }
@@ -962,7 +961,7 @@ export default {
       }
     },
     disableUpstreamStages()  {
-      // This function disables all the operators in stages above Translate
+      // This function disables all the operators in stages except WebCaptions, Translate, and TransformText
       let data = {
         "Name": "ContentLocalizationWorkflow",
         "Configuration": this.workflow_config
@@ -977,25 +976,22 @@ export default {
       let end = false
       while (end == false) {
           console.log("Stage: "+ stage_name)
-        // If the current stage is End then end the loop.
-        if ("End" in stage && stage["End"] == true){
+          // If the current stage is End then end the loop.
+          if ("End" in stage && stage["End"] == true){
               end = true
           }
-          // If the current stage is Translate then end the loop.
-          else if (stage_name == "Translate") {
-              end = true
-          }
-          // For all other stages disable all the operators in the stage
-          else {
-              // Disable all the operators in the stage
+          // Avoid disabling Translate or TransformText stages because
+          // their results need to be updated to reflect subtitle edits.
+          if (stage_name !== "Translate" && stage_name !== "TransformText") {
+              // Disable all the operators in this stage
               for (const operator in data["Configuration"][stage_name]){
                 data["Configuration"][stage_name][operator]["Enabled"] = false
                 console.log(operator + " is disabled")
               }
-              // Now look at the next stage in the workflow
-              stage_name = stage["Next"]
-              stage = workflow["Stages"][stage_name]
           }
+          // Now look at the next stage in the workflow
+          stage_name = stage["Next"]
+          stage = workflow["Stages"][stage_name]
       }
 
       return data
@@ -1004,8 +1000,11 @@ export default {
     rerunWorkflow: async function () {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
+      data["Configuration"]["TransformText"]["WebToSRTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
+      data["Configuration"]["TransformText"]["WebToVTTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
       data["Configuration"]["Translate"]["TranslateWebCaptions"].Enabled = true;
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["PreprocessVideo"]["Thumbnail"].Enabled = true;
       // The Transcribe operator sets the TranscribeSourceLanguage metadata in Globals, 
@@ -1013,6 +1012,7 @@ export default {
       // to populate subtitle changes to downstream operators (e.g. translate), then the
       // Globals will be erased. So, we'll initialize TranscribeSourceLanguage in Globals here:
       data["Globals"] = {"MetaData": {"TranscribeSourceLanguage": this.sourceLanguageCode}};
+      console.log("Workflow config for rerun:")
       console.log(JSON.stringify(data));
 
       let apiName = 'mieWorkflowApi'

@@ -222,8 +222,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     assert "JEFF STEEN-replaced-by-terminology" in subtitle3_text
 
     # Edit a subtitle
-    #subtitle1.clear()
-    #subtitle1.send_keys("EDITED: COME BACK TO PORTLAND")
     subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
 
     # Check the file info

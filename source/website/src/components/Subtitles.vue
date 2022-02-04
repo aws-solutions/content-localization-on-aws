@@ -1002,8 +1002,6 @@ export default {
       let data = this.disableUpstreamStages();
       data["Configuration"]["TransformText"]["WebToSRTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["TransformText"]["WebToVTTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
-      data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-      data["Configuration"]["Translate"]["TranslateWebCaptions"].Enabled = true;
       data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["PreprocessVideo"]["Thumbnail"].Enabled = true;

@@ -188,7 +188,6 @@ class WorkflowAPI:
         print("POST /service/translate/delete_terminology")
         create_terminology_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=True, auth=self.auth)
-
         return create_terminology_response
 
     def delete_vocabulary_request(self, body):
@@ -196,7 +195,6 @@ class WorkflowAPI:
         print("POST /service/transcribe/delete_vocabulary")
         create_vocabulary_response = requests.post(
             self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
-
         return create_vocabulary_response
 
 
@@ -268,6 +266,14 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
         "s3uri": vocabulary_s3_uri
     }
 
+    # Try deleting the test vocabulary in case the previous test failed prematurely
+    delete_vocabulary_body = {
+        "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
+    }
+    delete_vocabulary_request = workflow_api.delete_vocabulary_request(
+        delete_vocabulary_body)
+    
+    # Create test vocabulary
     create_vocabulary_request = workflow_api.create_vocabulary_request(
         create_vocabulary_body)
     assert create_vocabulary_request.status_code == 200
@@ -315,6 +321,13 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         "terminology_csv": "\"en\",\"es\"\n\"STEEN\",\"STEEN-replaced-by-terminology\""
     }
 
+    # Try deleting the test terminology in case the previous test failed prematurely
+    delete_terminology_body = {
+        "terminology_name": "uitestterminology"
+    }
+    delete_terminology_request = workflow_api.delete_terminology_request(
+        delete_terminology_body)
+    
     create_terminology_request = workflow_api.create_terminology_request(
         create_terminology_body)
     assert create_terminology_request.status_code == 200

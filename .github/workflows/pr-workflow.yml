@@ -35,7 +35,7 @@ jobs:
         run: |
           cd deployment
           CONTENT_LOCALIZATION_STACK_NAME="pr${SHORT_SHA}"
-          EMAIL="micontentlocalization@gmail.com"
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION="us-west-2"
           VERSION="0.0.0"
           aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
@@ -186,7 +186,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=sample@example.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=us-west-2
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev
@@ -242,7 +242,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=us-west-2
           VERSION="pr-${SHORT_SHA}"
           DIST_OUTPUT_BUCKET=micl-dev

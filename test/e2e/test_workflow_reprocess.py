@@ -81,7 +81,7 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     # Save edits
     time.sleep(1)
     # Save edits
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[3]").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[2]").click()
     time.sleep(5)
     # Confirm Save Edits
     #browser.find_elements_by_link_text("Confirm")[0].click()
@@ -102,7 +102,7 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
 
     iterations = 0
 
-    while workflow_status != "Complete" and iterations < 20:
+    while workflow_status != "Complete" and iterations < 60:
         print('Sleeping for 60 seconds before retrying')
         iterations = iterations + 1
         time.sleep(55)

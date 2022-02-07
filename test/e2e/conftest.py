@@ -94,7 +94,7 @@ def stack_resources(testing_env_variables):
         
             resources[output["OutputKey"]] = output["OutputValue"]
     
-    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython38Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
+    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython39Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
     
     assert set(resources.keys()) == set(expected_resources)
 
@@ -132,7 +132,7 @@ class WorkflowAPI:
 
     def get_workflow_request(self, workflow):
         get_workflow_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/'+workflow, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/'+workflow, verify=True, auth=self.auth)
         return get_workflow_response
 
     # Workflow execution methods
@@ -141,21 +141,21 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /workflow/execution")
         create_workflow_execution_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_workflow_execution_response
 
     def get_workflow_execution_request(self, id):
         print("GET /workflow/execution/{}".format(id))
         get_workflow_execution_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=True, auth=self.auth)
 
         return get_workflow_execution_response
 
     def get_workflow_execution_request(self, id):
         print("GET /workflow/execution/{}".format(id))
         get_workflow_execution_response = requests.get(
-            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/workflow/execution/' + id, verify=True, auth=self.auth)
 
         return get_workflow_execution_response
 
@@ -163,7 +163,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/create_terminology")
         create_terminology_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/create_terminology', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/create_terminology', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_terminology_response
 
@@ -171,7 +171,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/create_vocabulary")
         create_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/create_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/create_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
 
         return create_vocabulary_response
 
@@ -179,7 +179,7 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/get_vocabulary")
         get_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/get_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
 
         return get_vocabulary_response
 
@@ -187,16 +187,14 @@ class WorkflowAPI:
         headers = {"Content-Type": "application/json"}
         print("POST /service/translate/delete_terminology")
         create_terminology_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=False, auth=self.auth)
-
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/translate/delete_terminology', headers=headers, json=body, verify=True, auth=self.auth)
         return create_terminology_response
 
     def delete_vocabulary_request(self, body):
         headers = {"Content-Type": "application/json"}
         print("POST /service/transcribe/delete_vocabulary")
         create_vocabulary_response = requests.post(
-            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=False, auth=self.auth)
-
+            self.stack_resources["WorkflowApiEndpoint"]+'/service/transcribe/delete_vocabulary', headers=headers, json=body, verify=True, auth=self.auth)
         return create_vocabulary_response
 
 
@@ -230,7 +228,7 @@ class DataplaneAPI:
         print(
             "GET /metadata/{asset}/{operator}".format(asset=asset_id, operator=operator))
         single_metadata_response = requests.get(
-            url, headers=headers, verify=False, auth=self.auth)
+            url, headers=headers, verify=True, auth=self.auth)
         return single_metadata_response
 
     def delete_asset(self, asset_id):
@@ -239,7 +237,7 @@ class DataplaneAPI:
         headers = {"Content-Type": "application/json"}
         print("DELETE /metadata/{asset}".format(asset=asset_id))
         delete_asset_response = requests.delete(
-            url, headers=headers, verify=False, auth=self.auth)
+            url, headers=headers, verify=True, auth=self.auth)
         return delete_asset_response
 
 # Dataplane API Fixture
@@ -268,6 +266,14 @@ def vocabulary(workflow_api, stack_resources, testing_env_variables):
         "s3uri": vocabulary_s3_uri
     }
 
+    # Try deleting the test vocabulary in case the previous test failed prematurely
+    delete_vocabulary_body = {
+        "vocabulary_name": testing_env_variables['SAMPLE_VOCABULARY_FILE']
+    }
+    delete_vocabulary_request = workflow_api.delete_vocabulary_request(
+        delete_vocabulary_body)
+    
+    # Create test vocabulary
     create_vocabulary_request = workflow_api.create_vocabulary_request(
         create_vocabulary_body)
     assert create_vocabulary_request.status_code == 200
@@ -315,6 +321,13 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
         "terminology_csv": "\"en\",\"es\"\n\"STEEN\",\"STEEN-replaced-by-terminology\""
     }
 
+    # Try deleting the test terminology in case the previous test failed prematurely
+    delete_terminology_body = {
+        "terminology_name": "uitestterminology"
+    }
+    delete_terminology_request = workflow_api.delete_terminology_request(
+        delete_terminology_body)
+    
     create_terminology_request = workflow_api.create_terminology_request(
         create_terminology_body)
     assert create_terminology_request.status_code == 200
@@ -402,6 +415,7 @@ def workflow_config(all_operators):
                 "en",
                 "es"
                 ],
+            "SourceLanguageCode": "en",
             "Enabled": True
             },
         "WebToVTTCaptions": {
@@ -410,6 +424,7 @@ def workflow_config(all_operators):
                 "en",
                 "es"
                 ],
+            "SourceLanguageCode": "en",
             "Enabled": True
         },
         "PollyWebCaptions": {

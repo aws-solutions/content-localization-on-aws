@@ -92,7 +92,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL="sample@example.com"
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=${{ env.REGION }}
           MIE_STACK_NAME=${{ env.MIE_STACK_NAME }}
           CONTENT_LOCALIZATION_STACK_NAME=${{ env.CONTENT_LOCALIZATION_STACK_NAME }}
@@ -183,7 +183,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL="sample@example.com"
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=${{ env.REGION }}
           MIE_STACK_NAME=${{ env.MIE_STACK_NAME }}
           CONTENT_LOCALIZATION_STACK_NAME=${{ env.CONTENT_LOCALIZATION_STACK_NAME }}
@@ -434,7 +434,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=${{ env.REGION }}
           MIE_STACK_NAME=${{ env.MIE_STACK_NAME }}
           CONTENT_LOCALIZATION_STACK_NAME=${{ env.CONTENT_LOCALIZATION_STACK_NAME }}
@@ -495,7 +495,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=${{ env.REGION }}
           MIE_STACK_NAME=${{ env.MIE_STACK_NAME }}
           CONTENT_LOCALIZATION_STACK_NAME=${{ env.CONTENT_LOCALIZATION_STACK_NAME }}

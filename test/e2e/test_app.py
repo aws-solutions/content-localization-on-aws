@@ -91,8 +91,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     time.sleep(5)
     # Configure transcribe
     transcribe_language_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[2]/select[1]")
-    # # default language is en-US
-    assert transcribe_language_box.get_attribute("value") == "en-US"
+    # # default source language selection should be set for auto detection
+    assert transcribe_language_box.get_attribute("value") == "auto"
     
     transcribe_language_box.send_keys("ru-RU")
     
@@ -103,20 +103,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     subtitles_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[4]/input")
     subtitles_box.send_keys("test.vtt")
     assert subtitles_box.get_attribute("value") == "test.vtt"
-
-    # Configure translate language to en-ES
-    
-    translate_languages_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div[2]/div[1]/p/input")
-    assert translate_languages_box.get_attribute("textContent") == ""
-    # Select spanish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[43]").click() 
-
-    # Check that spanish badge is in the input box
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span/span").get_attribute("textContent") == "Spanish"
-
-    # click the Swedish badge
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[2]/p/span[44]").click()
-    assert browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[3]/div[2]/fieldset/div/div[3]/fieldset/div/div/div[1]/span[2]/span").get_attribute("textContent") == "Swedish"
     
      ####### Collection View
      # Navigate to Collection view
@@ -153,13 +139,9 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/button").click()
    
     # Pause
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/div[12]/button").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
     # Play
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/button[1]").click()
-    # Speed 1.5x
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/div[9]/button").click()
-    # Toggle language
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[4]/div[12]/button").click()
 
     # Check the File Information
     duration = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[2]/div[2]/div/div/div/div/div/div/div[1]/div[1]").get_attribute("textContent")
@@ -240,8 +222,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     assert "JEFF STEEN-replaced-by-terminology" in subtitle3_text
 
     # Edit a subtitle
-    #subtitle1.clear()
-    #subtitle1.send_keys("EDITED: COME BACK TO PORTLAND")
     subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
 
     # Check the file info

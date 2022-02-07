@@ -12,7 +12,6 @@
     "aws-amplify": "^4.3.2",
     "aws-amplify-vue": "^2.1.5",
     "axios": "^0.23.0",
-    "bad-words": "^3.0.4",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
     "chart.js": "^2.9.4",

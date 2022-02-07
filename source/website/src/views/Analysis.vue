@@ -135,7 +135,9 @@
               v-if="
                 videoOptions.sources[0].src === '' ||
                   (videoOptions.captions.length > 0 &&
-                    videoOptions.captions.length !== num_caption_tracks)
+                    videoOptions.captions.length !== num_caption_tracks) ||
+                  (videoOptions.captions.length > 0 &&
+                    videoOptions.captions[0].lang === '')
               "
             >
               <Loading />
@@ -439,10 +441,10 @@
 
 
         input_file = s3uri.split("/").slice(-1)[0]
-        proxy_file = input_file.split(".")[0]+"_proxy.mp4";
+        proxy_file = input_file.split(".").slice(0,-1).join('.')+"_proxy.mp4";
         proxy_key = "private/assets/"+asset_id+"/"+proxy_file
 
-        const data = { "S3Bucket": bucket, "S3Key": proxy_key };
+        const data = { "S3Bucket": this.DATAPLANE_BUCKET, "S3Key": proxy_key };
 
         // get presigned URL to video file in S3
 

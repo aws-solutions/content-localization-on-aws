@@ -15,22 +15,19 @@
 
 <template>
   <div>
-    <div v-if="noTranscript === true">
-      No transcript found for this asset
-    </div>
     <b-alert
-      v-model="showSaveNotification"
-      variant="success"
-      dismissible
-      fade
+        v-model="showSaveNotification"
+        variant="success"
+        dismissible
+        fade
     >
       {{ saveNotificationMessage }}
     </b-alert>
     <b-alert
-      v-model="showVocabularyNotification"
-      :variant="vocabularyNotificationStatus"
-      dismissible
-      fade
+        v-model="showVocabularyNotification"
+        :variant="vocabularyNotificationStatus"
+        dismissible
+        fade
     >
       {{ vocabularyNotificationMessage }}
     </b-alert>
@@ -40,21 +37,21 @@
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
             <b-form-radio-group
-              id="custom-vocab-selection"
-              v-model="customVocabularySelected"
-              name="custom-vocab-list"
-              :options="customVocabularyList"
-              text-field="name_and_status"
-              value-field="name"
-              disabled-field="notEnabled"
-              stacked
+                id="custom-vocab-selection"
+                v-model="customVocabularySelected"
+                name="custom-vocab-list"
+                :options="customVocabularyList"
+                text-field="name_and_status"
+                value-field="name"
+                disabled-field="notEnabled"
+                stacked
             >
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
             Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-              Delete
-            </b-button>
+            Delete
+          </b-button>
           </div>
         </b-col>
         <b-col>
@@ -67,9 +64,9 @@
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
           <b-form-select
-            v-model="vocabulary_language_code"
-            :options="transcribeLanguages"
-            size="sm"
+              v-model="vocabulary_language_code"
+              :options="transcribeLanguages"
+              size="sm"
           />
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
@@ -88,13 +85,13 @@
         </div>
       </div>
       <b-table
-        :items="customVocabularyUnion"
-        :fields="customVocabularyFields"
-        selectable
-        select-mode="single"
-        fixed responsive="sm"
-        bordered
-        small
+          :items="customVocabularyUnion"
+          :fields="customVocabularyFields"
+          selectable
+          select-mode="single"
+          fixed responsive="sm"
+          bordered
+          small
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
@@ -199,22 +196,19 @@ to highlight the fields in the custom vocab schema. -->
     <b-modal ref="delete-vocab-modal" ok-title="Confirm" ok-variant="danger" title="Delete Vocabulary?" @ok="deleteVocabularyRequest(customVocabularyName=customVocabularySelected)">
       <p>Are you sure you want to permanently delete the custom vocabulary <b>{{ customVocabularySelected }}</b>?</p>
     </b-modal>
-
     <div v-if="isBusy">
       <b-spinner
-        variant="secondary"
-        label="Loading..."
+          variant="secondary"
+          label="Loading..."
       />
       <p class="text-muted">
         (Loading...)
       </p>
     </div>
+    <div v-else-if="noSubtitles === true">
+      No transcript found for this asset
+    </div>
     <div v-else>
-      <div v-if="isProfane">
-        <span style="color:red">WARNING: Transcript contains potentially offensive words.</span>
-        <br>
-        <br>
-      </div>
       <div id="event-line-editor" class="event-line-editor">
         <b-table
           ref="selectableTable"
@@ -272,9 +266,17 @@ to highlight the fields in the custom vocab schema. -->
       <!--        <b-icon icon="upload" color="white"></b-icon> Upload JSON-->
       <!--      </b-button> &nbsp;-->
       <!-- this is the download button -->
-      <b-button v-if="webCaptions.length > 0" id="downloadCaptionsVTT" size="sm" class="mb-2" @click="downloadCaptionsVTT()">
-        <b-icon icon="download" color="white"></b-icon> Download VTT
-      </b-button> &nbsp;
+      <b-dropdown v-if="webCaptions.length > 0" id="download-dropdown" text="Download VTT/SRT" class="mb-2" size="sm" dropup no-caret>
+        <template slot="button-content">
+          <b-icon icon="download" color="white"></b-icon> Download
+        </template>
+        <b-dropdown-item :href="vtt_url">
+          Download VTT
+        </b-dropdown-item>
+        <b-dropdown-item :href="srt_url">
+          Download SRT
+        </b-dropdown-item>
+      </b-dropdown>&nbsp;
       <!-- this is the save vocabulary button -->
       <b-button id="saveVocabulary" v-b-tooltip.hover title="Save vocabulary will open a window where you can create or modify custom vocabularies for AWS Transcribe" size="sm" class="mb-2" @click="showVocabConfirmation()">
         <b-icon icon="card-text" color="white"></b-icon>
@@ -347,6 +349,8 @@ export default {
       vocabulary_uri: null,
       webCaptions: [],
       webCaptions_vtt: '',
+      vtt_url: null,
+      srt_url: null,
       webCaptions_fields: [
         {key: 'timeslot', label: 'timeslot', tdClass: this.tdClassFunc},
         {key: 'caption', label: 'caption'}
@@ -357,7 +361,7 @@ export default {
       isBusy: false,
       isSaving: false,
       operator: "transcript",
-      noTranscript: false,
+      noSubtitles: false,
       transcribeLanguages: [
         {text: 'Arabic, Gulf', value: 'ar-AE'},
         {text: 'Arabic, Modern Standard', value: 'ar-SA'},
@@ -454,11 +458,6 @@ export default {
       )
     },
     ...mapState(['player', 'waveform_seek_position', 'unsaved_custom_vocabularies']),
-    isProfane() {
-      const Filter = require('bad-words');
-      const profanityFilter = new Filter({ placeHolder: '_' });
-      return profanityFilter.isProfane(this.transcript);
-    },
   },
   watch: {
     // When user moves the cursor on the waveform
@@ -484,6 +483,7 @@ export default {
     }
   },
   deactivated: function () {
+    this.noSubtitles = false;
     console.log('deactivated component:', this.operator)
   },
   activated: function () {
@@ -500,6 +500,86 @@ export default {
     clearInterval(this.vocab_status_polling)
   },
   methods: {
+    getVttCaptions: async function () {
+      const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/WebToVTTCaptions'
+      let requestOpts = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        response: true
+      };
+      try {
+        let transcribed_language = this.transcribe_language_code.split('-')[0]
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        let source_language_caption = response.data.results.CaptionsCollection.filter(item => {return item.LanguageCode === transcribed_language;})[0];
+        const bucket = source_language_caption.Results.S3Bucket;
+        const key = source_language_caption.Results.S3Key;
+        // get URL to captions file in S3
+        path = 'download'
+        requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            "S3Bucket": bucket,
+            "S3Key": key
+          },
+          response: true,
+          responseType: 'text'
+        };
+
+        try {
+          let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+          // record the signed urls in an array
+          this.vtt_url = res.data
+        } catch  (error){
+          console.error(error)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getSrtCaptions: async function () {
+      const asset_id = this.$route.params.asset_id;
+      let apiName = 'mieDataplaneApi'
+      let path = 'metadata/' + asset_id + '/WebToSRTCaptions'
+      let requestOpts = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        response: true
+      };
+      try {
+        let transcribed_language = this.transcribe_language_code.split('-')[0]
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        let source_language_caption = response.data.results.CaptionsCollection.filter(item => {return item.LanguageCode === transcribed_language;})[0];
+        const bucket = source_language_caption.Results.S3Bucket;
+        const key = source_language_caption.Results.S3Key;
+        // get URL to captions file in S3
+        path = 'download'
+        requestOpts = {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            "S3Bucket": bucket,
+            "S3Key": key
+          },
+          response: true,
+          responseType: 'text'
+        };
+        try {
+          let res = await this.$Amplify.API.post(apiName, path, requestOpts);
+          this.srt_url = res.data
+        } catch  (error){
+          console.error(error)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
     getCustomVocabularyFailedReason: async function() {
       if (this.customVocabularySelected !== "") {
 
@@ -737,13 +817,19 @@ export default {
 
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        this.workflow_id = response.data[0].Id
-        this.workflow_status = response.data[0].Status
-        if ("CurrentStage" in response.data[0])
-          this.waiting_stage = response.data[0].CurrentStage
-        this.getTranscribeLanguage()
+        const workflows = response.data;
+        // The original workflow is the oldest one. This is the one that has results
+        // from Transcibe and Caption operators.
+        const original_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;})[0];
+        const latest_workflow = workflows.sort(function(a, b) {return a.Created - b.Created;}).slice(-1)[0];
+        const original_workflow_id = original_workflow.Id
+        this.workflow_id = latest_workflow.Id
+        this.workflow_status = latest_workflow.Status
+        if ("CurrentStage" in latest_workflow)
+          this.waiting_stage = latest_workflow.CurrentStage
+        this.getTranscribeLanguage(original_workflow_id)
         // get workflow config, needed for edit captions button
-        this.getWorkflowConfig();
+        this.getWorkflowConfig(original_workflow_id);
       } catch (error) {
         console.log(error)
       }
@@ -765,9 +851,9 @@ export default {
         console.log(error)
       }
     },
-    getTranscribeLanguage: async function() {
+    getTranscribeLanguage: async function(workflow_id) {
       let apiName = 'mieWorkflowApi'
-      let path =  "workflow/execution/" + this.workflow_id
+      let path =  "workflow/execution/" + workflow_id
       let requestOpts = {
         headers: {},
         response: true,
@@ -776,19 +862,22 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         console.log(response.data)
-        this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
-        this.transcribe_language_code = response.data.Configuration.AnalyzeVideo.TranscribeVideo.TranscribeLanguage
-        this.vocabulary_language_code = this.transcribe_language_code
-        this.vocabulary_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName
         const operator_info = []
-        const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
-        operator_info.push({"name": "Source Language", "value": transcribe_language})
-        if (this.vocabulary_used) {
-          operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
+        if ("TranscribeSourceLanguage" in response.data.Globals.MetaData) { 
+          this.sourceLanguageCode = response.data.Globals.MetaData.TranscribeSourceLanguage.split('-')[0]
+          this.transcribe_language_code = response.data.Globals.MetaData.TranscribeSourceLanguage
+          this.vocabulary_language_code = this.transcribe_language_code
+          this.vocabulary_used = response.data.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName
+          const transcribe_language = this.transcribeLanguages.filter(x => (x.value === this.transcribe_language_code))[0].text;
+          operator_info.push({"name": "Source Language", "value": transcribe_language})
+          if (this.vocabulary_used) {
+            operator_info.push({"name": "Custom Vocabulary", "value": this.vocabulary_used})
+          }
         }
         this.$store.commit('updateOperatorInfo', operator_info)
         this.getWebCaptions()
-
+        this.getVttCaptions()
+        this.getSrtCaptions()
       } catch (error) {
         console.log("ERROR: Failed to get transcribe language");
         console.log(error)
@@ -812,12 +901,11 @@ export default {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if(response.status == 200) {
             // save phrases from the currently selected vocabulary
-            this.customVocabularySaved = response.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
+            this.customVocabularySaved = response.data.vocabulary.map(item => ({
               original_phrase: "",
-              new_phrase: Phrase,
-              sounds_like: SoundsLike,
-              IPA: IPA,
-              display_as: DisplayAs
+              new_phrase: item["Phrase"],
+              sounds_like: item["SoundsLike"],
+              display_as: item["DisplayAs\r"]
             }));
           } else {
             console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
@@ -830,16 +918,16 @@ export default {
         console.log(error)
       }
     },
-    getWorkflowConfig: async function() {
+    getWorkflowConfig: async function(workflow_id) {
       let apiName = 'mieWorkflowApi'
-      let path = 'workflow/execution/' + this.workflow_id
+      let path = 'workflow/execution/' + workflow_id
       let requestOpts = {
         response: true,
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
-            this.workflow_definition = response.data.Workflow
+        this.workflow_definition = response.data.Workflow
       } catch (error) {
         console.log(error)
       }
@@ -873,7 +961,7 @@ export default {
       }
     },
     disableUpstreamStages()  {
-      // This function disables all the operators in stages above Translate
+      // This function disables all the operators in stages except WebCaptions, Translate, and TransformText
       let data = {
         "Name": "ContentLocalizationWorkflow",
         "Configuration": this.workflow_config
@@ -888,25 +976,22 @@ export default {
       let end = false
       while (end == false) {
           console.log("Stage: "+ stage_name)
-        // If the current stage is End then end the loop.
-        if ("End" in stage && stage["End"] == true){
+          // If the current stage is End then end the loop.
+          if ("End" in stage && stage["End"] == true){
               end = true
           }
-          // If the current stage is Translate then end the loop.
-          else if (stage_name == "Translate") {
-              end = true
-          }
-          // For all other stages disable all the operators in the stage
-          else {
-              // Disable all the operators in the stage
+          // Avoid disabling Translate or TransformText stages because
+          // their results need to be updated to reflect subtitle edits.
+          if (stage_name !== "Translate" && stage_name !== "TransformText") {
+              // Disable all the operators in this stage
               for (const operator in data["Configuration"][stage_name]){
                 data["Configuration"][stage_name][operator]["Enabled"] = false
                 console.log(operator + " is disabled")
               }
-              // Now look at the next stage in the workflow
-              stage_name = stage["Next"]
-              stage = workflow["Stages"][stage_name]
           }
+          // Now look at the next stage in the workflow
+          stage_name = stage["Next"]
+          stage = workflow["Stages"][stage_name]
       }
 
       return data
@@ -915,10 +1000,18 @@ export default {
     rerunWorkflow: async function () {
       // This function reruns all the operators downstream from transcribe.
       let data = this.disableUpstreamStages();
-      console.log(data)
-      data["Configuration"]["Translate"]["TranslateWebCaptions"].MediaType = "MetadataOnly";
-      data["Configuration"]["Translate"]["TranslateWebCaptions"].Enabled = true;
+      data["Configuration"]["TransformText"]["WebToSRTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
+      data["Configuration"]["TransformText"]["WebToVTTCaptions"].SourceLanguageCode = this.sourceLanguageCode;
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
+      data["Configuration"]["Translate"]["TranslateWebCaptions"].SourceLanguageCode = this.sourceLanguageCode;
       data["Configuration"]["PreprocessVideo"]["Thumbnail"].Enabled = true;
+      // The Transcribe operator sets the TranscribeSourceLanguage metadata in Globals, 
+      // which is used when loading subtitles from this component. However, when we resume
+      // to populate subtitle changes to downstream operators (e.g. translate), then the
+      // Globals will be erased. So, we'll initialize TranscribeSourceLanguage in Globals here:
+      data["Globals"] = {"MetaData": {"TranscribeSourceLanguage": this.sourceLanguageCode}};
+      console.log("Workflow config for rerun:")
+      console.log(JSON.stringify(data));
 
       let apiName = 'mieWorkflowApi'
       let path = 'workflow/execution'
@@ -1046,7 +1139,7 @@ export default {
           body: {
             "vocabulary_name":customVocabularyName,
             "s3uri": s3uri,
-            "language_code": this.transcribe_language_code
+            "language_code": this.vocabulary_language_code
           },
           response: true
       };
@@ -1178,20 +1271,8 @@ export default {
           console.log("Response: " + response.status);
         }
       } catch (error) {
-        this.showDataplaneAlert = true
         console.log(error)
       }
-    },
-    downloadCaptionsVTT() {
-      this.webToVtt()
-      const blob = new Blob([this.webCaptions_vtt], {type: 'text/plain', endings:'native'});
-      const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
-      a.download = "WebCaptions.vtt";
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      a.dispatchEvent(e);
     },
     // Uncomment to enable Upload button
     // showModal() {
@@ -1243,7 +1324,7 @@ export default {
             console.log(response.data.Message);
             console.log("Response: " + response.status);
             this.isBusy = false
-            this.noTranscript = true
+            this.noSubtitles = true
           }
           if (response.data.results) {
             cursor = response.data.cursor;
@@ -1272,7 +1353,8 @@ export default {
             this.videoOptions.captions = []
           }
       } catch (error) {
-        this.showDataplaneAlert = true
+        this.noSubtitles = true
+        this.isBusy = false
         console.log(error)
       }
     },

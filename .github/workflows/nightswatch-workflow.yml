@@ -46,6 +46,16 @@ jobs:
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           exit 0
 
+      - name: Build Failed
+        if: ${{ failure() }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Nightswatch deploy for Content Localization failed
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ianwow
+          labels: bug
+          body: Nightswatch deploy for Content Localization failed
+
   test-content-localization-us-west-2:
     needs: deploy-latest-clo-us-west-2
     runs-on: ubuntu-latest
@@ -106,13 +116,21 @@ jobs:
           cd $GITHUB_WORKSPACE
           cd test/e2e
           ./run_e2e.sh
+      - name: Test Failed
+        if: ${{ failure() }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Nightswatch test for Content Localization failed
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ianwow
+          labels: bug
+          body: Nightswatch test for Content Localization failed
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-
       - name: Delete stacks
         run: |
           aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME

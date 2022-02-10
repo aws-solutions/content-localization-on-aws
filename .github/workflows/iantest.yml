@@ -20,6 +20,9 @@ jobs:
  
       - name: Get latest release number
         run: |
+          wget -q -O- $TEMPLATE 
+          wget -q -O- $TEMPLATE | grep SolutionVersion 
+          wget -q -O- $TEMPLATE | grep SolutionVersion | cut -f 2 -d '"'
           echo "LATEST_VERSION=`wget -q -O- $TEMPLATE | grep SolutionVersion | cut -f 2 -d '"'`" >> $GITHUB_ENV
           echo LATEST_VERSION: $LATEST_VERSION
       

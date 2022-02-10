@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'
-      TEMPLATE: 'https://solutions-reference:s3:amazonaws:com/content-localization-on-aws/latest/content-localization-on-aws.template'
+      TEMPLATE: 'https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template'
     steps:
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

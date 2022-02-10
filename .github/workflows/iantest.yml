@@ -10,6 +10,13 @@ jobs:
     env:
       MIE_REGION: 'us-west-2'
     steps:
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+ 
       - name: Get latest release number
         run: |
           aws cloudformation get-template --stack-name clsol --region us-west-2 --query 'TemplateBody' | grep -o 'SolutionVersion: \\"v\d*.\d*.\d*\\"' 

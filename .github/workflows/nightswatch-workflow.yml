@@ -62,14 +62,10 @@ jobs:
     env:
       MIE_REGION: 'us-west-2'
     steps:
-      - name: Get latest release number
-        run: |
-            echo "LATEST_VERSION=$(aws cloudformation get-template --stack-name clsol --region us-west-2 --profile clobot --query 'TemplateBody' | grep -o 'SolutionVersion: \\"v\d*.\d*.\d*\\"' | tr -d '\' | cut -f 2 -d '"')" >> $GITHUB_ENV
-      
       - name: Check out release branch
         uses: actions/checkout@v2.3.4
         with:
-          ref: release/$LATEST_VERSION
+          ref: main
 
       - name: Initialize test AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

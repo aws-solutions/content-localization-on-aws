@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MIE_REGION: 'us-west-2'
+      TEMPLATE: 'https://solutions-reference:s3:amazonaws:com/content-localization-on-aws/latest/content-localization-on-aws.template'
     steps:
       - name: Initialize build AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -19,11 +20,8 @@ jobs:
  
       - name: Get latest release number
         run: |
-          aws cloudformation get-template --stack-name clsol --region us-west-2 --query 'TemplateBody' | grep -o 'SolutionVersion: \\"v\d*.\d*.\d*\\"' 
-          
-          aws cloudformation get-template --stack-name clsol --region us-west-2 --query 'TemplateBody' | grep -o 'SolutionVersion: \\"v\d*.\d*.\d*\\"' | tr -d '\\' | cut -f 2 -d '"'
-
-          echo "LATEST_VERSION=$(aws cloudformation get-template --stack-name clsol --region us-west-2 --query 'TemplateBody' | grep -o 'SolutionVersion: \\"v\d*.\d*.\d*\\"' | tr -d '\' | cut -f 2 -d '"')" >> $GITHUB_ENV
+          echo "LATEST_VERSION=$(wget -q -O- $TEMPLATE | grep SolutionVersion | cut -f 2 -d '"')" >> $GITHUB_ENV
+          echo $LATEST_VERSION
       
       - name: Check out release branch
         uses: actions/checkout@v2.3.4

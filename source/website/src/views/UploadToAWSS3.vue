@@ -53,7 +53,7 @@
       <b-button v-if="validForm && upload_in_progress===false" variant="primary" @click="uploadFiles">
         Upload and Run Workflow
       </b-button>
-      <b-button v-else disabled variant="primary" @click="uploadFiles">
+      <b-button v-else v-b-tooltip.hover disabled variant="primary" title="Your workflow configuration is invalid" @click="uploadFiles">
         Upload and Run Workflow
       </b-button>
       <br>
@@ -150,11 +150,6 @@
                       </b-form-select>
                       <br>
                     </div>
-                  </div>
-                  <b-form-checkbox value="Subtitles">
-                    Subtitles
-                  </b-form-checkbox>
-                  <div v-if="enabledOperators.includes('Subtitles')">
                     Use Existing Subtitles
                     <b-form-input v-model="existingSubtitlesFilename" placeholder="(optional) Enter .vtt filename"></b-form-input>
                   </div>
@@ -294,7 +289,7 @@
               </b-form-group>
             </b-card>
           </b-card-group>
-          <div align="right">
+          <div style="text-align: right;">
             <button type="button" class="btn btn-link" @click="selectAll">
               Select All
             </button>
@@ -407,8 +402,7 @@ export default {
       enabledOperators: [
         "thumbnail",
         "Transcribe",
-        "Translate",
-        "Subtitles"
+        "Translate"
       ],
       enable_caption_editing: false,
       videoOperators: [
@@ -421,8 +415,7 @@ export default {
         { text: "Face Search", value: "faceSearch" }
       ],
       audioOperators: [
-        { text: "Transcribe", value: "Transcribe" },
-        {text: "Subtitles", value: "Subtitles"}
+        { text: "Transcribe", value: "Transcribe" }
       ],
       textOperators: [
         { text: "Comprehend Key Phrases", value: "ComprehendKeyPhrases" },
@@ -591,9 +584,9 @@ export default {
       const language_codes = [].concat.apply([], this.customTerminology.map(x => x.TargetLanguageCodes))
       // get duplicate language codes in list
       let duplicate_language_codes = language_codes.sort().filter(function(item, pos, ary) {
-        return item == ary[pos - 1];
+        return item === ary[pos - 1];
       }).filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       // get the terminologies which contain duplicate language codes
       let overlapping_terminologies = []
@@ -602,7 +595,7 @@ export default {
       }
       // remove duplicate terminologies from the overlapping_terminologies list
       overlapping_terminologies = overlapping_terminologies.sort().filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       return overlapping_terminologies
     },
@@ -612,18 +605,18 @@ export default {
       const language_codes = [].concat.apply([], this.parallelData.map(x => x.TargetLanguageCodes))
       // get duplicate language codes in list
       let duplicate_language_codes = language_codes.sort().filter(function(item, pos, ary) {
-        return item == ary[pos - 1];
+        return item === ary[pos - 1];
       }).filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       // get the parallel data sets which contain duplicate language codes
       let overlapping_language_codes = []
       for (const i in duplicate_language_codes) {
-        overlapping_language_codes = overlapping_parallel_data.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
+        overlapping_language_codes = overlapping_language_codes.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
       }
       // remove duplicate parallel data from the overlapping_parallel_data list
       overlapping_language_codes = overlapping_language_codes.sort().filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       return overlapping_language_codes
     },
@@ -886,7 +879,6 @@ export default {
         "Transcribe",
         "Translate",
         "Polly",
-        "Subtitles",
         "ComprehendKeyPhrases",
         "ComprehendEntities",
         "technicalCueDetection",
@@ -897,7 +889,7 @@ export default {
       this.enabledOperators = [];
     },
     openWindow: function(url) {
-      window.open(url, "noopener,noreferer");
+      window.open(url, "noopener, noreferrer");
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
@@ -921,8 +913,8 @@ export default {
         this.showInvalidFile = true
       }
       // if this is a VTT file, auto-fill the vtt file input for transcribe
-      if ((file.name.split('.').pop().toLowerCase() == 'vtt')) {
-        if (this.existingSubtitlesFilename == ""){
+      if ((file.name.split('.').pop().toLowerCase() === 'vtt')) {
+        if (this.existingSubtitlesFilename === ""){
           this.existingSubtitlesFilename = file.name
         }
       }
@@ -936,19 +928,19 @@ export default {
         else
           errorMessage = "Unsupported file type: " + file.type;
       }
-      this.invalidFileMessages = this.invalidFileMessages.filter(function(value){ return value != errorMessage})
+      this.invalidFileMessages = this.invalidFileMessages.filter(function(value){ return value !== errorMessage})
       if (this.invalidFileMessages.length === 0 ) this.showInvalidFile = false;
       // if this is a VTT file, and the auto-filled file is removed, then remove the autofill
-      if ((file.name.split('.').pop().toLowerCase() == 'vtt')) {
-        if (this.existingSubtitlesFilename == file.name) {
+      if ((file.name.split('.').pop().toLowerCase() === 'vtt')) {
+        if (this.existingSubtitlesFilename === file.name) {
           this.existingSubtitlesFilename = ""
         }
       }
     },
     runWorkflow: async function(file) {
       const vm = this;
-      let media_type = null;
-      let s3Key = null;
+      let media_type;
+      let s3Key;
       if ("s3_key" in file) {
         media_type = file.type;
         s3Key = file.s3_key; // add in public since amplify prepends that to all keys
@@ -990,10 +982,10 @@ export default {
           if (this.customTerminology !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
-          if (this.parallelData != null) {
+          if (this.parallelData !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
-          if (this.existingSubtitlesFilename == "") {
+          if (this.existingSubtitlesFilename === "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
                 delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
             }
@@ -1003,7 +995,7 @@ export default {
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
-        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() == 'vtt')) {
+        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.
           console.log("VTT file has been uploaded to s3://" + s3Key);
@@ -1036,7 +1028,7 @@ export default {
           wf_id: wf_id
         };
         vm.executed_assets.push(executed_asset);
-        vm.getWorkflowStatus(wf_id);
+        await vm.getWorkflowStatus(wf_id);
         this.hasAssetParam = false;
         this.assetIdParam = "";
       } catch (error) {
@@ -1061,7 +1053,7 @@ export default {
           if (vm.executed_assets[i].wf_id === wf_id) {
             vm.executed_assets[i].workflow_status = response.data.Status;
             vm.executed_assets[i].state_machine_console_link =
-                "https://" + this.AWS_REGION + ".console.aws.amazon.com/states/home?region=" + this.AWS_REGION + "#/executions/details/" + response.data.StateMachineExecutionArn;
+                "https://" + this.AWS_REGION + ".console.aws.amazon.com/states/home?region=" + this.AWS_REGION + "#/executions/details/" + response.data['StateMachineExecutionArn'];
             break;
           }
         }
@@ -1142,11 +1134,11 @@ export default {
           }))
           // if any vocab is PENDING, then poll status until it is not PENDING. This is necessary so custom vocabs become selectable in the GUI as soon as they become ready.
           if (this.customVocabularyList.filter(item => item.status === "PENDING").length > 0) {
-            if (this.vocab_status_polling == null) {
+            if (this.vocab_status_polling === null) {
               this.pollVocabularyStatus();
             }
           } else {
-            if (this.vocab_status_polling != null) {
+            if (this.vocab_status_polling !== null) {
               clearInterval(this.vocab_status_polling)
               this.vocab_status_polling = null
             }
@@ -1195,13 +1187,13 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.customLanguageModelList = response.data["Models"].map(models => {
           return {
-            name: models.ModelName,
-            status: models.ModelStatus,
+            name: models['ModelName'],
+            status: models['ModelStatus'],
             language_code: models.LanguageCode,
-            name_and_status: models.ModelStatus === "COMPLETED" ?
-              models.ModelName + " (" + models.LanguageCode + ")" :
-              models.ModelName + " [" + models.ModelStatus + "]",
-            notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
+            name_and_status: models['ModelStatus'] === "COMPLETED" ?
+              models['ModelName'] + " (" + models.LanguageCode + ")" :
+              models['ModelName'] + " [" + models['ModelStatus'] + "]",
+            notEnabled: (models['ModelStatus'] !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
           }
         })
       } catch (error) {
@@ -1224,8 +1216,4 @@ label {
   font-weight: bold;
 }
 
-.note {
-  color: red;
-  font-family: "Courier New"
-}
 </style>

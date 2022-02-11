@@ -818,7 +818,7 @@ def bulk_index(es_object, asset, index, data):
     # size that is well below the "Maximum Size of HTTP Request Payloads" for the smallest AWS
     # Elasticsearch instance type (10MB). See service limits here:
     # https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/aes-limits.html
-    maxPayloadSize=8000000
+    maxPayloadSize=5000000
     for item in data:
         item["AssetId"] = asset
         action = json.dumps({"index": {"_index": es_index, "_type": "_doc"}})

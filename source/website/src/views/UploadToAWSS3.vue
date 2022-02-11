@@ -150,14 +150,9 @@
                       </b-form-select>
                       <br>
                     </div>
-                  </div>
-                  <b-form-checkbox value="Subtitles">
-                    Subtitles
-                  </b-form-checkbox>
-                  <div v-if="enabledOperators.includes('Subtitles')">
                     Use Existing Subtitles
                     <b-form-input v-model="existingSubtitlesFilename" placeholder="(optional) Enter .vtt filename"></b-form-input>
-                  </div>
+                </div>
                 </b-form-checkbox-group>
               </b-form-group>
               <div v-if="audioFormError" style="color:red">
@@ -407,8 +402,7 @@ export default {
       enabledOperators: [
         "thumbnail",
         "Transcribe",
-        "Translate",
-        "Subtitles"
+        "Translate"
       ],
       enable_caption_editing: false,
       videoOperators: [
@@ -421,8 +415,7 @@ export default {
         { text: "Face Search", value: "faceSearch" }
       ],
       audioOperators: [
-        { text: "Transcribe", value: "Transcribe" },
-        {text: "Subtitles", value: "Subtitles"}
+        { text: "Transcribe", value: "Transcribe" }
       ],
       textOperators: [
         { text: "Comprehend Key Phrases", value: "ComprehendKeyPhrases" },
@@ -886,7 +879,6 @@ export default {
         "Transcribe",
         "Translate",
         "Polly",
-        "Subtitles",
         "ComprehendKeyPhrases",
         "ComprehendEntities",
         "technicalCueDetection",

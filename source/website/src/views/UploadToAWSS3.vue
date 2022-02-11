@@ -53,7 +53,7 @@
       <b-button v-if="validForm && upload_in_progress===false" variant="primary" @click="uploadFiles">
         Upload and Run Workflow
       </b-button>
-      <b-button v-else disabled variant="primary" @click="uploadFiles">
+      <b-button v-else v-b-tooltip.hover disabled variant="primary" title="Your workflow configuration is invalid" @click="uploadFiles">
         Upload and Run Workflow
       </b-button>
       <br>
@@ -612,7 +612,7 @@ export default {
       // get the parallel data sets which contain duplicate language codes
       let overlapping_language_codes = []
       for (const i in duplicate_language_codes) {
-        overlapping_language_codes = overlapping_parallel_data.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
+        overlapping_language_codes = overlapping_language_codes.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
       }
       // remove duplicate parallel data from the overlapping_parallel_data list
       overlapping_language_codes = overlapping_language_codes.sort().filter(function(item, pos, ary) {
@@ -889,7 +889,7 @@ export default {
       this.enabledOperators = [];
     },
     openWindow: function(url) {
-      window.open(url, "noopener,noreferer");
+      window.open(url, "noopener, noreferrer");
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
@@ -1028,7 +1028,7 @@ export default {
           wf_id: wf_id
         };
         vm.executed_assets.push(executed_asset);
-        vm.getWorkflowStatus(wf_id);
+        await vm.getWorkflowStatus(wf_id);
         this.hasAssetParam = false;
         this.assetIdParam = "";
       } catch (error) {
@@ -1053,7 +1053,7 @@ export default {
           if (vm.executed_assets[i].wf_id === wf_id) {
             vm.executed_assets[i].workflow_status = response.data.Status;
             vm.executed_assets[i].state_machine_console_link =
-                "https://" + this.AWS_REGION + ".console.aws.amazon.com/states/home?region=" + this.AWS_REGION + "#/executions/details/" + response.data.StateMachineExecutionArn;
+                "https://" + this.AWS_REGION + ".console.aws.amazon.com/states/home?region=" + this.AWS_REGION + "#/executions/details/" + response.data['StateMachineExecutionArn'];
             break;
           }
         }
@@ -1187,13 +1187,13 @@ export default {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.customLanguageModelList = response.data["Models"].map(models => {
           return {
-            name: models.ModelName,
-            status: models.ModelStatus,
+            name: models['ModelName'],
+            status: models['ModelStatus'],
             language_code: models.LanguageCode,
-            name_and_status: models.ModelStatus === "COMPLETED" ?
-              models.ModelName + " (" + models.LanguageCode + ")" :
-              models.ModelName + " [" + models.ModelStatus + "]",
-            notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
+            name_and_status: models['ModelStatus'] === "COMPLETED" ?
+              models['ModelName'] + " (" + models.LanguageCode + ")" :
+              models['ModelName'] + " [" + models['ModelStatus'] + "]",
+            notEnabled: (models['ModelStatus'] !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
           }
         })
       } catch (error) {

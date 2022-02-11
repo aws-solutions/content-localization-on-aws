@@ -152,7 +152,7 @@
                     </div>
                     Use Existing Subtitles
                     <b-form-input v-model="existingSubtitlesFilename" placeholder="(optional) Enter .vtt filename"></b-form-input>
-                </div>
+                  </div>
                 </b-form-checkbox-group>
               </b-form-group>
               <div v-if="audioFormError" style="color:red">
@@ -289,7 +289,7 @@
               </b-form-group>
             </b-card>
           </b-card-group>
-          <div align="right">
+          <div style="text-align: right;">
             <button type="button" class="btn btn-link" @click="selectAll">
               Select All
             </button>
@@ -584,9 +584,9 @@ export default {
       const language_codes = [].concat.apply([], this.customTerminology.map(x => x.TargetLanguageCodes))
       // get duplicate language codes in list
       let duplicate_language_codes = language_codes.sort().filter(function(item, pos, ary) {
-        return item == ary[pos - 1];
+        return item === ary[pos - 1];
       }).filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       // get the terminologies which contain duplicate language codes
       let overlapping_terminologies = []
@@ -595,7 +595,7 @@ export default {
       }
       // remove duplicate terminologies from the overlapping_terminologies list
       overlapping_terminologies = overlapping_terminologies.sort().filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       return overlapping_terminologies
     },
@@ -605,9 +605,9 @@ export default {
       const language_codes = [].concat.apply([], this.parallelData.map(x => x.TargetLanguageCodes))
       // get duplicate language codes in list
       let duplicate_language_codes = language_codes.sort().filter(function(item, pos, ary) {
-        return item == ary[pos - 1];
+        return item === ary[pos - 1];
       }).filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       // get the parallel data sets which contain duplicate language codes
       let overlapping_language_codes = []
@@ -616,7 +616,7 @@ export default {
       }
       // remove duplicate parallel data from the overlapping_parallel_data list
       overlapping_language_codes = overlapping_language_codes.sort().filter(function(item, pos, ary) {
-        return !pos || item != ary[pos - 1];
+        return !pos || item !== ary[pos - 1];
       })
       return overlapping_language_codes
     },
@@ -913,8 +913,8 @@ export default {
         this.showInvalidFile = true
       }
       // if this is a VTT file, auto-fill the vtt file input for transcribe
-      if ((file.name.split('.').pop().toLowerCase() == 'vtt')) {
-        if (this.existingSubtitlesFilename == ""){
+      if ((file.name.split('.').pop().toLowerCase() === 'vtt')) {
+        if (this.existingSubtitlesFilename === ""){
           this.existingSubtitlesFilename = file.name
         }
       }
@@ -928,19 +928,19 @@ export default {
         else
           errorMessage = "Unsupported file type: " + file.type;
       }
-      this.invalidFileMessages = this.invalidFileMessages.filter(function(value){ return value != errorMessage})
+      this.invalidFileMessages = this.invalidFileMessages.filter(function(value){ return value !== errorMessage})
       if (this.invalidFileMessages.length === 0 ) this.showInvalidFile = false;
       // if this is a VTT file, and the auto-filled file is removed, then remove the autofill
-      if ((file.name.split('.').pop().toLowerCase() == 'vtt')) {
-        if (this.existingSubtitlesFilename == file.name) {
+      if ((file.name.split('.').pop().toLowerCase() === 'vtt')) {
+        if (this.existingSubtitlesFilename === file.name) {
           this.existingSubtitlesFilename = ""
         }
       }
     },
     runWorkflow: async function(file) {
       const vm = this;
-      let media_type = null;
-      let s3Key = null;
+      let media_type;
+      let s3Key;
       if ("s3_key" in file) {
         media_type = file.type;
         s3Key = file.s3_key; // add in public since amplify prepends that to all keys
@@ -982,10 +982,10 @@ export default {
           if (this.customTerminology !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
-          if (this.parallelData != null) {
+          if (this.parallelData !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
           }
-          if (this.existingSubtitlesFilename == "") {
+          if (this.existingSubtitlesFilename === "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
                 delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
             }
@@ -995,7 +995,7 @@ export default {
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
-        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() == 'vtt')) {
+        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.
           console.log("VTT file has been uploaded to s3://" + s3Key);
@@ -1134,11 +1134,11 @@ export default {
           }))
           // if any vocab is PENDING, then poll status until it is not PENDING. This is necessary so custom vocabs become selectable in the GUI as soon as they become ready.
           if (this.customVocabularyList.filter(item => item.status === "PENDING").length > 0) {
-            if (this.vocab_status_polling == null) {
+            if (this.vocab_status_polling === null) {
               this.pollVocabularyStatus();
             }
           } else {
-            if (this.vocab_status_polling != null) {
+            if (this.vocab_status_polling !== null) {
               clearInterval(this.vocab_status_polling)
               this.vocab_status_polling = null
             }
@@ -1216,8 +1216,4 @@ label {
   font-weight: bold;
 }
 
-.note {
-  color: red;
-  font-family: "Courier New"
-}
 </style>

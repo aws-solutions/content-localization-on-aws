@@ -115,22 +115,41 @@
                     <label>Source Language</label>
                     <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages">
                     </b-form-select>
-                    <br>
-                    Custom Vocabulary
-                    <b-form-select
-                      v-model="customVocab"
-                      :options="customVocabularyList"
-                      text-field="name_and_status"
-                      value-field="name"
-                      disabled-field="notEnabled"
-                    >
-                      <template #first>
-                        <b-form-select-option :value="null" disabled>
-                          (optional)
-                        </b-form-select-option>
-                      </template>
-                    </b-form-select>
-                    <br>
+                    <!-- Custom vocab and CLM options are disabled when source language 
+                    autodetect is enabled in order to prevent users from selecting 
+                    incompatible customizations. -->
+                    <div v-if="transcribeLanguage !== 'auto'">
+                      Custom Vocabulary
+                      <b-form-select
+                        v-model="customVocabulary"
+                        :options="customVocabularyList"
+                        text-field="name_and_status"
+                        value-field="name"
+                        disabled-field="notEnabled"
+                      >
+                        <template #first>
+                          <b-form-select-option :value="null">
+                            (optional)
+                          </b-form-select-option>
+                        </template>
+                      </b-form-select>
+                      <br>
+                      Custom Language Models
+                      <b-form-select
+                        v-model="customLanguageModel"
+                        :options="customLanguageModelList"
+                        text-field="name_and_status"
+                        value-field="name"
+                        disabled-field="notEnabled"
+                      >
+                        <template #first>
+                          <b-form-select-option :value="null">
+                            (optional)
+                          </b-form-select-option>
+                        </template>
+                      </b-form-select>
+                      <br>
+                    </div>
                   </div>
                   <b-form-checkbox value="Subtitles">
                     Subtitles
@@ -360,6 +379,7 @@ export default {
       requestBody: "",
       requestType: "",
       customVocabularyList: [],
+      customLanguageModelList: [],
       selectedTags: [
       ],
       fields: [
@@ -412,13 +432,14 @@ export default {
       faceCollectionId: "",
       ComprehendEncryption: false,
       kmsKeyId: "",
-      customVocab: null,
+      customVocabulary: null,
+      customLanguageModel: null,
       customTerminology: [],
       customTerminologyList: [],
       parallelData: [],
       parallelDataList: [],
       existingSubtitlesFilename: "",
-      transcribeLanguage: "auto",
+      transcribeLanguage: "en-US",
       transcribeLanguages: [
         {text: '(auto detect)', value: 'auto'},
         {text: 'Afrikaans', value: 'af-ZA'},
@@ -745,12 +766,12 @@ export default {
       const TransformText = {
         WebToSRTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         WebToVTTCaptions: {
           MediaType: "MetadataOnly",
-          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode),
+          TargetLanguageCodes: Object.values(this.selectedTranslateLanguages.map(x => x.text)).filter(x => x !== this.sourceLanguageCode).concat(this.sourceLanguageCode),
           Enabled: this.enabledOperators.includes("Transcribe") || this.enabledOperators.includes("Translate")
         },
         PollyWebCaptions: {
@@ -794,7 +815,7 @@ export default {
     workflowConfigWithInput() {
       // This function is just used to pretty print the rest api
       // for workflow execution in a popup modal
-      let data = JSON.parse(JSON.stringify(this.videoWorkflowConfig));
+      let data = JSON.parse(JSON.stringify(this.workflow_config));
       data["Input"] = {
         "Media": {
           "Video": {
@@ -819,10 +840,13 @@ export default {
     },
     transcribeLanguage() {
       // Transcribe will fail if the custom vocabulary language
-      // does not match the transcribe job language.
+      // or custom language model does not match the transcribe job language.
       // So, this function prevents users from selecting vocabularies
-      // which don't match the selected Transcribe source language.
+      // or CLMs which don't match the selected Transcribe source language.
       this.customVocabularyList.map(item => {
+        item.notEnabled=(item.language_code !== this.transcribeLanguage)
+      })
+      this.customLanguageModelList.map(item => {
         item.notEnabled=(item.language_code !== this.transcribeLanguage)
       })
     }
@@ -840,6 +864,7 @@ export default {
     this.listVocabulariesRequest()
     this.listTerminologiesRequest()
     this.listParallelDataRequest()
+    this.listLanguageModelsRequest()
   },
   beforeDestroy () {
     clearInterval(this.workflow_status_polling)
@@ -934,7 +959,7 @@ export default {
       if (this.hasAssetParam) {
         if (media_type === "video") {
           this.workflow_config = vm.videoWorkflowConfig;
-            this.workflow_config["Input"] = { AssetId: this.assetIdParam, Media: { Video: {} } };
+          this.workflow_config["Input"] = { AssetId: this.assetIdParam, Media: { Video: {} } };
         } else {
           vm.s3UploadError(
               "Unsupported media type, " + this.$route.query.mediaType + "."
@@ -956,14 +981,17 @@ export default {
 
 
           // Add optional parameters to workflow config:
+          if (this.customVocabulary !== null) {
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocabulary
+          }
+          if (this.customLanguageModel !== null) {
+            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.LanguageModelName = this.customLanguageModel
+          }
           if (this.customTerminology !== null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
           }
           if (this.parallelData != null) {
             this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
-          }
-          if (this.customVocab !== null) {
-            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocab
           }
           if (this.existingSubtitlesFilename == "") {
             if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
@@ -1151,6 +1179,33 @@ export default {
           })
       } catch (error) {
         console.log("ERROR: Failed to get parallel data. Check Workflow API logs.");
+        console.log(error)
+      }
+    },
+    listLanguageModelsRequest: async function () {
+      let apiName = 'mieWorkflowApi'
+      let path = 'service/transcribe/list_language_models'
+      let requestOpts = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        response: true
+      };
+      try {
+        let response = await this.$Amplify.API.get(apiName, path, requestOpts);
+        this.customLanguageModelList = response.data["Models"].map(models => {
+          return {
+            name: models.ModelName,
+            status: models.ModelStatus,
+            language_code: models.LanguageCode,
+            name_and_status: models.ModelStatus === "COMPLETED" ?
+              models.ModelName + " (" + models.LanguageCode + ")" :
+              models.ModelName + " [" + models.ModelStatus + "]",
+            notEnabled: (models.ModelStatus !== "COMPLETED" || models.LanguageCode !== this.transcribeLanguage)
+          }
+        })
+      } catch (error) {
+        console.log("ERROR: Failed to get language models. Check Workflow API logs.");
         console.log(error)
       }
     }

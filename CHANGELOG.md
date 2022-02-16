@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed:
 
-* Remove profanity checker due to insufficient support for non-english languages (#256)
 * Fix missing data in line chart for computer vision results (#303)
 * Fix opensearch throttling (#303)
 * Remove unused subtitles checkbox from Upload view (#300)

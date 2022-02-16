@@ -99,11 +99,6 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     # # now it should be ru-RU
     assert transcribe_language_box.get_attribute("value") == "ru-RU"
     
-    # Configure subtitles
-    subtitles_box = browser.find_element_by_xpath("/html/body/div/div/div[2]/div[2]/div/div[1]/div[2]/div[2]/fieldset/div/div/div[4]/input")
-    subtitles_box.send_keys("test.vtt")
-    assert subtitles_box.get_attribute("value") == "test.vtt"
-    
      ####### Collection View
      # Navigate to Collection view
     #browser.find_element_by_link_text("Collection").click()

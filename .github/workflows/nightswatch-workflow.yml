@@ -45,12 +45,9 @@ jobs:
           aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=OpensearchNodeSize,ParameterValue=t3.small.search --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
           aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
           status=$(aws cloudformation describe-stacks --stack-name $CONTENT_LOCALIZATION_STACK_NAME --query 'Stacks[0].StackStatus')
-          while [ "$status" == "CREATE_IN_PROGRESS" ]; do 
-            aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
-            status=$(aws cloudformation describe-stacks --stack-name $CONTENT_LOCALIZATION_STACK_NAME --query 'Stacks[0].StackStatus')
-        done
-        echo "Create stack $CONTENT_LOCALIZATION_STACK_NAME status: $status"
-        exit 0
+          while [ "$status" == "CREATE_IN_PROGRESS" ]; do aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME; status=$(aws cloudformation describe-stacks --stack-name $CONTENT_LOCALIZATION_STACK_NAME --query 'Stacks[0].StackStatus'); done
+          echo "Create stack $CONTENT_LOCALIZATION_STACK_NAME status: $status"
+          exit 0
 
       - name: Build Failed
         if: ${{ failure() }}

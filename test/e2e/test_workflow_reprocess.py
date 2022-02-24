@@ -74,13 +74,13 @@ def test_workflow_reprocess(browser, workflow_to_modify, testing_env_variables):
     subtitle1 = browser.find_element_by_xpath("/html/body/div[1]/div/div[2]/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[1]/td[2]/div/div/div[1]/textarea")
     subtitle1_text = subtitle1.get_attribute("value")
     assert "Boulder" in subtitle1_text
-
+    
     # Edit a subtitle
+    time.sleep(5)
     subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00")
 
     # Save edits
-    time.sleep(1)
-    # Save edits
+    time.sleep(5)
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[2]").click()
     time.sleep(5)
     # Confirm Save Edits

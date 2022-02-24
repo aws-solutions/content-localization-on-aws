@@ -905,18 +905,17 @@ export default {
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
         if(response.status == 200) {
-            // save phrases from the currently selected vocabulary
-          this.customVocabularySaved = response.data.vocabulary.map(({Phrase, SoundsLike, IPA, DisplayAs}) => ({
+          // save phrases from the currently selected vocabulary
+          this.customVocabularySaved = response.data.vocabulary.map(item => ({
             original_phrase: "",
-            new_phrase: Phrase,
-            sounds_like: SoundsLike,
-            IPA: IPA,
-            display_as: DisplayAs
+            new_phrase: item["Phrase"],
+            sounds_like: item["SoundsLike"],
+            display_as: item["DisplayAs\r"]
           }));
-          } else {
-            console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
-            this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
-          }
+        } else {
+          console.log("WARNING: Could not download vocabulary. Loading vocab from vuex state...")
+          this.customVocabularySaved = this.unsaved_custom_vocabularies.filter(item => (item.Name === this.customVocabularySelected))[0].vocabulary
+        }
       } catch (error) {
         alert(
           "ERROR: Failed to get vocabularies."

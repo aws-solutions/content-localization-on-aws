@@ -1,8 +1,8 @@
 name: scheduled-workflow
 
 on:
-  schedule:
-    - cron: '0 4 * * *'
+  #schedule:
+  #  - cron: '0 4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
         run: |
           cd deployment
           CONTENT_LOCALIZATION_STACK_NAME="cl"
-          EMAIL="micontentlocalization@gmail.com"
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION="us-west-2"
           VERSION=${SHORT_SHA}
           aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
@@ -52,11 +52,11 @@ jobs:
   build-mie-dev-us-west-2:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout MIE development branch
+      - name: Checkout MIE release branch
         uses: actions/checkout@v2
         with:
           repository: awslabs/aws-media-insights-engine
-          ref: development
+          ref: master
 
       - name: Initialize AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -184,7 +184,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=us-west-2
           VERSION={SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev
@@ -240,7 +240,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Deploy
         run: |
-          EMAIL=micontentlocalization@gmail.com
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
           REGION=us-west-2
           VERSION=${SHORT_SHA}
           DIST_OUTPUT_BUCKET=micl-dev

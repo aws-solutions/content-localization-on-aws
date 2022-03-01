@@ -351,13 +351,14 @@ export default {
         {text: 'Albanian', value: 'sq'},
         {text: 'Amharic', value: 'am'},
         {text: 'Arabic', value: 'ar'},
+        {text: 'Armenian', value: 'hy'},
         {text: 'Azerbaijani', value: 'az'},
         {text: 'Bengali', value: 'bn'},
         {text: 'Bosnian', value: 'bs'},
         {text: 'Bulgarian', value: 'bg'},
+        {text: 'Catalan', value: 'ca'},
         {text: 'Chinese (Simplified)', value: 'zh'},
-        // AWS Translate does not support translating from zh to zh-TW
-        // {text: 'Chinese (Traditional)', value: 'zh-TW'},
+        {text: 'Chinese (Traditional)', value: 'zh-TW'},
         {text: 'Croatian', value: 'hr'},
         {text: 'Czech', value: 'cs'},
         {text: 'Danish', value: 'da'},
@@ -365,43 +366,60 @@ export default {
         {text: 'Dutch', value: 'nl'},
         {text: 'English', value: 'en'},
         {text: 'Estonian', value: 'et'},
+        {text: 'Farsi (Persian)', value: 'fa'},
+        {text: 'Filipino (Tagalog)', value: 'tl'},
         {text: 'Finnish', value: 'fi'},
         {text: 'French', value: 'fr'},
         {text: 'French (Canadian)', value: 'fr-CA'},
         {text: 'Georgian', value: 'ka'},
         {text: 'German', value: 'de'},
         {text: 'Greek', value: 'el'},
+        {text: 'Gujarati', value: 'gu'},
+        {text: 'Haitian Creole', value: 'ht'},
         {text: 'Hausa', value: 'ha'},
         {text: 'Hebrew', value: 'he'},
         {text: 'Hindi', value: 'hi'},
         {text: 'Hungarian', value: 'hu'},
+        {text: 'Icelandic', value: 'is'},
         {text: 'Indonesian', value: 'id'},
         {text: 'Italian', value: 'it'},
+        {text: 'Irish', value: 'ga'},
         {text: 'Japanese', value: 'ja'},
+        {text: 'Kannada', value: 'kn'},
+        {text: 'Kazakh', value: 'kk'},
         {text: 'Korean', value: 'ko'},
         {text: 'Latvian', value: 'lv'},
         {text: 'Malay', value: 'ms'},
+        {text: 'Malayalam', value: 'ml'},
+        {text: 'Maltese', value: 'mt'},
+        {text: 'Marathi', value: 'mr'},
+        {text: 'Mongolian', value: 'mn'},
         {text: 'Norwegian', value: 'no'},
-        {text: 'Persian', value: 'fa'},
         {text: 'Pashto', value: 'ps'},
         {text: 'Polish', value: 'pl'},
         {text: 'Portuguese', value: 'pt'},
+        {text: 'Portuguese (Portugal)', value: 'pt-PT'},
+        {text: 'Punjabi', value: 'pa'},
         {text: 'Romanian', value: 'ro'},
         {text: 'Russian', value: 'ru'},
         {text: 'Serbian', value: 'sr'},
+        {text: 'Sinhala', value: 'si'},
         {text: 'Slovak', value: 'sk'},
         {text: 'Slovenian', value: 'sl'},
         {text: 'Somali', value: 'so'},
         {text: 'Spanish', value: 'es'},
+        {text: 'Spanish (Mexico)', value: 'es-MX'},
         {text: 'Swahili', value: 'sw'},
         {text: 'Swedish', value: 'sv'},
-        {text: 'Tagalog', value: 'tl'},
         {text: 'Tamil', value: 'ta'},
+        {text: 'Telugu', value: 'te'},
         {text: 'Thai', value: 'th'},
         {text: 'Turkish', value: 'tr'},
         {text: 'Ukrainian', value: 'uk'},
         {text: 'Urdu', value: 'ur'},
+        {text: 'Uzbek', value: 'uz'},
         {text: 'Vietnamese', value: 'vi'},
+        {text: 'Welsh', value: 'cy'},
       ],
       asset_id: this.$route.params.asset_id,
       workflow_id: "",
@@ -432,7 +450,6 @@ export default {
       id: 0,
       transcript: "",
       isSaving: false,
-      noTranscript: false
     }
   },
   computed: {
@@ -573,6 +590,7 @@ export default {
   deactivated: function () {
     console.log('deactivated component:', this.operator)
     this.selected_lang_code = ""
+    this.noTranslation = false
     clearInterval(this.workflow_status_polling)
   },
   activated: function () {
@@ -647,18 +665,18 @@ export default {
               {text: languageLabel, value: item.TargetLanguageCode}
             );
           })
-          console.log("got the collection")
+        console.log("got the collection")
+        console.log(this.translationsCollection)
+        // Got all the languages now.
+        // Set the default language to the first one in the alphabetized list.
+        if (this.alphabetized_language_collection.length > 0) {
+          this.selected_lang = this.alphabetized_language_collection[0].text
+          this.selected_lang_code = this.alphabetized_language_collection[0].value
+          await this.getWebCaptions()
+          console.log("got the captions")
           console.log(this.translationsCollection)
-          // Got all the languages now.
-          // Set the default language to the first one in the alphabetized list.
-          if (this.alphabetized_language_collection.length > 0) {
-            this.selected_lang = this.alphabetized_language_collection[0].text
-            this.selected_lang_code = this.alphabetized_language_collection[0].value
-            await this.getWebCaptions()
-            console.log("got the captions")
-            console.log(this.translationsCollection)
-          }
-          this.isBusy = false
+        }
+        this.isBusy = false
       } catch (error) {
         console.log(
           "ERROR: Failed to get languages."
@@ -1090,7 +1108,7 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         this.workflow_config = response.data.Configuration
-        this.sourceLanguageCode = response.data.Configuration.WebCaptions.WebCaptions.SourceLanguageCode
+        this.sourceLanguageCode = response.data.Configuration.Translate.TranslateWebCaptions.SourceLanguageCode
         this.terminology_used = response.data.Configuration.Translate.TranslateWebCaptions.TerminologyNames.map(x => x.Name)
         this.parallel_data_used = response.data.Configuration.Translate.TranslateWebCaptions.ParallelDataNames.map(x => x.Name)
         this.workflow_definition = response.data.Workflow
@@ -1462,7 +1480,6 @@ export default {
             console.log(response.data.Message);
             console.log("Response: " + response.status);
             this.isBusy = false
-            this.noTranscript = true
           }
           console.log("response.data")
           console.log(response.data)

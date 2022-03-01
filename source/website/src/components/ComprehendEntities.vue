@@ -60,7 +60,10 @@ export default {
     },
   data() {
     return {
-      Confidence: 90,
+               curlCommand: '',
+        searchQuery: '',
+        showElasticsearchApiRequest: false,
+        Confidence: 90,
       sortBy: "BeginOffset",
       fields: [
         { key: 'EntityText', sortable: true },

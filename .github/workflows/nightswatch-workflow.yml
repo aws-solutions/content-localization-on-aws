@@ -1,0 +1,146 @@
+name: nightswatch-workflow
+
+on:
+  schedule:
+    - cron: '10 1 * * *'
+  workflow_dispatch:
+
+jobs:
+
+  deploy-latest-clo-us-west-2:
+    runs-on: ubuntu-latest
+    env:
+      REGION: 'us-west-2'
+    steps:
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Generate short sha
+        run: |
+          echo "CONTENT_LOCALIZATION_STACK_NAME=clsol" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v2
+      - name: Deploy
+        run: |
+          EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}
+          REGION=us-west-2
+          VERSION={SHORT_SHA}
+          TEMPLATE=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template
+
+          # Delete $CONTENT_LOCALIZATION_STACK_NAME if it already exists.
+          # This is necessary in order to rerun github action workflows.
+          # If $CONTENT_LOCALIZATION_STACK_NAME exists...
+          if [ $(echo $(aws cloudformation list-stacks --query 'StackSummaries[?StackName==`$CONTENT_LOCALIZATION_STACK_NAME`]' --output text)  | tr -d '\n' | wc -c) > 0 ]; then
+            echo "Removing stack, $CONTENT_LOCALIZATION_STACK_NAME"
+            aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --region $REGION
+            aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          fi
+
+          echo "deploy cloudformation: 'aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=OpensearchNodeSize,ParameterValue=t3.small.search --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback'"
+
+          aws cloudformation create-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL ParameterKey=OpensearchNodeSize,ParameterValue=t3.small.search --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --disable-rollback
+          aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          status=$(aws cloudformation describe-stacks --stack-name $CONTENT_LOCALIZATION_STACK_NAME --query 'Stacks[0].StackStatus')
+          while [ "$status" == "CREATE_IN_PROGRESS" ]; do aws cloudformation wait stack-create-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME; status=$(aws cloudformation describe-stacks --stack-name $CONTENT_LOCALIZATION_STACK_NAME --query 'Stacks[0].StackStatus'); done
+          echo "Create stack $CONTENT_LOCALIZATION_STACK_NAME status: $status"
+          exit 0
+
+      - name: Build Failed
+        if: ${{ failure() }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Nightswatch deploy for Content Localization failed
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ianwow
+          labels: bug
+          body: Nightswatch deploy for Content Localization failed
+
+  test-content-localization-us-west-2:
+    needs: deploy-latest-clo-us-west-2
+    runs-on: ubuntu-latest
+    env:
+      MIE_REGION: 'us-west-2'
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: main
+
+      - name: Initialize test AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-west-2
+
+      - name: Generate short sha
+        run: |
+          echo "CONTENT_LOCALIZATION_STACK_NAME=clsol" >> $GITHUB_ENV
+      - name: Run cfn_nag
+        uses: stelligent/cfn_nag@master
+        continue-on-error: true
+        with:
+            input_path: deployment
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Setup Chromedriver
+        uses: nanasess/setup-chromedriver@master
+      - name: Get user pool id
+        run: |
+          aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, `clsol-AuthStack`)].Outputs[1].OutputValue' --output text --region us-west-2
+          echo "USER_POOL_ID=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`clsol-AuthStack\`)].Outputs[1].OutputValue' --output text --region us-west-2`" >> $GITHUB_ENV
+      - name: Reset CL user password
+        run: |
+          aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username ${{ secrets.TEST_ADMIN_EMAIL }} --password ${{ secrets.TEST_ADMIN_PASSWORD }} --permanent --region us-west-2
+      - name: Get MIE stack name
+        run: |
+          echo "MIE_STACK_NAME=`aws cloudformation describe-stacks --region us-west-2 --query 'sort_by(Stacks[?starts_with(StackName, \`clsol-MieStack\`)].{StackName: StackName, CreationTime: CreationTime}, &CreationTime)[0].StackName' --output text`" >> $GITHUB_ENV
+      - name: Get Content Localization endpoint
+        run: |
+          echo "APP_ENDPOINT=`aws cloudformation describe-stacks --query 'Stacks[?starts_with(StackName, \`clsol-WebStack\`)].Outputs[0].OutputValue' --output text`" >> $GITHUB_ENV
+      - name: Set admin creds
+        run: |
+          echo APP_USERNAME=${{ secrets.TEST_ADMIN_EMAIL }} >> $GITHUB_ENV
+          echo APP_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} >> $GITHUB_ENV
+      - name: Set media path and file name
+        run: |
+          echo TEST_MEDIA_PATH=$GITHUB_WORKSPACE/test/e2e/ >> $GITHUB_ENV
+          echo TEST_FILE_NAME=run_e2e.sh >> $GITHUB_ENV
+      - name: Initialize test AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+            aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-west-2
+      - name: Run e2e tests
+        run: |
+          cd $GITHUB_WORKSPACE
+          cd test/e2e
+          ./run_e2e.sh
+      - name: Test Failed
+        if: ${{ failure() }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Nightswatch test for Content Localization failed
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ianwow
+          labels: bug
+          body: Nightswatch test for Content Localization failed
+      - name: Initialize build AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - name: Delete stacks
+        run: |
+          aws cloudformation delete-stack --stack-name $CONTENT_LOCALIZATION_STACK_NAME
+          aws cloudformation wait stack-delete-complete --stack-name $CONTENT_LOCALIZATION_STACK_NAME

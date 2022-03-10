@@ -197,17 +197,8 @@ Workflows can be started automatically when files are copied to a designated S3 
        Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/docs/sigv4_post_sample.py) into a new Lambda function.
     3. Under "Layers", click Add a layer
     4. Select Custom layers, then select `media-insights-engine-python38` from the drop-down menu, and click Add.
-    5. Make the following code changes to the copied code:
-
-- Put `import json` at the top
-- Replace `{restapi_id}` with the value of the `WorkflowApiRestID` key in the MieStack outputs
-- Replace `{region}` with the value of the region your stack is running in.
-- Replace `{api_name}` with `workflow`
-- Replace `{method_name}` with `execution`
-- Replace `{s3_bucket}` with the name of the S3 bucket you specified in `ExternalBucketArn`, above.
-- Replace `{s3_key}` with `event["Records"][0]["s3"]["object"]["key"]`
-- Replace `os.environ.get('AWS_ACCESS_KEY_ID')` with your AWS_ACCESS_KEY_ID
-- Replace `os.environ.get('AWS_SECRET_ACCESS_KEY')` with your AWS_SECRET_ACCESS_KEY
+    5. Add an environment variable `REST_API_ID` with the value of the `WorkflowApiRestID` key in the MieStack outputs.
+    6. Update the IAM role used by the Lambda function to grant it permission to invoke the WorkflowAPI.
 
 3. Setup an S3 trigger for the Lambda function, using the name of the S3 bucket you specified in `ExternalBucketArn`, above.
 

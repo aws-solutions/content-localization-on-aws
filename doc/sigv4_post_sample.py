@@ -62,6 +62,8 @@ def lambda_handler(event, context):
     # to embed credentials in code.
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    if 'AWS_SESSION_TOKEN' in os.environ:
+        session_token = os.environ.get('AWS_SESSION_TOKEN')
     if access_key is None or secret_key is None:
         print('No access key is available.')
         sys.exit()
@@ -89,7 +91,10 @@ def lambda_handler(event, context):
     # Step 4: Create the canonical headers. Header names must be trimmed
     # and lowercase, and sorted in code point order from low to high.
     # Note that there is a trailing \n.
-    canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amz_date + '\n'
+    canonical_headers = 'host:' + host + '\n' + \
+        'x-amz-date:' + amz_date + '\n'
+    if session_token is not None:
+        canonical_headers += 'x-amz-security-token:' + session_token + '\n'
 
     # Step 5: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -97,6 +102,8 @@ def lambda_handler(event, context):
     # signed_headers include those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
     signed_headers = 'host;x-amz-date'
+    if session_token is not None:
+        signed_headers += ';x-amz-security-token'
 
     # Step 6: Create payload hash. In this example, the payload (body of
     # the request) contains the request parameters.
@@ -132,6 +139,8 @@ def lambda_handler(event, context):
     headers = {'Authorization': authorization_header,
                'Content-Type': content_type,
                'x-amz-date': amz_date}
+    if session_token:
+        headers['x-amz-security-token'] = session_token
 
     # ************* SEND THE REQUEST *************
     print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')

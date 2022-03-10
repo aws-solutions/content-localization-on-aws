@@ -45,15 +45,16 @@ def lambda_handler(event, context):
     method = 'POST'
     service = 'execute-api'
     # Host is the base URL for your REST API, where {restapi_id} is the API identifier, {region} is the Region of the API deployment. 
-    host = '{restapi_id}.execute-api.{region}.amazonaws.com'
-    region = '{region}'
+    region = os.environ.get('AWS_REGION')
+    rest_api_id = os.environ.get('REST_API_ID')
+    host = f"{rest_api_id}.execute-api.{region}.amazonaws.com"
     # Endpoint is the endpoint URL for your REST API resource, where {api_name} is the API name, and {method_name} is the name of the method resource of the API deployment. 
-    endpoint = 'https://{restapi_id}.execute-api.us-west-2.amazonaws.com/api/{api_name}/{method_name}'
+    endpoint = f'https://{host}/api/workflow/execution'
     # POST requests use a content type header.
     content_type = 'application/json'
 
     # Specify the Amazon S3 location for the input media file:
-    s3_bucket = '{s3_bucket}'
+    s3_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     s3_key = event["Records"][0]["s3"]["object"]["key"]
     # Request parameters for executing the CasImageWorkflow in its default configuration
     request_parameters = '{"Name":"ContentLocalizationWorkflow","Configuration":{"PreprocessVideo":{"Thumbnail":{"ThumbnailPosition":"2","Enabled":true},"Mediainfo":{"Enabled":true}},"AnalyzeVideo":{"faceDetection":{"Enabled":false},"technicalCueDetection":{"Enabled":false},"shotDetection":{"Enabled":false},"celebrityRecognition":{"MediaType":"Video","Enabled":false},"labelDetection":{"MediaType":"Video","Enabled":true},"personTracking":{"MediaType":"Video","Enabled":false},"faceSearch":{"MediaType":"Video","Enabled":false,"CollectionId":"undefined"},"textDetection":{"MediaType":"Video","Enabled":false},"Mediaconvert":{"MediaType":"Video","Enabled":false},"TranscribeVideo":{"Enabled":true,"TranscribeLanguage":"en-US","MediaType":"Audio"}},"TransformText":{"WebToSRTCaptions":{"MediaType":"MetadataOnly","TargetLanguageCodes":["es","de","en"],"Enabled":true},"WebToVTTCaptions":{"MediaType":"MetadataOnly","TargetLanguageCodes":["es","de","en"],"Enabled":true},"PollyWebCaptions":{"MediaType":"MetadataOnly","Enabled":false,"SourceLanguageCode":"en"}},"WebCaptions":{"WebCaptions":{"MediaType":"MetadataOnly","SourceLanguageCode":"en","Enabled":true}},"Translate":{"Translate":{"MediaType":"Text","Enabled":false},"TranslateWebCaptions":{"MediaType":"MetadataOnly","Enabled":true,"TargetLanguageCodes":["es","de"],"SourceLanguageCode":"en","TerminologyNames":[],"ParallelDataNames":[]}},"AnalyzeText":{"ComprehendEntities":{"MediaType":"Text","Enabled":false},"ComprehendKeyPhrases":{"MediaType":"Text","Enabled":false}}}, "Input":{"Media":{"Video":{"S3Bucket": "' + s3_bucket + '", "S3Key":"' + s3_key + '"}}}}'

@@ -37,9 +37,9 @@ The following Cloudformation templates will deploy the Content Localization fron
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v1.0.0/content-localization-on-aws.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -194,7 +194,7 @@ Workflows can be started automatically when files are copied to a designated S3 
 
     1. Click "Create function"
     2. Provide a function name and select the latest Python runtime version
-       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/docs/sigv4_post_sample.py) into a new Lambda function.
+       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/doc/sigv4_post_sample.py) into a new Lambda function.
     3. Under "Layers", click Add a layer
     4. Select Custom layers, then select `media-insights-engine-python38` from the drop-down menu, and click Add.
     5. Make the following code changes to the copied code:
@@ -343,7 +343,7 @@ Example data:
     "UUID": "d84a0bd5-7483-494e-8ab1-fdfaa7e97687",
     "TimeStamp": "2021-03-01T20:03:05.798545",
     "Data": {
-        "Version": "v1.0.0",
+        "Version": "v2.0.0",
         "CFTemplate": "Created"
     }
 }

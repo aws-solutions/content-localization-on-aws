@@ -71,6 +71,7 @@ export TEST_IMAGE="sample-image.jpg"
 export TEST_VIDEO="sample-video.mp4"
 export TEST_AUDIO="sample-audio.m4a"
 export TEST_VOCABULARY_FILE="uitestvocabulary"
+export DATAPLANE_BUCKET=$(aws --region $MIE_REGION cloudformation list-exports --query "Exports[?Name==\`${MIE_STACK_NAME}:DataplaneBucket\`].Value" --no-paginate --output text)
 
 # Retrieve exports from mie stack
 #export BUCKET_NAME=`aws cloudformation list-stack-resources --profile default --stack-name $MIE_STACK_NAME --region $REGION --output text --query 'StackResourceSummaries[?LogicalResourceId == \`Dataplane\`]'.PhysicalResourceId`
@@ -85,8 +86,12 @@ pytest -s -W ignore::DeprecationWarning -p no:cacheproviders
 ######TESTING: test a single file
 
 if [ $? -eq 0 ]; then
+    rm *.png
     exit 0
 else
+    # Copy browser screenshots from github workspace to S3 in case they're needed
+    # for troubleshooting e2e errors.
+    ls -1 *.png | while read line; do aws s3 cp $line s3://$DATAPLANE_BUCKET/; done
     exit 1
 fi
 

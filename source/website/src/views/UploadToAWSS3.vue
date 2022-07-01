@@ -17,101 +17,69 @@
     <Header :is-upload-active="true" />
     <br />
     <b-container>
-      <b-alert
-        :show="dismissCountDown"
-        dismissible
-        variant="danger"
-        @dismissed="dismissCountDown = 0"
-        @dismiss-count-down="countDownChanged"
+      <b-alert :show="dismissCountDown" dismissible variant="danger" @dismissed="dismissCountDown = 0"
+               @dismiss-count-down="countDownChanged"
       >
         {{ uploadErrorMessage }}
       </b-alert>
       <b-alert :show="showInvalidFile" variant="danger">
         {{ invalidFileMessages[invalidFileMessages.length - 1] }}
       </b-alert>
-      <h1 v-if="!hasAssetParam">Upload Content</h1>
-      <h1 v-else>Analyze Asset</h1>
+      <h1 v-if="!hasAssetParam">
+        Upload Content
+      </h1>
+      <h1 v-else>
+        Analyze Asset
+      </h1>
       <p v-if="!hasAssetParam">
         Media analysis status will be shown after upload completes.
       </p>
       <p v-if="!hasAssetParam">
         Media analysis status will be shown after you configure your workflow.
       </p>
-      <vue-dropzone
-        v-if="!hasAssetParam"
-        id="dropzone"
-        ref="myVueDropzone"
-        :awss3="awss3"
-        :options="dropzoneOptions"
-        @vdropzone-s3-upload-error="s3UploadError"
-        @vdropzone-file-added="fileAdded"
-        @vdropzone-removed-file="fileRemoved"
-        @vdropzone-success="runWorkflow"
-        @vdropzone-sending="upload_in_progress = true"
-        @vdropzone-queue-complete="upload_in_progress = false"
+      <vue-dropzone v-if="!hasAssetParam" id="dropzone" ref="myVueDropzone" :awss3="awss3" :options="dropzoneOptions"
+                    @vdropzone-s3-upload-error="s3UploadError" @vdropzone-file-added="fileAdded"
+                    @vdropzone-removed-file="fileRemoved" @vdropzone-success="runWorkflow"
+                    @vdropzone-sending="upload_in_progress = true" @vdropzone-queue-complete="upload_in_progress = false"
       />
-      <p v-if="hasAssetParam"><b>Asset ID:</b> {{ assetIdParam }}<br /></p>
+      <p v-if="hasAssetParam">
+        <b>Asset ID:</b> {{ assetIdParam }}<br />
+      </p>
       <br />
       <b-button v-b-toggle.collapse-2 class="m-1">
         Configure Workflow
       </b-button>
       <div v-if="!hasAssetParam" style="display: inline-block">
-        <b-button
-          v-if="!hasAssetParam && validForm && upload_in_progress === false"
-          variant="primary"
-          @click="uploadFiles"
+        <b-button v-if="!hasAssetParam && validForm && upload_in_progress === false" variant="primary"
+                  @click="uploadFiles"
         >
           Upload and Run Workflow
         </b-button>
-        <b-button
-          v-else
-          v-b-tooltip.hover
-          disabled
-          variant="primary"
-          title="Your workflow configuration is invalid"
-          @click="uploadFiles"
+        <b-button v-else v-b-tooltip.hover disabled variant="primary" title="Your workflow configuration is invalid"
+                  @click="uploadFiles"
         >
           Upload and Run Workflow
         </b-button>
       </div>
       <div v-else style="display: inline-block">
-        <b-button
-          v-if="validForm && upload_in_progress === false"
-          variant="primary"
-          @click="runWorkflow"
-        >
+        <b-button v-if="validForm && upload_in_progress === false" variant="primary" @click="runWorkflow">
           Run Workflow
         </b-button>
-        <b-button
-          v-else
-          v-b-tooltip.hover
-          disabled
-          variant="primary"
-          title="Your workflow configuration is invalid"
-          @click="runWorkflow"
+        <b-button v-else v-b-tooltip.hover disabled variant="primary" title="Your workflow configuration is invalid"
+                  @click="runWorkflow"
         >
           Run Workflow
         </b-button>
       </div>
       <br />
-      <b-button
-        :pressed="false"
-        size="sm"
-        variant="link"
-        class="text-decoration-none"
-        @click="showExecuteApi = true"
-      >
+      <b-button :pressed="false" size="sm" variant="link" class="text-decoration-none" @click="showExecuteApi = true">
         Show API request to run workflow
       </b-button>
       <b-modal v-model="showExecuteApi" scrollable title="REST API" ok-only>
         <label>Request URL:</label>
-        <pre
-          v-highlightjs
-        ><code class="bash">POST {{ WORKFLOW_API_ENDPOINT }}workflow/execution</code></pre>
+        <pre v-highlightjs><code class="bash">POST {{ WORKFLOW_API_ENDPOINT }}workflow/execution</code></pre>
         <label>Request data:</label>
-        <pre
-          v-highlightjs="JSON.stringify(workflowConfigWithInput)"
-        ><code class="json"></code></pre>
+        <pre v-highlightjs="JSON.stringify(workflowConfigWithInput)"><code class="json"></code></pre>
         <label>Sample command:</label>
         <p>
           Be sure to replace "SAMPLE_VIDEO.MP4" with the S3 key of an actual
@@ -120,9 +88,7 @@
         <pre v-highlightjs="curlCommand"><code class="bash"></code></pre>
       </b-modal>
       <br />
-      <span v-if="upload_in_progress" class="text-secondary"
-        >Upload in progress</span
-      >
+      <span v-if="upload_in_progress" class="text-secondary">Upload in progress</span>
       <b-container v-if="upload_in_progress">
         <b-spinner label="upload_in_progress" />
       </b-container>
@@ -132,26 +98,14 @@
           <b-card-group deck>
             <b-card header="Video Operators">
               <b-form-group>
-                <b-form-checkbox-group
-                  id="checkbox-group-1"
-                  v-model="enabledOperators"
-                  :options="videoOperators"
-                  name="flavour-1"
+                <b-form-checkbox-group id="checkbox-group-1" v-model="enabledOperators" :options="videoOperators"
+                                       name="flavour-1"
                 ></b-form-checkbox-group>
                 <label>Thumbnail position: </label>
-                <b-form-input
-                  v-model="thumbnail_position"
-                  type="range"
-                  min="1"
-                  max="20"
-                  step="1"
-                ></b-form-input>
+                <b-form-input v-model="thumbnail_position" type="range" min="1" max="20" step="1"></b-form-input>
                 {{ thumbnail_position }} sec
-                <b-form-input
-                  v-if="enabledOperators.includes('faceSearch')"
-                  id="face_collection_id"
-                  v-model="faceCollectionId"
-                  placeholder="Enter face collection id"
+                <b-form-input v-if="enabledOperators.includes('faceSearch')" id="face_collection_id"
+                              v-model="faceCollectionId" placeholder="Enter face collection id"
                 ></b-form-input>
               </b-form-group>
               <div v-if="videoFormError" style="color: red">
@@ -160,32 +114,21 @@
             </b-card>
             <b-card header="Audio Operators">
               <b-form-group>
-                <b-form-checkbox-group
-                  id="checkbox-group-2"
-                  v-model="enabledOperators"
-                  name="audioOperators"
-                >
+                <b-form-checkbox-group id="checkbox-group-2" v-model="enabledOperators" name="audioOperators">
                   <b-form-checkbox value="Transcribe">
                     Transcribe
                   </b-form-checkbox>
                   <div v-if="enabledOperators.includes('Transcribe')">
                     <label>Source Language</label>
-                    <b-form-select
-                      v-model="transcribeLanguage"
-                      :options="transcribeLanguages"
-                    >
+                    <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages">
                     </b-form-select>
                     <!-- Custom vocab and CLM options are disabled when source language 
                     autodetect is enabled in order to prevent users from selecting 
                     incompatible customizations. -->
                     <div v-if="transcribeLanguage !== 'auto'">
                       Custom Vocabulary
-                      <b-form-select
-                        v-model="customVocabulary"
-                        :options="customVocabularyList"
-                        text-field="name_and_status"
-                        value-field="name"
-                        disabled-field="notEnabled"
+                      <b-form-select v-model="customVocabulary" :options="customVocabularyList"
+                                     text-field="name_and_status" value-field="name" disabled-field="notEnabled"
                       >
                         <template #first>
                           <b-form-select-option :value="null">
@@ -195,12 +138,8 @@
                       </b-form-select>
                       <br />
                       Custom Language Models
-                      <b-form-select
-                        v-model="customLanguageModel"
-                        :options="customLanguageModelList"
-                        text-field="name_and_status"
-                        value-field="name"
-                        disabled-field="notEnabled"
+                      <b-form-select v-model="customLanguageModel" :options="customLanguageModelList"
+                                     text-field="name_and_status" value-field="name" disabled-field="notEnabled"
                       >
                         <template #first>
                           <b-form-select-option :value="null">
@@ -211,10 +150,8 @@
                       <br />
                     </div>
                     Use Existing Subtitles
-                    <b-form-input
-                      v-model="existingSubtitlesFilename"
-                      placeholder="(optional) Enter .vtt filename"
-                    ></b-form-input>
+                    <b-form-input v-model="existingSubtitlesFilename" placeholder="(optional) Enter .vtt filename">
+                    </b-form-input>
                   </div>
                 </b-form-checkbox-group>
               </b-form-group>
@@ -224,11 +161,7 @@
             </b-card>
             <b-card header="Text Operators">
               <b-form-group>
-                <b-form-checkbox-group
-                  id="checkbox-group-3"
-                  v-model="enabledOperators"
-                  name="textOperators"
-                >
+                <b-form-checkbox-group id="checkbox-group-3" v-model="enabledOperators" name="textOperators">
                   <b-form-checkbox value="ComprehendEntities">
                     Comprehend Entities
                   </b-form-checkbox>
@@ -245,71 +178,36 @@
                 <div v-if="pollyFormError" style="color: red">
                   {{ pollyFormError }}
                 </div>
-                <b-form-checkbox
-                  v-if="
-                    enabledOperators.includes('ComprehendEntities') ||
+                <b-form-checkbox v-if="
+                  enabledOperators.includes('ComprehendEntities') ||
                     enabledOperators.includes('ComprehendKeyPhrases')
-                  "
-                  v-model="ComprehendEncryption"
+                " v-model="ComprehendEncryption"
                 >
                   Encrypt Comprehend Job
                 </b-form-checkbox>
-                <b-form-input
-                  v-if="
-                    ComprehendEncryption &&
+                <b-form-input v-if="
+                  ComprehendEncryption &&
                     (enabledOperators.includes('ComprehendEntities') ||
                       enabledOperators.includes('ComprehendKeyPhrases'))
-                  "
-                  v-model="kmsKeyId"
-                  placeholder="Enter KMS key ID"
+                " v-model="kmsKeyId" placeholder="Enter KMS key ID"
                 ></b-form-input>
                 <div v-if="enabledOperators.includes('Translate')">
                   <!-- Show only those custom terminologies whose source language match
                    the source language that the user specified for Transcribe. -->
-                  <div
-                    v-if="
-                      customTerminologyList.filter(
-                        (x) => x.SourceLanguageCode === sourceLanguageCode
-                      ).length > 0
-                    "
+                  <div v-if="
+                    customTerminologyList.filter(
+                      (x) => x.SourceLanguageCode === sourceLanguageCode
+                    ).length > 0
+                  "
                   >
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }}
                     selected)
-                    <b-form-select
-                      v-model="customTerminology"
-                      :options="
-                        customTerminologyList
-                          .filter(
-                            (x) => x.SourceLanguageCode === sourceLanguageCode
-                          )
-                          .map((x) => {
-                            return {
-                              text: x.Name + ' (' + x.TargetLanguageCodes + ')',
-                              value: {
-                                Name: x.Name,
-                                TargetLanguageCodes: x.TargetLanguageCodes,
-                              },
-                            };
-                          })
-                      "
-                      multiple
-                    >
-                    </b-form-select>
-                  </div>
-                  <!-- If the user specified auto-detect for the Transcribe source
-                   language then show all custom terminologies. -->
-                  <div
-                    v-else-if="
-                      sourceLanguageCode === 'auto' &&
-                      customTerminologyList.length > 0
-                    "
-                  >
-                    <b>Custom Terminologies:</b> ({{ customTerminology.length }}
-                    selected)
-                    <b-form-select
-                      v-model="customTerminology"
-                      :options="
-                        customTerminologyList.map((x) => {
+                    <b-form-select v-model="customTerminology" :options="
+                      customTerminologyList
+                        .filter(
+                          (x) => x.SourceLanguageCode === sourceLanguageCode
+                        )
+                        .map((x) => {
                           return {
                             text: x.Name + ' (' + x.TargetLanguageCodes + ')',
                             value: {
@@ -318,8 +216,30 @@
                             },
                           };
                         })
-                      "
-                      multiple
+                    " multiple
+                    >
+                    </b-form-select>
+                  </div>
+                  <!-- If the user specified auto-detect for the Transcribe source
+                   language then show all custom terminologies. -->
+                  <div v-else-if="
+                    sourceLanguageCode === 'auto' &&
+                      customTerminologyList.length > 0
+                  "
+                  >
+                    <b>Custom Terminologies:</b> ({{ customTerminology.length }}
+                    selected)
+                    <b-form-select v-model="customTerminology" :options="
+                      customTerminologyList.map((x) => {
+                        return {
+                          text: x.Name + ' (' + x.TargetLanguageCodes + ')',
+                          value: {
+                            Name: x.Name,
+                            TargetLanguageCodes: x.TargetLanguageCodes,
+                          },
+                        };
+                      })
+                    " multiple
                     >
                     </b-form-select>
                   </div>
@@ -327,65 +247,30 @@
                     <b>Custom Terminologies:</b>
                     (none available)
                   </div>
-                  <div
-                    v-if="overlappingTerminologies.length > 0"
-                    style="color: red"
-                  >
+                  <div v-if="overlappingTerminologies.length > 0" style="color: red">
                     You must not select terminologies that define translations
                     for the same language. The following terminologies overlap:
                     <ul id="overlapping_terminologies">
-                      <li
-                        v-for="terminology in overlappingTerminologies"
-                        :key="terminology"
-                      >
+                      <li v-for="terminology in overlappingTerminologies" :key="terminology">
                         {{ terminology }}
                       </li>
                     </ul>
                   </div>
                   <!-- Show only those parallel data sets whose source language match
                    the source language that the user specified for Transcribe. -->
-                  <div
-                    v-if="
-                      parallelDataList.filter(
-                        (x) => x.SourceLanguageCode === sourceLanguageCode
-                      ).length > 0
-                    "
+                  <div v-if="
+                    parallelDataList.filter(
+                      (x) => x.SourceLanguageCode === sourceLanguageCode
+                    ).length > 0
+                  "
                   >
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
-                    <b-form-select
-                      v-model="parallelData"
-                      :options="
-                        parallelDataList
-                          .filter(
-                            (x) => x.SourceLanguageCode === sourceLanguageCode
-                          )
-                          .map((x) => {
-                            return {
-                              text: x.Name + ' (' + x.TargetLanguageCodes + ')',
-                              value: {
-                                Name: x.Name,
-                                TargetLanguageCodes: x.TargetLanguageCodes,
-                              },
-                            };
-                          })
-                      "
-                      multiple
-                    >
-                    </b-form-select>
-                  </div>
-                  <!-- If the user specified auto-detect for the Transcribe source
-                   language then show all parallel data sets. -->
-                  <div
-                    v-else-if="
-                      sourceLanguageCode === 'auto' &&
-                      parallelDataList.length > 0
-                    "
-                  >
-                    <b>Parallel Data:</b> ({{ parallelData.length }} selected)
-                    <b-form-select
-                      v-model="parallelData"
-                      :options="
-                        parallelDataList.map((x) => {
+                    <b-form-select v-model="parallelData" :options="
+                      parallelDataList
+                        .filter(
+                          (x) => x.SourceLanguageCode === sourceLanguageCode
+                        )
+                        .map((x) => {
                           return {
                             text: x.Name + ' (' + x.TargetLanguageCodes + ')',
                             value: {
@@ -394,8 +279,29 @@
                             },
                           };
                         })
-                      "
-                      multiple
+                    " multiple
+                    >
+                    </b-form-select>
+                  </div>
+                  <!-- If the user specified auto-detect for the Transcribe source
+                   language then show all parallel data sets. -->
+                  <div v-else-if="
+                    sourceLanguageCode === 'auto' &&
+                      parallelDataList.length > 0
+                  "
+                  >
+                    <b>Parallel Data:</b> ({{ parallelData.length }} selected)
+                    <b-form-select v-model="parallelData" :options="
+                      parallelDataList.map((x) => {
+                        return {
+                          text: x.Name + ' (' + x.TargetLanguageCodes + ')',
+                          value: {
+                            Name: x.Name,
+                            TargetLanguageCodes: x.TargetLanguageCodes,
+                          },
+                        };
+                      })
+                    " multiple
                     >
                     </b-form-select>
                   </div>
@@ -403,17 +309,11 @@
                     <b>Parallel Data:</b>
                     (none available)
                   </div>
-                  <div
-                    v-if="overlappingParallelData.length > 0"
-                    style="color: red"
-                  >
+                  <div v-if="overlappingParallelData.length > 0" style="color: red">
                     You must not select Parallel Data that define translations
                     for the same language. The following Parallel Data overlap:
                     <ul id="overlapping_parallel_data">
-                      <li
-                        v-for="parallel_data in overlappingParallelData"
-                        :key="parallel_data"
-                      >
+                      <li v-for="parallel_data in overlappingParallelData" :key="parallel_data">
                         {{ parallel_data }}
                       </li>
                     </ul>
@@ -425,20 +325,11 @@
                     <div v-if="textFormError" style="color: red">
                       {{ textFormError }}
                     </div>
-                    <voerro-tags-input
-                      v-model="selectedTranslateLanguages"
-                      element-id="target_language_tags"
-                      :limit="10"
-                      :hide-input-on-limit="true"
-                      :existing-tags="translateLanguageTags"
-                      :only-existing-tags="true"
-                      :add-tags-on-space="true"
-                      :add-tags-on-comma="true"
-                      :add-tags-on-blur="true"
-                      :sort-search-results="true"
-                      :typeahead-always-show="true"
-                      :typeahead-hide-discard="true"
-                      :typeahead="true"
+                    <voerro-tags-input v-model="selectedTranslateLanguages" element-id="target_language_tags"
+                                       :limit="10" :hide-input-on-limit="true" :existing-tags="translateLanguageTags"
+                                       :only-existing-tags="true" :add-tags-on-space="true" :add-tags-on-comma="true"
+                                       :add-tags-on-blur="true" :sort-search-results="true" :typeahead-always-show="true"
+                                       :typeahead-hide-discard="true" :typeahead="true"
                     />
                   </b-form-group>
                 </div>
@@ -458,38 +349,23 @@
     </b-container>
     <b-container v-if="executed_assets.length > 0">
       <label> Execution History </label>
-      <b-table
-        :fields="fields"
-        bordered
-        hover
-        small
-        responsive
-        show-empty
-        fixed
-        :items="executed_assets"
-      >
+      <b-table :fields="fields" bordered hover small responsive show-empty fixed :items="executed_assets">
         <template #cell(workflow_status)="data">
-          <a
-            v-if="data.item.workflow_status !== 'Queued'"
-            href=""
-            @click.stop.prevent="
-              openWindow(data.item.state_machine_console_link)
-            "
-            >{{ data.item.workflow_status }}</a
-          >
+          <a v-if="data.item.workflow_status !== 'Queued'" href="" @click.stop.prevent="
+            openWindow(data.item.state_machine_console_link)
+          "
+          >{{ data.item.workflow_status }}</a>
           <div v-if="data.item.workflow_status === 'Queued'">
             {{ data.item.workflow_status }}
           </div>
         </template>
       </b-table>
-      <b-button size="sm" @click="clearHistory"> Clear History </b-button>
+      <b-button size="sm" @click="clearHistory">
+        Clear History
+      </b-button>
       <br />
-      <b-button
-        :pressed="false"
-        size="sm"
-        variant="link"
-        class="text-decoration-none"
-        @click="showWorkflowStatusApi = true"
+      <b-button :pressed="false" size="sm" variant="link" class="text-decoration-none"
+                @click="showWorkflowStatusApi = true"
       >
         Show API request to get execution history
       </b-button>
@@ -513,6 +389,8 @@ import VoerroTagsInput from "@/components/VoerroTagsInput.vue";
 import "@/components/VoerroTagsInput.css";
 
 import { mapState } from "vuex";
+
+const mime = require("mime");
 
 export default {
   components: {
@@ -1117,12 +995,19 @@ export default {
       this.uploadErrorMessage = error;
       this.dismissCountDown = this.dismissSecs;
     },
+    getMimeType: function (file) {
+      if (file.type === "") {
+        return mime.getType(file.name);
+      }
+      return file.type;   
+    },
     fileAdded: function (file) {
       let errorMessage = "";
-      console.log(file.type);
-      if (!file.type.match(/video\/.+|application\/mxf/g)) {
-        if (file.type === "") errorMessage = "Unsupported file type: unknown";
-        else errorMessage = "Unsupported file type: " + file.type;
+      let fileType = this.getMimeType(file);
+      console.log(fileType);
+      if (!fileType.match(/video\/.+|application\/mxf/g)) {
+        if (fileType === "") errorMessage = "Unsupported file type: unknown";
+        else errorMessage = "Unsupported file type: " + fileType;
         this.invalidFileMessages.push(errorMessage);
         this.showInvalidFile = true;
       }
@@ -1135,9 +1020,10 @@ export default {
     },
     fileRemoved: function (file) {
       let errorMessage = "";
-      if (!file.type.match(/video\/.+|application\/mxf/g)) {
-        if (file.type === "") errorMessage = "Unsupported file type: unknown";
-        else errorMessage = "Unsupported file type: " + file.type;
+      let fileType = this.getMimeType(file)
+      if (!fileType.match(/video\/.+|application\/mxf/g)) {
+        if (fileType === "") errorMessage = "Unsupported file type: unknown";
+        else errorMessage = "Unsupported file type: " + fileType;
       }
       this.invalidFileMessages = this.invalidFileMessages.filter(function (
         value
@@ -1157,7 +1043,7 @@ export default {
       let media_type;
       let s3Key;
       if ("s3_key" in file) {
-        media_type = file.type;
+        media_type = this.getMimeType(file);
         s3Key = file.s3_key; // add in public since amplify prepends that to all keys
       } else {
         media_type = this.$route.query.mediaType;

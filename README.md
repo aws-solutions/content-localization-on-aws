@@ -375,7 +375,7 @@ Join our Gitter chat at https://gitter.im/awslabs/aws-media-insights-engine. Thi
 
 # Known Issues
 
-Visit the Issue page in this repository for known issues and feature requests.
+Visit the [Issues](https://github.com/aws-solutions/content-localization-on-aws/issues) page in this repository for known issues and feature requests.
 
 
 # Contributing

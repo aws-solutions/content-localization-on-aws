@@ -167,7 +167,7 @@ regional_dist_dir="$build_dir/regional-s3-assets"
 echo "------------------------------------------------------------------------------"
 echo "Creating a temporary Python virtualenv for this script"
 echo "------------------------------------------------------------------------------"
-python -c "import os; print (os.getenv('VIRTUAL_ENV'))" | grep -q None
+python3 -c "import os; print (os.getenv('VIRTUAL_ENV'))" | grep -q None
 if [ $? -ne 0 ]; then
     echo "ERROR: Do not run this script inside Virtualenv. Type \`deactivate\` and run again.";
     exit 1;
@@ -274,6 +274,12 @@ echo "Building Vue.js website"
 cd "$source_dir/website/" || exit 1
 echo "Installing node dependencies"
 npm install
+
+# BUG 352 WORKAROUND
+mkdir -p node_modules/videojs-hotkeys/build
+cp node_modules/videojs-hotkeys/videojs.hotkeys.* node_modules/videojs-hotkeys/build/
+# BUG 352 WORKAROUND
+
 echo "Compiling the vue app"
 npm run build
 echo "Finished building website"

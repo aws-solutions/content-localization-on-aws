@@ -275,11 +275,6 @@ cd "$source_dir/website/" || exit 1
 echo "Installing node dependencies"
 npm install
 
-# BUG 352 WORKAROUND
-mkdir -p node_modules/videojs-hotkeys/build
-cp node_modules/videojs-hotkeys/videojs.hotkeys.* node_modules/videojs-hotkeys/build/
-# BUG 352 WORKAROUND
-
 echo "Compiling the vue app"
 npm run build
 echo "Finished building website"

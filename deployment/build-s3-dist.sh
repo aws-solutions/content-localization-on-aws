@@ -167,7 +167,7 @@ regional_dist_dir="$build_dir/regional-s3-assets"
 echo "------------------------------------------------------------------------------"
 echo "Creating a temporary Python virtualenv for this script"
 echo "------------------------------------------------------------------------------"
-python -c "import os; print (os.getenv('VIRTUAL_ENV'))" | grep -q None
+python3 -c "import os; print (os.getenv('VIRTUAL_ENV'))" | grep -q None
 if [ $? -ne 0 ]; then
     echo "ERROR: Do not run this script inside Virtualenv. Type \`deactivate\` and run again.";
     exit 1;

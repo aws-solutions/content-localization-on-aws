@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Version bumped python runtime for web helper lambda function which was preventing successful deployment
 
-
 ## [2.0.0] - 03/01/2022
 
 ### New:

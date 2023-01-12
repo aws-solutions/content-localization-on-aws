@@ -12,6 +12,7 @@
 ######################################################################################################################
 
 import pytest
+from datetime import datetime
 import time
 import json
 from webdriver_manager.chrome import ChromeDriverManager
@@ -153,6 +154,9 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     assert "Boulder" in subtitle1_text
 
     # Edit a subtitle
+    time.sleep(1)
+    file_name = f'{datetime.today().strftime("%Y-%m-%d_%H:%M")}.png'.replace("/","_").replace("::","__")
+    browser.save_screenshot(file_name)
     subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00STEEN REPLACED BY EDITS00")
 
     # Check the file info

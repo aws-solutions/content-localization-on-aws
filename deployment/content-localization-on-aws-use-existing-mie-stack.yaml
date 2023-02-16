@@ -29,6 +29,12 @@ Mappings:
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
       CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       Version: "%%VERSION%%"
+  Solution:
+    Data:
+      SolutionId: "SO0164"
+      SolutionName: "Content Localization on AWS"
+      ApplicationType: "AWS-Solutions"
+      AppRegistryApplicationName: "ContentLocalizationOnAws"
 
 Resources:
 
@@ -145,6 +151,100 @@ Resources:
         UserPoolId: !GetAtt AuthStack.Outputs.UserPoolId
         IdentityPoolId: !GetAtt AuthStack.Outputs.IdentityPoolId
         PoolClientId: !GetAtt AuthStack.Outputs.UserPoolClientId
+
+  # AppRegistry
+  Application:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Description: !Sub
+        - Service Catalog application to track and manage all your resources. The Solution ID is ${solutionId} and Solution Version is ${solutionVersion}.
+        -
+          solutionId: !FindInMap
+            - Solution
+            - Data
+            - SolutionId
+          solutionVersion: !FindInMap
+            - Application
+            - SourceCode
+            - Version
+      Name:
+        !Join
+          - "-"
+          - - !FindInMap [Solution, Data, "AppRegistryApplicationName"]
+            - !Ref AWS::Region
+            - !Ref AWS::AccountId
+            - !Ref AWS::StackName
+      Tags: {
+      'Solutions:SolutionID': !FindInMap [Solution, Data, "SolutionId"],
+      'Solutions:SolutionName': !FindInMap [Solution, Data, "SolutionName"],
+      'Solutions:SolutionVersion': !FindInMap [Application, SourceCode, "Version"],
+      'Solutions:ApplicationType': !FindInMap [Solution, Data, "ApplicationType"],
+      }
+
+  AppRegistryApplicationStackAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref AWS::StackId
+      ResourceType: CFN_STACK
+
+  DefaultApplicationAttributes:
+    Type: AWS::ServiceCatalogAppRegistry::AttributeGroup
+    Properties:
+      Name: !Join ['-', [!Ref 'AWS::Region', !Ref 'AWS::StackName']]
+      Description: Attribute group for solution information.
+      Attributes:       
+        { "ApplicationType" : !FindInMap [Solution, Data, "ApplicationType"],
+          "Version": !FindInMap [Application, SourceCode, "Version"],
+          "SolutionID": !FindInMap [Solution, Data, "SolutionId"],
+          "SolutionName": !FindInMap [Solution, Data, "SolutionName"]
+        }
+
+  AppRegistryApplicationAttributeAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::AttributeGroupAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      AttributeGroup: !GetAtt DefaultApplicationAttributes.Id
+
+  AppRegistryApplicationStackAssociationMieStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource: !Ref MieStackName
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationOpenSearchStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref OpensearchStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationAuthStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref AuthStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationWebStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref WebStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationVideoWorkflowStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref VideoWorkflow
+      ResourceType: CFN_STACK
 
 Outputs:
   ContentLocalizationSolution:

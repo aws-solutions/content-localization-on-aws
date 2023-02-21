@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - tbd
+## [2.0.2] - 01/11/2023
 
 ### Fixed:
 
-* Fix DisplayAs column for Custom Vocabulary editor (#309) 
+* Updated python packages
+* Replaced deprecated python command with python3
+
+## [2.0.1] - 08/18/2022
+
+### Fixed:
+
+* Version bumped python runtime for web helper lambda function which was preventing successful deployment
 
 ## [2.0.0] - 03/01/2022
 

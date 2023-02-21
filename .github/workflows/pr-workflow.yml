@@ -13,12 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
 
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
       - name: Initialize AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
@@ -55,13 +60,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout MIE development branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: awslabs/aws-media-insights-engine
           ref: development
 
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
       - name: Initialize AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
@@ -95,12 +105,12 @@ jobs:
       MIE_REGION: 'us-west-2'
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
 
       - name: Initialize test AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
             aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
@@ -135,12 +145,12 @@ jobs:
       MIE_REGION: 'us-west-2'
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
 
       - name: Initialize test AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
             aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
@@ -168,11 +178,11 @@ jobs:
       MIE_REGION: 'us-west-2'
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
       - name: Initialize build AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
             aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
@@ -224,11 +234,11 @@ jobs:
       MIE_REGION: 'us-west-2'
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
       - name: Initialize build AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
             aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
@@ -279,12 +289,12 @@ jobs:
       MIE_REGION: 'us-west-2'
     steps:
       - name: Check out pr branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
 
       - name: Initialize test AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
             aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
@@ -310,7 +320,7 @@ jobs:
       #     ./run_unit.sh dataplaneapi
 
       - name: Initialize build AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}

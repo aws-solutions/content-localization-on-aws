@@ -55,7 +55,7 @@ Resources:
             - MediaInsightsEngine
             - Release
             - Version
-          - "/media-insights-stack.template"
+          - "/media-insights-on-aws-stack.template"
       Parameters:
         DeployAnalyticsPipeline: Yes
         DeployTestResources: No

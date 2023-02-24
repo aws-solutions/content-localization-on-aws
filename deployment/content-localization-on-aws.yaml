@@ -50,7 +50,7 @@ Resources:
     Properties:
       TemplateURL: !Join
         - ""
-        - - "https://solutions-reference.s3.amazonaws.com/aws-media-insights-engine/"
+        - - "https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/"
           - !FindInMap
             - MediaInsightsEngine
             - Release

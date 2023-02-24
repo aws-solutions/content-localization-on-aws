@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Added ServiceCatalog AppRegistry resources
 
+### Changed:
+
+* Updated requests-aws4auth to v1.2.2
+* Changed parameter value from "true" to "Yes" for github workflows
+
 ## [2.0.2] - 01/11/2023
 
 ### Fixed:

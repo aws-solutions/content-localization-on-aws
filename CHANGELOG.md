@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.2] - 01/11/2023
 
+### New:
+
+* Added ServiceCatalog AppRegistry resources
+
+## [2.0.2] - 01/11/2023
+
 ### Fixed:
 
 * Updated python packages

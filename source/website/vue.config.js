@@ -22,7 +22,7 @@ module.exports = {
     plugins: [
       new SriPlugin({
         hashFuncNames: ['sha256', 'sha384'],
-        enabled: true
+        enabled: true // set to false for local development
       }),
     ],
     performance: {

@@ -255,6 +255,35 @@ Click Submit to save the new policy. After your domain is finished updating, cli
 
 Now, you can use Kibana to validate that your operator's data is present in OpenSearch, and thereby able to be surfaced in the user interface. You can validate data from new operators by running a workflow where said operator is the only enabled operator, then searching for the asset_id produced by that workflow in Kibana.
 
+## Modifying the Front-End Application
+
+### Local Development
+
+To enable local development, after you have deployed the solution, do the following:
+- in `/source/website/vue.config.js` on [L25](https://github.com/aws-solutions/content-localization-on-aws/blob/development/source/website/vue.config.js#L25) set the value of `enabled` to `false`. For production usage, make sure this value is set to `true`. This is a security feature that enables browsers to verify that files they fetch (for example, from a CDN) are delivered without unexpected manipulation (Subresource Integrity, SRI). Unfortunately, this feature will prevent hot-reloading in your local environment. Learn more [here](https://www.npmjs.com/package/webpack-subresource-integrity)
+- from the root of this repo run the following command to download your live runtime configurations to your local environment
+```bash
+SOLUTION_URL=<something like https://dab0xxxxxxxx.cloudfront.net>
+curl $SOLUTION_URL > source/website/public/runtimeConfig.json
+```
+- install dependencies 
+```bash
+cd source/website
+npm i
+```
+- start development server
+```bash
+npm run serve
+```
+- you can authenticate with the credentials you have received at installation time
+
+### Front-end Deployment
+- change `source/website/package.json` [L9](https://github.com/aws-solutions/content-localization-on-aws/blob/v2.0.0/source/website/package.json#L9) to include your website deployment S3 bucket
+- deploy to that S3 bucket by running
+```bash
+cd source/website
+npm run deploy
+```
 
 # User Authentication
 

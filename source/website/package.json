@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint --no-fix",
-    "deploy": "aws s3 sync --acl public-read --profile mie --delete dist/ s3://[your_website_bucket]"
+    "deploy": "aws s3 sync --acl public-read --delete dist/ s3://[your_website_bucket]"
   },
   "dependencies": {
     "aws-amplify": "4.3.2",

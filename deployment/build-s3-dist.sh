@@ -274,6 +274,7 @@ echo "Building Vue.js website"
 cd "$source_dir/website/" || exit 1
 echo "Installing node dependencies"
 npm install
+
 echo "Compiling the vue app"
 npm run build
 echo "Finished building website"

@@ -6,7 +6,7 @@ Content Localization has the following types of tests:
 
 *End to End:* Tests of each functional component of the framework with each other and all dependencies. Scope is the ensure all components work successfully to perform the expected function, e.g. ensure the workflowapi can successfully communicate with the dataplaneapi and successfully complete a workflow
 
-*These tests require MIE to be deployed. 
+*These tests require MIE to be deployed.*
 
 
 You can find each of these within the `test` directory of the project
@@ -27,10 +27,14 @@ You also need to set the following environment variables:
 * `APP_USERNAME` - A valid username to use to log in to the web application
 * `APP_PASSWORD` - web application password for the username
 
-*Note, the IAM credentials you specify must belong to an IAM principal that
-has administrator permissions on the MIE API's.  
+If you are using temporary STS credentials, you also need to set the session token:
 
-These tests are invoked by running the `run_e2e.sh` script in the `test/e2e` directory. 
+* `AWS_SESSION_TOKEN` - For use with STS temporary credentials
+
+*Note, the IAM credentials you specify must belong to an IAM principal that
+has administrator permissions on the MIE API's.*
+
+These tests are invoked by running the `run_e2e.sh` script in the `test/e2e` directory.
 
 
 ### Debugging the selenium e2e tests
@@ -39,7 +43,7 @@ Here are some debug tips to diagnose failing tests and help with extending them 
 
 #### Skip workflow setup for tests
 
-There are a number of pytest fixtures that are used to setup the AWS reources and workflow that are required for the e2e tests.  The workflows that are created take 10-15 minutes to setup.  When debugging it can be useful to reuse the workflow from a previous test run.  You need to be careful that the test you are working with won't modify the workflow in non-determinitic ways.  For the exisitng tests, the workflow is not modified.  
+There are a number of pytest fixtures that are used to setup the AWS reources and workflow that are required for the e2e tests.  The workflows that are created take 10-15 minutes to setup.  When debugging it can be useful to reuse the workflow from a previous test run.  You need to be careful that the test you are working with won't modify the workflow in non-determinitic ways.  For the exisitng tests, the workflow is not modified.
 
 To skip workflow creating for individiual test, you can use the environment variable before running the test:
 

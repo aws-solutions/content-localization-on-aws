@@ -25,8 +25,6 @@
 #
 ###############################################################################
 
-trap cleanup_and_die SIGINT SIGTERM ERR
-
 usage() {
   msg "$msg"
   cat <<EOF
@@ -46,21 +44,22 @@ EOF
 }
 
 cleanup_and_die() {
-  trap - SIGINT SIGTERM ERR
   echo "Trapped signal."
   cleanup
-  die 1
+  die
 }
 
 cleanup() {
+  trap - SIGINT SIGTERM EXIT
   # Deactivate and remove the temporary python virtualenv used to run this script
-  if [[ "$VIRTUAL_ENV" != "" ]];
+  if [ -n "${VIRTUAL_ENV:-}" ]
   then
     deactivate
     echo "------------------------------------------------------------------------------"
     echo "Cleaning up complete"
     echo "------------------------------------------------------------------------------"
   fi
+  [ -n "$VENV" ] && [ -d "$VENV" ] && rm -rf "$VENV"
 }
 
 msg() {
@@ -68,9 +67,9 @@ msg() {
 }
 
 die() {
-  local msg=$1
-  local code=${2-1} # default exit status 1
-  msg "$msg"
+  local -r msg=${1-}
+  local -r code=${2-1} # default exit status 1
+  [ -n "$msg" ] && msg "$msg"
   exit "$code"
 }
 
@@ -167,19 +166,24 @@ regional_dist_dir="$build_dir/regional-s3-assets"
 echo "------------------------------------------------------------------------------"
 echo "Creating a temporary Python virtualenv for this script"
 echo "------------------------------------------------------------------------------"
-python3 -c "import os; print (os.getenv('VIRTUAL_ENV'))" | grep -q None
-if [ $? -ne 0 ]; then
+if [ -n "${VIRTUAL_ENV:-}" ]; then
     echo "ERROR: Do not run this script inside Virtualenv. Type \`deactivate\` and run again.";
     exit 1;
 fi
-command -v python3
-if [ $? -ne 0 ]; then
+if ! command -v python3 &>/dev/null; then
     echo "ERROR: install Python3 before running this script"
     exit 1
 fi
+
+# Make temporary directory for the virtual environment
 VENV=$(mktemp -d)
-python3 -m venv "$VENV"
-source "$VENV"/bin/activate
+
+# Trap exits so we are sure to clean up the virtual environment
+trap cleanup_and_die SIGINT SIGTERM EXIT
+
+# Create and activate the virtual environment
+python3 -m venv "$VENV" || die "ERROR: Couldn't create virtual python environment"
+source "$VENV"/bin/activate || die "ERROR: Couldn't activate virtual python environment"
 
 echo "------------------------------------------------------------------------------"
 echo "Create distribution directory"
@@ -192,8 +196,6 @@ echo "mkdir -p $global_dist_dir"
 mkdir -p "$global_dist_dir"
 echo "rm -rf $regional_dist_dir"
 rm -rf "$regional_dist_dir"
-echo "mkdir -p $regional_dist_dir"
-mkdir -p "$regional_dist_dir"
 echo "mkdir -p $regional_dist_dir/website/"
 mkdir -p "$regional_dist_dir"/website/
 
@@ -216,24 +218,9 @@ new_global_bucket="s/%%GLOBAL_BUCKET_NAME%%/$global_bucket/g"
 new_regional_bucket="s/%%REGIONAL_BUCKET_NAME%%/$regional_bucket/g"
 new_version="s/%%VERSION%%/$version/g"
 # Update templates in place. Copy originals to [filename].orig
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-auth.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-auth.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-auth.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-opensearch.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-opensearch.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-opensearch.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-web.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-web.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-web.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-use-existing-mie-stack.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws-video-workflow.template"
-sed -i.orig -e "$new_global_bucket" "$global_dist_dir/content-localization-on-aws.template"
-sed -i.orig -e "$new_regional_bucket" "$global_dist_dir/content-localization-on-aws.template"
-sed -i.orig -e "$new_version" "$global_dist_dir/content-localization-on-aws.template"
+sed -i.orig -e "$new_global_bucket" -e "$new_regional_bucket" -e "$new_version" "$global_dist_dir"/*.template
+# Delete the originals.
+rm -f "${global_dist_dir}"/*.orig
 
 
 echo "------------------------------------------------------------------------------"
@@ -243,9 +230,9 @@ echo "--------------------------------------------------------------------------
 echo "Building Opensearch Consumer function"
 cd "$source_dir/consumer" || exit 1
 
-[ -e dist ] && rm -r dist
+[ -e dist ] && rm -rf dist
 mkdir -p dist
-[ -e package ] && rm -r package
+[ -e package ] && rm -rf package
 mkdir -p package
 echo "preparing packages from requirements.txt"
 # Package dependencies listed in requirements.txt
@@ -266,12 +253,17 @@ popd || exit 1
 zip -q -g dist/esconsumer.zip ./*.py
 cp "./dist/esconsumer.zip" "$regional_dist_dir/esconsumer.zip"
 
+# Clean up the build directories
+rm -rf dist
+rm -rf package
+
 echo "------------------------------------------------------------------------------"
 echo "Build vue website"
 echo "------------------------------------------------------------------------------"
 
 echo "Building Vue.js website"
 cd "$source_dir/website/" || exit 1
+[ -e dist ] && rm -rf dist
 echo "Installing node dependencies"
 npm install
 echo "Compiling the vue app"
@@ -287,7 +279,8 @@ echo "--------------------------------------------------------------------------
 # order to use the least privileges for deploying the webapp.
 #
 # Details: The website_helper.py Lambda function needs this list in order to copy
-# files from $regional_dist_dir/website to the ContentAnalysisWebsiteBucket (see content-localization-on-aws-web.yaml).  Since the manifest file is computed during build
+# files from $regional_dist_dir/website to the ContentAnalysisWebsiteBucket (see
+# content-localization-on-aws-web.yaml). Since the manifest file is computed at build
 # time, the website_helper.py Lambda can use that to figure out what files to copy
 # instead of doing a list bucket operation, which would require ListBucket permission.
 # Furthermore, the S3 bucket used to host AWS solutions (s3://solutions-reference)
@@ -307,10 +300,11 @@ echo "--------------------------------------------------------------------------
 
 echo "Building website helper function"
 cd "$source_dir/helper" || exit 1
-[ -e dist ] && rm -r dist
+[ -e dist ] && rm -rf dist
 mkdir -p dist
-zip -q -g ./dist/websitehelper.zip ./website_helper.py webapp-manifest.json
+zip -q -9 ./dist/websitehelper.zip ./website_helper.py webapp-manifest.json
 cp "./dist/websitehelper.zip" "$regional_dist_dir/websitehelper.zip"
+rm -rf dist
 
 echo "------------------------------------------------------------------------------"
 echo "Creating deployment package for anonymous data logger"
@@ -338,13 +332,17 @@ elif [ -d ../dist/anonymous-data-logger.zip ]; then
   echo "Package already present"
 fi
 popd || exit 1
-zip -q -g ./dist/anonymous-data-logger.zip ./anonymous-data-logger.py
+zip -q -g -9 ./dist/anonymous-data-logger.zip ./anonymous-data-logger.py
 cp "./dist/anonymous-data-logger.zip" "$regional_dist_dir/anonymous-data-logger.zip"
+
+# Clean up the build directories
+rm -rf dist
+rm -rf package
 
 # Skip copy dist to S3 if building for solution builder because
 # that pipeline takes care of copying the dist in another script.
 if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solutions-test-reference" ] &&  [ "$global_bucket" != "solutions-features-reference" ]; then
-  
+
   echo "------------------------------------------------------------------------------"
   echo "Copy dist to S3"
   echo "------------------------------------------------------------------------------"
@@ -352,20 +350,17 @@ if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solut
   # Get account id
   account_id=$(aws sts get-caller-identity --query Account --output text $(if [ ! -z $profile ]; then echo "--profile $profile"; fi))
   if [ $? -ne 0 ]; then
-    msg "ERROR: Failed to get AWS account ID"
-    die 1
+    die "ERROR: Failed to get AWS account ID"
   fi
   # Validate ownership of $global_dist_dir
   aws s3api head-bucket --bucket $global_bucket --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
   if [ $? -ne 0 ]; then
-    msg "ERROR: Your AWS account does not own s3://$global_bucket/"
-    die 1
+    die "ERROR: Your AWS account does not own s3://$global_bucket/"
   fi
   # Validate ownership of ${regional_bucket}-${region}
   aws s3api head-bucket --bucket ${regional_bucket}-${region} --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
   if [ $? -ne 0 ]; then
-    msg "ERROR: Your AWS account does not own s3://${regional_bucket}-${region} "
-    die 1
+    die "ERROR: Your AWS account does not own s3://${regional_bucket}-${region} "
   fi
   # Copy deployment assets to distribution buckets
   cd "$build_dir"/ || exit 1

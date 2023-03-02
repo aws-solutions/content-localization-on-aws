@@ -608,8 +608,15 @@ export default {
               // is 1 too high. We decrement that line number by 1 here so it
               // lines up with the custom vocabulary table.
               let failure_reason = response.data["FailureReason"].split("error: ")[1]
-              let error_text_part_1 = failure_reason.split("Error at line")[0]
-              let error_text_part_2 = "Error at line " + failure_reason.split("Error at line")[1].replace(/[0-9]+(?!.*[0-9])/, function(line_number) { return line_number-1 })
+              let error_text_parts = failure_reason.split("Error at line")
+              let error_text_part_1 = error_text_parts[0] + "Error at line "
+              let error_text_part_2 = error_text_parts[1]
+              let matches = error_text_part_2.match(/\d+/g)
+              if (matches) {
+                let line_number = matches[matches.length - 1]
+                let index = error_text_part_2.lastIndexOf(line_number)
+                error_text_part_2 = error_text_part_2.substring(0, index) + error_text_part_2.substring(index).replace(line_number, "" + (parseInt(line_number, 10) - 1))
+              }
               this.customVocabularyFailedReason = error_text_part_1 + error_text_part_2
             } else {
               this.customVocabularyFailedReason = ''

@@ -19,6 +19,7 @@ import datetime
 import json
 import urllib.request
 
+
 def send_metrics(config):
     metrics = {}
     # move Solution ID and UUID to the root JSON level
@@ -29,8 +30,7 @@ def send_metrics(config):
     url = 'https://metrics.awssolutionsbuilder.com/generic'
     data = json.dumps(metrics).encode('utf8')
     headers = {'content-type': 'application/json'}
-    req = urllib.request.Request(url, data,headers)
+    req = urllib.request.Request(url, data, headers)
     response = urllib.request.urlopen(req)
     print('RESPONSE CODE:: {}'.format(response.getcode()))
     print('METRICS SENT:: {}'.format(data))
-    return

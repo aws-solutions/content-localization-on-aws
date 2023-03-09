@@ -1,0 +1,22 @@
+{
+    "Persons": [
+        { "Person": { "Index": 0 } },
+        {
+            "Person": {
+                "Index": 1,
+                "BoundingBox": { "Width": "0.36959773302078247", "Height": "0.6934193968772888", "Left": "0.3121304512023926", "Top": "0.17156612873077393" },
+                "Face": {
+                    "BoundingBox": { "Width": "0.36959773302078247", "Height": "0.6934193968772888", "Left": "0.3121304512023926", "Top": "0.17156612873077393" },
+                    "Landmarks": "testLandmarks",
+                    "Pose": "testPose",
+                    "Quality": "testQuality",
+                    "Confidence": "79.54973602294922"
+                }
+            },
+            "FaceMatches": [{
+                "Similarity": "testSimilarity",
+                "Face": { "FaceId": 2, "BoundingBox": {}, "ImageId": "imageId" }
+            }]
+        }
+    ]
+}

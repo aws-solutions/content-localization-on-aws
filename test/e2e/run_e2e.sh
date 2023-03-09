@@ -19,32 +19,32 @@
 
 if [ -z "${MIE_REGION:-}" ]
 then
-    echo "You must set the AWS region your MIE stack is install in under the env variable 'MIE_REGION'. Quitting."
-    exit
+    echo "You must set the env variable 'MIE_REGION' to the AWS region your Media Insights on AWS stack is install in. Quitting."
+    exit 1
 fi
 
 if [ -z "${MIE_STACK_NAME:-}" ]
 then
-    echo "You must set the name of your MIE stack under the env variable 'MIE_STACK_NAME'. Quitting."
-    exit
+    echo "You must set the env variable 'MIE_STACK_NAME' to the name of your Media Insights on AWS stack. Quitting."
+    exit 1
 fi
 
-if [ -z "${AWS_ACCESS_KEY_ID:-}" ]
+if [ -z "${AWS_ACCESS_KEY_ID:+mask}" ]
 then
-    echo "You must set the env variable 'AWS_ACCESS_KEY_ID' with a valid IAM access key id. Quitting."
-    exit
+    echo "You must set the env variable 'AWS_ACCESS_KEY_ID' to a valid IAM access key id. Quitting."
+    exit 1
 fi
 
-if [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]
+if [ -z "${AWS_SECRET_ACCESS_KEY:+mask}" ]
 then
-    echo "You must set the env variable 'AWS_SECRET_ACCESS_KEY' with a valid IAM secret access key. Quitting."
-    exit
+    echo "You must set the env variable 'AWS_SECRET_ACCESS_KEY' to a valid IAM secret access key. Quitting."
+    exit 1
 fi
 
-if [ -z "${APP_PASSWORD:-}" ]
+if [ -z "${APP_PASSWORD:+mask}" ]
 then
-    echo "You must set the env variable 'APP_PASSWORD' with a valid password to use to log in to the web application. Quitting."
-    exit
+    echo "You must set the env variable 'APP_PASSWORD' to a valid password to use to log in to the web application. Quitting."
+    exit 1
 fi
 
 #################### Nothing for users to change below here ####################

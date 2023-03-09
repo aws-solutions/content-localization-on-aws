@@ -16,18 +16,18 @@
 <template>
   <div>
     <b-alert
-        v-model="showSaveNotification"
-        variant="success"
-        dismissible
-        fade
+      v-model="showSaveNotification"
+      variant="success"
+      dismissible
+      fade
     >
       {{ saveNotificationMessage }}
     </b-alert>
     <b-alert
-        v-model="showVocabularyNotification"
-        :variant="vocabularyNotificationStatus"
-        dismissible
-        fade
+      v-model="showVocabularyNotification"
+      :variant="vocabularyNotificationStatus"
+      dismissible
+      fade
     >
       {{ vocabularyNotificationMessage }}
     </b-alert>
@@ -37,21 +37,21 @@
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
             <b-form-radio-group
-                id="custom-vocab-selection"
-                v-model="customVocabularySelected"
-                name="custom-vocab-list"
-                :options="customVocabularyList"
-                text-field="name_and_status"
-                value-field="name"
-                disabled-field="notEnabled"
-                stacked
+              id="custom-vocab-selection"
+              v-model="customVocabularySelected"
+              name="custom-vocab-list"
+              :options="customVocabularyList"
+              text-field="name_and_status"
+              value-field="name"
+              disabled-field="notEnabled"
+              stacked
             >
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
             Delete the selected vocabulary (optional): <b-button v-b-tooltip.hover.right size="sm" title="Delete selected vocabulary" variant="danger" @click="deleteVocabulary">
-            Delete
-          </b-button>
+              Delete
+            </b-button>
           </div>
         </b-col>
         <b-col>
@@ -64,9 +64,9 @@
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
           <b-form-select
-              v-model="vocabulary_language_code"
-              :options="transcribeLanguages"
-              size="sm"
+            v-model="vocabulary_language_code"
+            :options="transcribeLanguages"
+            size="sm"
           />
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
@@ -85,13 +85,13 @@
         </div>
       </div>
       <b-table
-          :items="customVocabularyUnion"
-          :fields="customVocabularyFields"
-          selectable
-          select-mode="single"
-          fixed responsive="sm"
-          bordered
-          small
+        :items="customVocabularyUnion"
+        :fields="customVocabularyFields"
+        selectable
+        select-mode="single"
+        fixed responsive="sm"
+        bordered
+        small
       >
         <!-- This template adds an additional row in the header
 to highlight the fields in the custom vocab schema. -->
@@ -198,8 +198,8 @@ to highlight the fields in the custom vocab schema. -->
     </b-modal>
     <div v-if="isBusy">
       <b-spinner
-          variant="secondary"
-          label="Loading..."
+        variant="secondary"
+        label="Loading..."
       />
       <p class="text-muted">
         (Loading...)

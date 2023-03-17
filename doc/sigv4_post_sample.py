@@ -139,7 +139,7 @@ def lambda_handler(event, context):
     print('request_parameters = ' + str(request_parameters))
     print('headers = ' + str(headers))
 
-    r = requests.post(endpoint, data=request_parameters, headers=headers)
+    r = requests.post(endpoint, data=request_parameters, headers=headers, timeout=10)
 
     print('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     print('Response code: %d\n' % r.status_code)

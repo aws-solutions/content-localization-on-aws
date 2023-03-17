@@ -15,7 +15,6 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 import base64
 import json
 import os
-import botocore
 from botocore import config
 import boto3
 from requests_aws4auth import AWS4Auth
@@ -31,6 +30,7 @@ s3 = boto3.client('s3', config=config)
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
 supported_operators = ["textdetection", "mediainfo", "transcribeaudio", "transcribevideo", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "face_search", "contentmoderation", "facedetection", "key_phrases", "entities", "webcaptions", "shotdetection", "technicalcuedetection"]
 
+
 def normalize_confidence(confidence_value):
     converted = float(confidence_value) * 100
     return str(converted)
@@ -40,64 +40,42 @@ def convert_to_milliseconds(time_value):
     converted = float(time_value) * 1000
     return str(converted)
 
+
 def process_text_detection(asset, workflow, results):
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
     # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
-    if isinstance(metadata, list):
-        # handle paged results
-        for page in metadata:
-            if len(page["TextDetections"]) > 0:
-                for item in page["TextDetections"]:
-                    try:
-                        # Handle text detection schema for videos
-                        if "TextDetection" in item:
-                            text_detection = item["TextDetection"]
-                            text_detection["Timestamp"] = item["Timestamp"]
-                            text_detection["Operator"] = "textDetection"
-                            text_detection["Workflow"] = workflow
-                            # Flatten the bbox Label array
-                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
-                            del text_detection["Geometry"]
-                            print(text_detection)
-                            extracted_items.append(text_detection)
-                        # Handle text detection schema for images
-                        else:
-                            text_detection = item
-                            text_detection["Operator"] = "textDetection"
-                            text_detection["Workflow"] = workflow
-                            print(text_detection)
-                            extracted_items.append(text_detection)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        # these results are not paged
-        if len(metadata["TextDetections"]) > 0:
-                for item in metadata["TextDetections"]:
-                    try:
-                        # Handle text detection schema for videos
-                        if "TextDetection" in item:
-                            text_detection = item["TextDetection"]
-                            text_detection["Timestamp"] = item["Timestamp"]
-                            text_detection["Operator"] = "textDetection"
-                            text_detection["Workflow"] = workflow
-                            # Flatten the bbox Label array
-                            text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
-                            del text_detection["Geometry"]
-                            print(text_detection)
-                            extracted_items.append(text_detection)
-                        # Handle text detection schema for images
-                        else:
-                            text_detection = item
-                            text_detection["Operator"] = "textDetection"
-                            text_detection["Workflow"] = workflow
-                            print(text_detection)
-                            extracted_items.append(text_detection)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    # handle paged results
+    for page in metadata:
+        if len(page["TextDetections"]) > 0:
+            for item in page["TextDetections"]:
+                try:
+                    # Handle text detection schema for videos
+                    if "TextDetection" in item:
+                        text_detection = item["TextDetection"]
+                        text_detection["Timestamp"] = item["Timestamp"]
+                        text_detection["Operator"] = "textDetection"
+                        text_detection["Workflow"] = workflow
+                        # Flatten the bbox Label array
+                        text_detection["BoundingBox"] = text_detection["Geometry"]["BoundingBox"]
+                        del text_detection["Geometry"]
+                        print(text_detection)
+                        extracted_items.append(text_detection)
+                    # Handle text detection schema for images
+                    else:
+                        text_detection = item
+                        text_detection["Operator"] = "textDetection"
+                        text_detection["Workflow"] = workflow
+                        print(text_detection)
+                        extracted_items.append(text_detection)
+                except KeyError as e:
+                    print("KeyError: " + str(e))
+                    print("Item: " + json.dumps(item))
     bulk_index(es, asset, "textDetection", extracted_items)
 
 
@@ -105,58 +83,15 @@ def process_celebrity_detection(asset, workflow, results):
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
-    if isinstance(metadata, list):
-        for page in metadata:
-            # Parse schema for videos:
-            # https://docs.aws.amazon.com/rekognition/latest/dg/celebrities-video-sqs.html
-            if "Celebrities" in page:
-                for item in page["Celebrities"]:
-                    try:
-                        item["Operator"] = "celebrity_detection"
-                        item["Workflow"] = workflow
-                        if "Celebrity" in item:
-                            # flatten the inner Celebrity array
-                            item["Name"] = item["Celebrity"]["Name"]
-                            item["Confidence"] = item["Celebrity"]["Confidence"]
-                            # Bounding box can be around body or face. Prefer body.
-                            bounding_box = ''
-                            if 'BoundingBox' in item["Celebrity"]:
-                                bounding_box = item["Celebrity"]["BoundingBox"]
-                            elif 'BoundingBox' in item["Celebrity"]["Face"]:
-                                bounding_box = item["Celebrity"]["Face"]["BoundingBox"]
-                            item["BoundingBox"] = bounding_box
-                            # Set IMDB URL if it exists.
-                            url=''
-                            if item["Celebrity"]["Urls"]:
-                                url = item["Celebrity"]["Urls"][0]
-                            item['URL'] = url
-                            # delete flattened array
-                            del item["Celebrity"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-            # Parse schema for images:
-            # https://docs.aws.amazon.com/rekognition/latest/dg/API_RecognizeCelebrities.html
-            if "CelebrityFaces" in page:
-                for item in page["CelebrityFaces"]:
-                    try:
-                        item["Operator"] = "celebrity_detection"
-                        item["Workflow"] = workflow
-                        if "Face" in item:
-                            # flatten the inner Face array
-                            item["Confidence"] = item["Face"]["Confidence"]
-                            item["BoundingBox"] = item["Face"]["BoundingBox"]
-                            # delete flattened array
-                            del item["Face"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    for page in metadata:
         # Parse schema for videos:
-        if "Celebrities" in metadata:
-            for item in metadata["Celebrities"]:
+        # https://docs.aws.amazon.com/rekognition/latest/dg/celebrities-video-sqs.html
+        if "Celebrities" in page:
+            for item in page["Celebrities"]:
                 try:
                     item["Operator"] = "celebrity_detection"
                     item["Workflow"] = workflow
@@ -165,13 +100,14 @@ def process_celebrity_detection(asset, workflow, results):
                         item["Name"] = item["Celebrity"]["Name"]
                         item["Confidence"] = item["Celebrity"]["Confidence"]
                         # Bounding box can be around body or face. Prefer body.
-                        item["BoundingBox"] = ''
+                        bounding_box = ''
                         if 'BoundingBox' in item["Celebrity"]:
-                            item["BoundingBox"] = item["Celebrity"]["BoundingBox"]
+                            bounding_box = item["Celebrity"]["BoundingBox"]
                         elif 'BoundingBox' in item["Celebrity"]["Face"]:
-                            item["BoundingBox"] = item["Celebrity"]["Face"]["BoundingBox"]
+                            bounding_box = item["Celebrity"]["Face"]["BoundingBox"]
+                        item["BoundingBox"] = bounding_box
                         # Set IMDB URL if it exists.
-                        url=''
+                        url = ''
                         if item["Celebrity"]["Urls"]:
                             url = item["Celebrity"]["Urls"][0]
                         item['URL'] = url
@@ -182,8 +118,9 @@ def process_celebrity_detection(asset, workflow, results):
                     print("KeyError: " + str(e))
                     print("Item: " + json.dumps(item))
         # Parse schema for images:
-        if "CelebrityFaces" in metadata:
-            for item in metadata["CelebrityFaces"]:
+        # https://docs.aws.amazon.com/rekognition/latest/dg/API_RecognizeCelebrities.html
+        if "CelebrityFaces" in page:
+            for item in page["CelebrityFaces"]:
                 try:
                     item["Operator"] = "celebrity_detection"
                     item["Workflow"] = workflow
@@ -204,31 +141,13 @@ def process_content_moderation(asset, workflow, results):
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
-    if isinstance(metadata, list):
-        for page in metadata:
-            if "ModerationLabels" in page:
-                for item in page["ModerationLabels"]:
-                    try:
-                        item["Operator"] = "content_moderation"
-                        item["Workflow"] = workflow
-                        if "ModerationLabel" in item:
-                            # flatten the inner ModerationLabel array
-                            item["Name"] = item["ModerationLabel"]["Name"]
-                            item["ParentName"] = ''
-                            if 'ParentName' in item["ModerationLabel"]:
-                                item["ParentName"] = item["ModerationLabel"]["ParentName"]
-                            item["Confidence"] = ''
-                            if 'Confidence' in item["ModerationLabel"]:
-                                item["Confidence"] = item["ModerationLabel"]["Confidence"]
-                            # Delete the flattened array
-                            del item["ModerationLabel"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        if "ModerationLabels" in metadata:
-            for item in metadata["ModerationLabels"]:
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    for page in metadata:
+        if "ModerationLabels" in page:
+            for item in page["ModerationLabels"]:
                 try:
                     item["Operator"] = "content_moderation"
                     item["Workflow"] = workflow
@@ -255,50 +174,20 @@ def process_face_search(asset, workflow, results):
     es = connect_es(es_endpoint)
 
     extracted_items = []
-    if isinstance(metadata, list):
-        for page in metadata:
-            if "Persons" in page:
-                for item in page["Persons"]:
-                    item["Operator"] = "face_search"
-                    item["Workflow"] = workflow
-                    # flatten person key
-                    item["PersonIndex"] = item["Person"]["Index"]
-                    if "BoundingBox" in item["Person"]:
-                        item["PersonBoundingBox"] = item["Person"]["BoundingBox"]
-                    # flatten face key
-                    if "Face" in item["Person"]:
-                        item["FaceBoundingBox"] = item["Person"]["Face"]["BoundingBox"]
-                        item["FaceLandmarks"] = item["Person"]["Face"]["Landmarks"]
-                        item["FacePose"] = item["Person"]["Face"]["Pose"]
-                        item["FaceQuality"] = item["Person"]["Face"]["Quality"]
-                        confidence = item["Person"]["Face"]["Confidence"]
-                        item["Confidence"] = confidence
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
 
-                    if "FaceMatches" in item:
-                        item["ContainsKnownFace"] = True
-                        # flatten face matches key
-                        for face in item["FaceMatches"]:
-                            item["KnownFaceSimilarity"] = face["Similarity"]
-                            item["MatchingKnownFaceId"] = face["Face"]["FaceId"]
-                            item["KnownFaceBoundingBox"] = face["Face"]["BoundingBox"]
-                            item["ImageId"] = face["Face"]["ImageId"]
-                        del item["FaceMatches"]
-                    else:
-                        item["ContainsKnownFace"] = False
-                    del item["Person"]
-
-                    extracted_items.append(item)
-
-    else:
-        if "Persons" in metadata:
-            for item in metadata["Persons"]:
+    for page in metadata:
+        if "Persons" in page:
+            for item in page["Persons"]:
                 item["Operator"] = "face_search"
                 item["Workflow"] = workflow
                 # flatten person key
                 item["PersonIndex"] = item["Person"]["Index"]
                 if "BoundingBox" in item["Person"]:
                     item["PersonBoundingBox"] = item["Person"]["BoundingBox"]
-                #flatten face key
+                # flatten face key
                 if "Face" in item["Person"]:
                     item["FaceBoundingBox"] = item["Person"]["Face"]["BoundingBox"]
                     item["FaceLandmarks"] = item["Person"]["Face"]["Landmarks"]
@@ -329,44 +218,14 @@ def process_face_detection(asset, workflow, results):
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
-    if isinstance(metadata, list):
-        for page in metadata:
-            # Parse schema for video:
-            if "Faces" in page:
-                for item in page["Faces"]:
-                    try:
-                        item["Operator"] = "face_detection"
-                        item["Workflow"] = workflow
-                        if "Face" in item:
-                            # flatten the inner Face array
-                            item["BoundingBox"] = item["Face"]["BoundingBox"]
-                            item["AgeRange"] = item["Face"]["AgeRange"]
-                            item["Smile"] = item["Face"]["Smile"]
-                            item["Eyeglasses"] = item["Face"]["Eyeglasses"]
-                            item["Sunglasses"] = item["Face"]["Sunglasses"]
-                            item["Gender"] = item["Face"]["Gender"]
-                            item["Beard"] = item["Face"]["Beard"]
-                            item["Mustache"] = item["Face"]["Mustache"]
-                            item["EyesOpen"] = item["Face"]["EyesOpen"]
-                            item["MouthOpen"] = item["Face"]["MouthOpen"]
-                            item["Emotions"] = item["Face"]["Emotions"]
-                            item["Confidence"] = item["Face"]["Confidence"]
-                            # Delete the flattened array
-                            del item["Face"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-            # Parse schema for images:
-            if "FaceDetails" in page:
-                for item in page["FaceDetails"]:
-                    item["Operator"] = "face_detection"
-                    item["Workflow"] = workflow
-                    extracted_items.append(item)
-    else:
-        # Parse schema for videos:
-        if "Faces" in metadata:
-            for item in metadata["Faces"]:
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    for page in metadata:
+        # Parse schema for video:
+        if "Faces" in page:
+            for item in page["Faces"]:
                 try:
                     item["Operator"] = "face_detection"
                     item["Workflow"] = workflow
@@ -391,12 +250,13 @@ def process_face_detection(asset, workflow, results):
                     print("KeyError: " + str(e))
                     print("Item: " + json.dumps(item))
         # Parse schema for images:
-        if "FaceDetails" in metadata:
-            for item in metadata["FaceDetails"]:
+        if "FaceDetails" in page:
+            for item in page["FaceDetails"]:
                 item["Operator"] = "face_detection"
                 item["Workflow"] = workflow
                 extracted_items.append(item)
     bulk_index(es, asset, "face_detection", extracted_items)
+
 
 def process_mediainfo(asset, workflow, results):
     # This function puts mediainfo data in Elasticsearch.
@@ -411,52 +271,27 @@ def process_mediainfo(asset, workflow, results):
             extracted_items.append(item)
     bulk_index(es, asset, "mediainfo", extracted_items)
 
+
 def process_generic_data(asset, workflow, results):
     # This function puts generic data in Elasticsearch.
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
     # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
-    if isinstance(metadata, list):
-        # handle paged results
-        for page in metadata:
-            if "Labels" in page:
-                for item in page["Labels"]:
-                    try:
-                        item["Operator"] = "generic_data_lookup"
-                        item["Workflow"] = workflow
-                        if "Label" in item:
-                            # Flatten the inner Label array
-                            item["Confidence"] = float(item["Label"]["Confidence"])*100
-                            item["Name"] = item["Label"]["Name"]
-                            item["Instances"] = ''
-                            if 'Instances' in item["Label"]:
-                                for box in item["Label"]["Instances"]:
-                                    box["BoundingBox"]["Height"] = float(box["BoundingBox"]["Height"]) / 720
-                                    box["BoundingBox"]["Top"] = float(box["BoundingBox"]["Top"]) / 720
-                                    box["BoundingBox"]["Left"] = float(box["BoundingBox"]["Left"]) / 1280
-                                    box["BoundingBox"]["Width"] = float(box["BoundingBox"]["Width"]) / 1280
-                                    box["Confidence"] = float(box["Confidence"])*100
-                                item["Instances"] = item["Label"]["Instances"]
-                            item["Parents"] = ''
-                            if 'Parents' in item["Label"]:
-                                item["Parents"] = item["Label"]["Parents"]
-                            # Delete the flattened array
-                            del item["Label"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        # these results are not paged
-        if "Labels" in metadata:
-            for item in metadata["Labels"]:
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    # handle paged results
+    for page in metadata:
+        if "Labels" in page:
+            for item in page["Labels"]:
                 try:
                     item["Operator"] = "generic_data_lookup"
                     item["Workflow"] = workflow
                     if "Label" in item:
                         # Flatten the inner Label array
-                        item["Confidence"] = float(item["Label"]["Confidence"])*100
+                        item["Confidence"] = float(item["Label"]["Confidence"]) * 100
                         item["Name"] = item["Label"]["Name"]
                         item["Instances"] = ''
                         if 'Instances' in item["Label"]:
@@ -465,7 +300,7 @@ def process_generic_data(asset, workflow, results):
                                 box["BoundingBox"]["Top"] = float(box["BoundingBox"]["Top"]) / 720
                                 box["BoundingBox"]["Left"] = float(box["BoundingBox"]["Left"]) / 1280
                                 box["BoundingBox"]["Width"] = float(box["BoundingBox"]["Width"]) / 1280
-                                box["Confidence"] = float(box["Confidence"])*100
+                                box["Confidence"] = float(box["Confidence"]) * 100
                             item["Instances"] = item["Label"]["Instances"]
                         item["Parents"] = ''
                         if 'Parents' in item["Label"]:
@@ -478,40 +313,21 @@ def process_generic_data(asset, workflow, results):
                     print("Item: " + json.dumps(item))
     bulk_index(es, asset, "labels", extracted_items)
 
+
 def process_label_detection(asset, workflow, results):
     # Rekognition label detection puts labels on an inner array in its JSON result, but for ease of search in Elasticsearch we need those results as a top level json array. So this function does that.
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
     # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
-    if isinstance(metadata, list):
-        # handle paged results
-        for page in metadata:
-            if "Labels" in page:
-                for item in page["Labels"]:
-                    try:
-                        item["Operator"] = "label_detection"
-                        item["Workflow"] = workflow
-                        if "Label" in item:
-                        # Flatten the inner Label array
-                            item["Confidence"] = item["Label"]["Confidence"]
-                            item["Name"] = item["Label"]["Name"]
-                            item["Instances"] = ''
-                            if 'Instances' in item["Label"]:
-                                item["Instances"] = item["Label"]["Instances"]
-                            item["Parents"] = ''
-                            if 'Parents' in item["Label"]:
-                                item["Parents"] = item["Label"]["Parents"]
-                            # Delete the flattened array
-                            del item["Label"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        # these results are not paged
-        if "Labels" in metadata:
-            for item in metadata["Labels"]:
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
+
+    # handle paged results
+    for page in metadata:
+        if "Labels" in page:
+            for item in page["Labels"]:
                 try:
                     item["Operator"] = "label_detection"
                     item["Workflow"] = workflow
@@ -533,38 +349,20 @@ def process_label_detection(asset, workflow, results):
                     print("Item: " + json.dumps(item))
     bulk_index(es, asset, "labels", extracted_items)
 
+
 def process_technical_cue_detection(asset, workflow, results):
     metadata = json.loads(results)
     es = connect_es(es_endpoint)
     extracted_items = []
     # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
-    if isinstance(metadata, list):
-        # handle paged results
-        for page in metadata:
-            if "Segments" in page:
-                for item in page["Segments"]:
-                    try:
-                        item["Operator"] = "technical_cue_detection"
-                        item["Workflow"] = workflow
-                        if "TechnicalCueSegment" in item:
-                            item["Confidence"] = item["TechnicalCueSegment"]["Confidence"]
-                            item["Type"] = item["TechnicalCueSegment"]["Type"]
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
 
-                            del item["TechnicalCueSegment"]
-
-                            item["StartTimestamp"] = item["StartTimestampMillis"]
-                            item["EndTimestamp"] = item["EndTimestampMillis"]
-
-                            del item["StartTimestampMillis"]
-                            del item["EndTimestampMillis"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        # these results are not paged
-        if "Segments" in metadata:
-            for item in metadata["Segments"]:
+    # handle paged results
+    for page in metadata:
+        if "Segments" in page:
+            for item in page["Segments"]:
                 try:
                     item["Operator"] = "technical_cue_detection"
                     item["Workflow"] = workflow
@@ -591,33 +389,14 @@ def process_shot_detection(asset, workflow, results):
     es = connect_es(es_endpoint)
     extracted_items = []
     # We can tell if json results are paged by checking to see if the json results are an instance of the list type.
-    if isinstance(metadata, list):
-        # handle paged results
-        for page in metadata:
-            if "Segments" in page:
-                for item in page["Segments"]:
-                    try:
-                        item["Operator"] = "shot_detection"
-                        item["Workflow"] = workflow
-                        if "ShotSegment" in item:
-                            item["Confidence"] = item["ShotSegment"]["Confidence"]
-                            item["Index"] = item["ShotSegment"]["Index"]
+    if not isinstance(metadata, list):
+        # Make it a single page list
+        metadata = [metadata]
 
-                            del item["ShotSegment"]
-
-                            item["StartTimestamp"] = item["StartTimestampMillis"]
-                            item["EndTimestamp"] = item["EndTimestampMillis"]
-
-                            del item["StartTimestampMillis"]
-                            del item["EndTimestampMillis"]
-                        extracted_items.append(item)
-                    except KeyError as e:
-                        print("KeyError: " + str(e))
-                        print("Item: " + json.dumps(item))
-    else:
-        # these results are not paged
-        if "Segments" in metadata:
-            for item in metadata["Segments"]:
+    # handle paged results
+    for page in metadata:
+        if "Segments" in page:
+            for item in page["Segments"]:
                 try:
                     item["Operator"] = "shot_detection"
                     item["Workflow"] = workflow
@@ -647,9 +426,10 @@ def process_translate(asset, workflow, results):
     es = connect_es(es_endpoint)
     index_document(es, asset, "translation", translation)
 
+
 def process_webcaptions(asset, workflow, results, language_code):
     metadata = json.loads(results)
-    metadata_type = "webcaptions"+"_"+language_code
+    metadata_type = "webcaptions" + "_" + language_code
 
     webcaptions = metadata
     webcaptions["Workflow"] = workflow
@@ -665,10 +445,9 @@ def process_transcribe(asset, workflow, results, type):
     transcript["workflow"] = workflow
     transcript_time = metadata["results"]["items"]
 
-    index_name = type+"transcript"
+    index_name = type + "transcript"
     es = connect_es(es_endpoint)
     index_document(es, asset, index_name, transcript)
-
 
     transcribe_items = []
 
@@ -788,11 +567,11 @@ def delete_asset_metadata_by_index(es_object, asset_id, index):
 
 def delete_asset_all_indices(es_object, asset_id):
     delete_query = {
-      "query": {
-        "match": {
-          "AssetId": asset_id
+        "query": {
+            "match": {
+                "AssetId": asset_id
+            }
         }
-      }
     }
 
     try:

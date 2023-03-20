@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * The "Download Data" button on the **Celebrities** works now.
+* Fixed upload of WebVTT files as "Existing Subtitles".
 
 ## [2.0.2] - 2023-01-11
 

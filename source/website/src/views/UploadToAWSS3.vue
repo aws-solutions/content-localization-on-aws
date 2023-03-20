@@ -906,7 +906,7 @@ export default {
     {
       let errorMessage = '';
       console.log(file.type)
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf|text\/vtt/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -924,7 +924,7 @@ export default {
     fileRemoved: function( file )
     {
       let errorMessage = '';
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf|text\/vtt/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -997,10 +997,17 @@ export default {
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
             this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
           }
-        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
+        } else if ((media_type === '' || media_type === 'text/vtt') && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
           // VTT files may be uploaded for the Transcribe operator, but
           // we won't run a workflow for VTT file types.
           console.log("VTT file has been uploaded to s3://" + s3Key);
+          // We need the existingSubtitlesFilename to contain the full S3 key.
+          // If it was auto-populated when we added the WebVTT file for upload,
+          // existingSubtitlesFilename will only contain the file name but not
+          // the full key. So, rewrite it now that we know the full S3 key.
+          if (this.existingSubtitlesFilename === s3Key.split('/').pop()) {
+            this.existingSubtitlesFilename = s3Key;
+          }
           return;
         } else {
           vm.s3UploadError("Unsupported media type: " + media_type + ".");

@@ -11,4 +11,4 @@ echo "--------------------------------------------------------------------------
 echo "Installing Dependencies And Testing Modules"
 echo "------------------------------------------------------------------------------"
 
-# Unit tests not implemented yet
+../test/unit/run_unit.sh

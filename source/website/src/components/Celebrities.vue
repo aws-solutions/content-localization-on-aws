@@ -200,8 +200,10 @@
       this.selectedLabel = '';
       clearInterval(this.canvasRefreshInterval);
       const canvas = document.getElementById('canvas');
-      if (canvas) var ctx = canvas.getContext('2d');
-      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     },
     activated: function () {
       console.log('activated component:', this.operator);
@@ -235,12 +237,11 @@
       saveFile() {
         const elasticsearch_data = this.elasticsearch_data;
         const blob = new Blob([JSON.stringify(elasticsearch_data)], {type: 'text/plain'});
-        const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+        const a = document.createElement('a');
         a.download = "data.json";
         a.href = window.URL.createObjectURL(blob);
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        const e = new MouseEvent('click', { view: window });
         a.dispatchEvent(e);
       },
       updateConfidence (event) {
@@ -258,8 +259,8 @@
         // clear canvas for redrawing
         this.boxes_available = [];
         clearInterval(this.canvasRefreshInterval);
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = "red";
         ctx.font = "15px Arial";
@@ -272,10 +273,10 @@
           return
         }
         this.selectedLabel = label;        // initialize lists of boxes and markers to be drawn
-        var boxMap = new Map();
-        var markers = [];
-        var es_data = this.elasticsearch_data;
-        var i=0;
+        let boxMap = new Map();
+        let markers = [];
+        let es_data = this.elasticsearch_data;
+        let i=0;
         es_data.forEach( function(record) {
           if (record.Name === label) {
             // Save label name overlaying on video timeline
@@ -344,7 +345,7 @@
           }
           else {
             this.lowerConfidence = false;
-            for (var i = 0, len = data.length; i < len; i++) {
+            for (let i = 0, len = data.length; i < len; i++) {
               es_data.push(data[i]._source)
             }
           }
@@ -353,8 +354,8 @@
         }
       },
       drawBoxes: function(boxMap) {
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
         // TODO: move image processing to a separate component
         if (this.mediaType === "image") {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -366,7 +367,7 @@
           ctx.fillStyle = "red";
           // For each box instance...
           boxMap.forEach( i => {
-            var drawMe = i[0];
+            let drawMe = i[0];
             if (drawMe) {
               ctx.rect(drawMe.x, drawMe.y, drawMe.width, drawMe.height);
               // Draw object name and confidence score
@@ -385,7 +386,7 @@
         // Look for and draw bounding boxes every 100ms
         const interval_ms = 100;
         const erase_on_iteration = 2;
-        var i = 0;
+        let i = 0;
         this.canvasRefreshInterval = setInterval(function () {
           i++;
           // erase old bounding boxes
@@ -400,7 +401,7 @@
             ctx.fillStyle = "red";
           }
           // Get current player timestamp to the nearest 1/10th second
-          var player_timestamp = Math.round(this.player.currentTime()*10.0);
+          let player_timestamp = Math.round(this.player.currentTime()*10.0);
           // If we have a box for the player's timestamp...
           if (boxMap.has(player_timestamp)) {
             i=0;
@@ -412,12 +413,12 @@
             ctx.textBaseline = "middle";
             ctx.fillStyle = "red";
             // ...then get a list of box instances
-            var instance_list = (boxMap.get(player_timestamp)).map( item => item.instance).filter((v, i, a) => a.indexOf(v) === i);
+            let instance_list = (boxMap.get(player_timestamp)).map( item => item.instance).filter((v, i, a) => a.indexOf(v) === i);
             // For each box instance...
             instance_list.forEach( i => {
               // ...get all of the boxes belonging to this instance
               // at the current timestamp.
-              var boxes = boxMap.get(player_timestamp).filter(box => box.instance === i);
+              let boxes = boxMap.get(player_timestamp).filter(box => box.instance === i);
               boxes.forEach (drawMe => {
                 if (drawMe) {
                   ctx.rect(drawMe.x, drawMe.y, drawMe.width, drawMe.height);
@@ -439,7 +440,7 @@
             timeseries.set(millisecond, {"x": millisecond, "y":1})
           }
         }
-        var es_data = this.elasticsearch_data;
+        let es_data = this.elasticsearch_data;
         es_data.forEach( function(record) {
           // Define timestamp with millisecond resolution
           const millisecond = Math.round(record.Timestamp);

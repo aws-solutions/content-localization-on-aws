@@ -144,85 +144,50 @@
         };
         let response = await this.$Amplify.API.get(apiName, path, apiParams);
         if (!response) {
-          this.showElasticSearchAlert = true
-        } else {
-          let es_data = [];
-          let result = await response;
-          let data = result.hits.hits;
-          for (let i = 0, len = data.length; i < len; i++) {
-            es_data.push(data[i]._source);
-          }
-          this.elasticsearch_data = JSON.parse(JSON.stringify(es_data));
-          let track_data = {"General": undefined, "Video": undefined, "Audio": undefined};
-          track_data["General"] = this.elasticsearch_data.filter(x => x.track_type === "General");
-          track_data["Video"] = this.elasticsearch_data.filter(x => x.track_type === "Video");
-          track_data["Audio"] = this.elasticsearch_data.filter(x => x.track_type === "Audio");
-          if (track_data["General"][0] !== undefined) {
-            if ("duration" in track_data["General"][0]) {
-              let seconds = track_data["General"][0].duration / 1000;
-              if (seconds >= 3600) {
-                this.duration = new Date(seconds * 1000).toISOString().substr(11, 8);
-              } else {
-                // drop hours portion if time is less than 1 hour
-                this.duration = new Date(seconds * 1000).toISOString().substr(14, 5);
-              }
-            }
-            if ("format" in track_data["General"][0]) {
-              this.format = track_data["General"][0].format;
-            }
-            if ("file_size" in track_data["General"][0]) {
-              this.file_size = (track_data["General"][0].file_size / 1000 / 1000).toFixed(2);
-            }
-            if ("overall_bit_rate" in track_data["General"][0]) {
-              this.overall_bit_rate = track_data["General"][0].overall_bit_rate;
-            }
-            if ("frame_rate" in track_data["General"][0]) {
-              this.frame_rate = track_data["General"][0].frame_rate;
-            }
-          }
-          if (track_data["Video"][0] !== undefined) {
-            if ("width" in track_data["Video"][0]) {
-              this.width = track_data["Video"][0].width;
-            }
-            if ("height" in track_data["Video"][0]) {
-              this.height = track_data["Video"][0].height;
-            }
-          }
-          if (track_data["Audio"][0] !== undefined) {
-            if (track_data["Audio"].length > 0) {
-              if ("other_bit_rate" in track_data["Audio"][0]) {
-                this.other_bit_rate = track_data["Audio"][0].other_bit_rate[0];
-              }
-              if ("other_sampling_rate" in track_data["Audio"][0]) {
-                this.other_sampling_rate = track_data["Audio"][0].other_sampling_rate[0];
-              }
-              if ("other_language" in track_data["Audio"][0]) {
-                this.other_language = track_data["Audio"][0].other_language[0];
-              }
-              if ("encoded_date" in track_data["Audio"][0]) {
-                this.encoded_date = track_data["Audio"][0].encoded_date;
-              }
-            }
-            if ("other_bit_rate" in track_data["Audio"][0]) {
-              this.other_bit_rate = track_data["Audio"][0].other_bit_rate[0];
-            }
-            if ("other_sampling_rate" in track_data["Audio"][0]) {
-              this.other_sampling_rate = track_data["Audio"][0].other_sampling_rate[0];
-            }
-            if ("other_language" in track_data["Audio"][0]) {
-              this.other_language = track_data["Audio"][0].other_language[0];
-            }
-            if ("encoded_date" in track_data["Audio"][0]) {
-              this.encoded_date = track_data["Audio"][0].encoded_date;
-            }
-          }
-          this.isBusy = false
+          this.showElasticSearchAlert = true;
+          return;
         }
+        let result = await response;
+        let data = result.hits.hits;
+        let es_data = data.map(d => d._source);
+        this.elasticsearch_data = JSON.parse(JSON.stringify(es_data));
+        const trackGeneral = this.elasticsearch_data.find(x => x.track_type === "General");
+        const trackVideo = this.elasticsearch_data.find(x => x.track_type === "Video");
+        const trackAudio = this.elasticsearch_data.find(x => x.track_type === "Audio");
+
+        const promote = (function (track, prop, mapFn) {
+          if (prop in track) {
+            this[prop] = mapFn(track[prop]);
+          }
+        }).bind(this);
+
+        if (trackGeneral !== undefined) {
+          if ("duration" in trackGeneral) {
+            let seconds = trackGeneral.duration / 1000;
+            if (seconds >= 3600) {
+              this.duration = new Date(seconds * 1000).toISOString().substring(11, 19);
+            } else {
+              // drop hours portion if time is less than 1 hour
+              this.duration = new Date(seconds * 1000).toISOString().substring(14, 19);
+            }
+          }
+          promote(trackGeneral, "format", value => value);
+          promote(trackGeneral, "file_size", value => (value / 1000 / 1000).toFixed(2));
+          promote(trackGeneral, "overall_bit_rate", value => value);
+          promote(trackGeneral, "frame_rate", value => value);
+        }
+        if (trackVideo !== undefined) {
+          promote(trackVideo, "width", value => value);
+          promote(trackVideo, "height", value => value);
+        }
+        if (trackAudio !== undefined) {
+          promote(trackAudio, "other_bit_rate", value => value[0]);
+          promote(trackAudio, "other_sampling_rate", value => value[0]);
+          promote(trackAudio, "other_language", value => value[0]);
+          promote(trackAudio, "encoded_date", value => value);
+        }
+        this.isBusy = false
       }
     }
   }
 </script>
-
-<style>
-
-</style>

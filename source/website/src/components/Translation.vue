@@ -479,13 +479,7 @@ export default {
     validTerminologyName: function() {
       const letterNumber = /^([A-Za-z0-9-]_?)+$/;
       // The name can be up to 256 characters long. Valid characters are a-z, A-Z, 0-9, -, and _.
-      if (this.customTerminologyCreateNew === "" || (this.customTerminologyCreateNew.match(letterNumber) && this.customTerminologyCreateNew.length<256)) {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      return !!(this.customTerminologyCreateNew === "" || (this.customTerminologyCreateNew.match(letterNumber) && this.customTerminologyCreateNew.length<256));
     },
     customTerminologyName: function () {
       if (this.customTerminologyCreateNew !== "")
@@ -494,7 +488,7 @@ export default {
         return null
     },
     inputListeners: function () {
-      var vm = this
+      let vm = this
       // `Object.assign` merges objects together to form a new object
       return Object.assign({},
         // We add all the listeners from the parent
@@ -537,7 +531,7 @@ export default {
           .sort(function(a, b) {
             const textA = a.text.toUpperCase();
             const textB = b.text.toUpperCase();
-            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+            return (textA < textB && -1) || (textA > textB && 1) || 0;
           });
     },
     vtt_url: function() {
@@ -690,8 +684,8 @@ export default {
     asyncForEach: async function(array, callback) {
       // This async function allows us to wait for all vtt files to be
       // downloaded.
-      for (let index = 0; index < array.length; index++) {
-        await callback(array[index]);
+      for (const item of array) {
+        await callback(item);
       }
     },
     getVttCaptions: async function () {
@@ -766,9 +760,10 @@ export default {
           // that the user may have saved by clicking the Save Edits button.
           if (vm.selected_lang_code !== "") {
             // hide all the captions in the video player
-            for (let i = 0; i < vm.player.textTracks().length; i++) {
+            const textTracks = vm.player.textTracks();
+            for (let i = 0, l = textTracks.length; i < l; i++) {
               console.log("in the loop")
-              let track = vm.player.textTracks()[i];
+              let track = textTracks[i];
               track.mode = "disabled";
             }
             console.log("getting old tracks")
@@ -901,19 +896,18 @@ export default {
     },
     downloadAudioFile() {
       const blob = new Blob([this.pollyaudio_url], {type: 'audio/mpeg', autoplay:'0', autostart:'false', endings:'native'});
-      const e = document.createEvent('MouseEvents'),
-        a = document.createElement('a');
+      const a = document.createElement('a');
       a.download = "audiofile.mp3";
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = ['audio/mpeg', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      const e = new MouseEvent('click', { view: window });
       a.dispatchEvent(e);
     },
     toHHMMSS(secs) {
-      var sec_num = parseInt(secs, 10)
-      var hours   = Math.floor(sec_num / 3600)
-      var minutes = Math.floor(sec_num / 60) % 60
-      var seconds = sec_num % 60
+      let sec_num = parseInt(secs, 10)
+      let hours   = Math.floor(sec_num / 3600)
+      let minutes = Math.floor(sec_num / 60) % 60
+      let seconds = sec_num % 60
 
       return [hours,minutes,seconds]
         .map(v => v < 10 ? "0" + v : v)
@@ -954,42 +948,42 @@ export default {
       console.log(diff)
       let old_phrase = ''
       let new_phrase = ''
-      for (let i=0; i<=(diff.length-1); i++) {
+      diff.forEach((element, i, diff) => {
+        const isLast = i === diff.length - 1;
         // if element contains key removed
-        if ("removed" in diff[i] && diff[i].removed !== undefined) {
-          old_phrase += diff[i].value+' '
+        if (element.removed) {
+          old_phrase += element.value+' '
         }
         // if element contains key added
-        else if ("added" in diff[i] && diff[i].added !== undefined) {
-          new_phrase += diff[i].value+' '
+        else if (element.added) {
+          new_phrase += element.value+' '
         }
         // otherwise if element is just words, or if it's the last element,
         // then save word change to custom terminology
-        if (i === (diff.length-1) || !("added" in diff[i] || "removed" in diff[i])) {
+        if (isLast || !("added" in element || "removed" in element)) {
           // if this value is a space and next value contains key 'added',
           // then break so that we can add that value to the new_phrase
-          if (i !== (diff.length-1) && diff[i].value === ' ' && "added" in diff[i+1] && diff[i+1].added !== 'undefined') {
-            continue
-          } else {
-            // or if this is the last element
-            // or if this value is anything other than a space
-            // then save to custom terminology
-            if (old_phrase != '' && new_phrase != '') {
-              // replace multiple spaces with a single space
-              // and remove spaces at beginning or end of word
-              old_phrase = old_phrase.replace(/ +(?= )/g, '').trim();
-              new_phrase = new_phrase.replace(/ +(?= )/g, '').trim();
-              // remove old_phrase from custom terminology, if it already exists
-              this.customTerminologyUnsaved = this.customTerminologyUnsaved.filter(item => {return item.original_phrase !== old_phrase;});
-              // add old_phrase to custom terminology
-              this.customTerminologyUnsaved.push({[this.sourceLanguageCode]: "", [this.selected_lang_code]: new_phrase})
-              console.log("CUSTOM TERMINOLOGY: " + JSON.stringify(this.customTerminologyUnsaved))
-            }
-            old_phrase = ''
-            new_phrase = ''
+          if (!isLast && element.value === ' ' && "added" in diff[i+1]) {
+            return;
           }
+          // or if this is the last element
+          // or if this value is anything other than a space
+          // then save to custom terminology
+          if (old_phrase != '' && new_phrase != '') {
+            // replace multiple spaces with a single space
+            // and remove spaces at beginning or end of word
+            old_phrase = old_phrase.replace(/ +(?= )/g, '').trim();
+            new_phrase = new_phrase.replace(/ +(?= )/g, '').trim();
+            // remove old_phrase from custom terminology, if it already exists
+            this.customTerminologyUnsaved = this.customTerminologyUnsaved.filter(item => item.original_phrase !== old_phrase);
+            // add old_phrase to custom terminology
+            this.customTerminologyUnsaved.push({[this.sourceLanguageCode]: "", [this.selected_lang_code]: new_phrase})
+            console.log("CUSTOM TERMINOLOGY: " + JSON.stringify(this.customTerminologyUnsaved))
+          }
+          old_phrase = ''
+          new_phrase = ''
         }
-      }
+      }, this);
       this.webCaptions[index].caption = new_caption
     },
     captionClickHandler(index) {
@@ -1009,7 +1003,7 @@ export default {
         timeline_position = 0
       }
       if (this.$refs.selectableTable) {
-        var element = document.getElementById("caption" + timeline_position);
+        let element = document.getElementById("caption" + timeline_position);
         element.scrollIntoView();
       }
     },
@@ -1028,14 +1022,14 @@ export default {
             timeline_position = 0
           }
           if (this.$refs.selectableTable) {
-            var element = document.getElementById("caption" + (timeline_position));
+            let element = document.getElementById("caption" + (timeline_position));
             element.scrollIntoView();
           }
         }.bind(this));
       }
     },
     handleVideoPlay() {
-      var last_position = 0;
+      let last_position = 0;
       // Advance the selected row in the caption table when the video is playing
       this.player.on('timeupdate', function () {
         const current_position = Math.round(this.player.currentTime());
@@ -1147,28 +1141,18 @@ export default {
       let workflow = this.workflow_definition
       let stage_name = workflow.StartAt
       let stage = workflow["Stages"][stage_name]
-      let end = false
       // This loop starts at the first stage and
       // goes until the staged named "End"
-      while (end == false) {
-        // If the current stage is End then end the loop.
-        if ("End" in stage && stage["End"] == true){
-          end = true
+      // If the current stage is End then end the loop.
+      // If the current stage is TransformText then end the loop.
+      while (!stage["End"] && stage_name !== "TransformText") {
+        // Disable all the operators in the stage
+        for (const operator in data["Configuration"][stage_name]){
+          data["Configuration"][stage_name][operator]["Enabled"] = false
         }
-        // If the current stage is TransformText then end the loop.
-        else if (stage_name == "TransformText") {
-          end = true
-        }
-        // For all other stages disable all the operators in the stage
-        else {
-          // Disable all the operators in the stage
-          for (const operator in data["Configuration"][stage_name]){
-            data["Configuration"][stage_name][operator]["Enabled"] = false
-          }
-          // Now look at the next stage in the workflow
-          stage_name = stage["Next"]
-          stage = workflow["Stages"][stage_name]
-        }
+        // Now look at the next stage in the workflow
+        stage_name = stage["Next"]
+        stage = workflow["Stages"][stage_name]
       }
 
       return data
@@ -1272,13 +1256,13 @@ export default {
       this.$refs['terminology-modal'].show()
     },
     convertToCSV: function(objArray) {
-      var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-      var str = '';
-      for (var i = 0; i < array.length; i++) {
-        var line = '';
-        for (var index in array[i]) {
+      let array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+      let str = '';
+      for (let item of array) {
+        let line = '';
+        for (let subitem of item) {
           if (line != '') line += ','
-          line += array[i][index];
+          line += subitem;
         }
         str += line + '\r\n';
       }
@@ -1407,9 +1391,9 @@ export default {
       }
     },
     csvJSON: function(csv) {
-      var lines=csv.split("\n");
-      var json = [];
-      var headers=lines[0].split(",");
+      let lines=csv.split("\n");
+      let json = [];
+      let headers=lines[0].split(",");
       for(let i=1;i<lines.length;i++){
         let obj = {};
         let currentline = lines[i].split(",");
@@ -1433,8 +1417,9 @@ export default {
 
       // switch the video player to show the selected language
       // by first disabling all the text tracks, like this:
-      for (let i = 0; i < this.player.textTracks().length; i++) {
-        let track = this.player.textTracks()[i];
+      const textTracks = this.player.textTracks();
+      for (let i = 0, l = textTracks.length; i < l; i++) {
+        const track = textTracks[i];
         track.mode = "disabled";
       }
       console.log("before player")
@@ -1562,9 +1547,6 @@ export default {
         const index_into_saved_terminology = index - this.customTerminologyUnsaved.length
         this.customTerminologySaved.splice(index_into_saved_terminology, 1)
       }
-      // if (this.customTerminologyUnion.length === 0){
-      //   this.customTerminologyUnsaved.push(this.emptyTerminologyRecord)
-      // }
     },
     pollWorkflowStatus() {
       // Poll frequency in milliseconds

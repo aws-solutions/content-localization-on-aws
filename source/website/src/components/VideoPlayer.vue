@@ -69,7 +69,7 @@ export default {
     alphabetical_caption_list: function () {
       const alphabetical_caption_list = this.captions
       return alphabetical_caption_list.sort(function(a, b) {
-        return (a.label < b.label) ? -1 : (a.label > b.label) ? 1 : 0;
+        return (a.label > b.label && 1) || (a.label < b.label && -1) || 0;
       });
     }
   },
@@ -112,7 +112,6 @@ export default {
         },
         markers: []
       });
-      // this.player.autoplay('muted');
       this.player.currentTime(0);
       let vm = this
       this.player.on('timeupdate', function() {

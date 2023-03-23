@@ -132,7 +132,7 @@
       getTimeUpdate() {
         const vm = this;
         // Send current time position for the video player to verticalLineCanvas
-        var last_position = 0;
+        let last_position = 0;
         if (this.player) {
           this.player.on('timeupdate', function () {
             const current_position = Math.round(this.player.currentTime() / this.player.duration() * 1000);
@@ -148,6 +148,3 @@
     }
   }
 </script>
-
-<style scoped>
-</style>

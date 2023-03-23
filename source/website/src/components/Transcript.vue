@@ -94,12 +94,11 @@ export default {
     },
     downloadTranscript() {
       const blob = new Blob([this.transcript], {type: 'text/plain', endings:'native'});
-      const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+      const a = document.createElement('a');
       a.download = "transcript.txt";
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      const e = new MouseEvent('click', { view: window });
       a.dispatchEvent(e);
 
     },

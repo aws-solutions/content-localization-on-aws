@@ -312,10 +312,6 @@ jobs:
         with:
           input_path: deployment
 
-      # FIXME - This is not working.  Need to test more
-      # check it with Hawkeye
-      # - name: Hawkeye Scanner
-      #   uses: ./.github/actions/hawkeye-scan
   scan-3rd-party-data-us-west-2:
     needs: build-content-localization-dev-us-west-2
     runs-on: ubuntu-latest
@@ -368,10 +364,6 @@ jobs:
         continue-on-error: true
         with:
           input_path: deployment
-      # FIXME - This is not working.  Need to test more
-      # check it with Hawkeye
-      # - name: Hawkeye Scanner
-      #   uses: ./.github/actions/hawkeye-scan
   scan-3rd-party-data-us-east-1:
     needs: build-content-localization-dev-us-east-1
     runs-on: ubuntu-latest

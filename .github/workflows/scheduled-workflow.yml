@@ -154,11 +154,6 @@ jobs:
         with:
           input_path: deployment
 
-      # FIXME - This is not working.  Need to test more
-      # check it with Hawkeye
-      # - name: Hawkeye Scanner
-      #   uses: ./.github/actions/hawkeye-scan
-
   deploy-mie-dev-us-west-2:
     needs: build-mie-dev-us-west-2
     runs-on: ubuntu-latest

@@ -10,7 +10,6 @@ test/coverage-reports/
 *node_modules
 *package
 *dist
-package-lock.json
 webapp-manifest.json
 source/website/public/runtimeConfig.json
 test/e2e/transcript.txt

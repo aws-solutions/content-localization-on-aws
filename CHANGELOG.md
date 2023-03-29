@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * The "Download Data" button on the **Celebrities** works now.
 * Fixed upload of WebVTT files as "Existing Subtitles".
+* Incorrect Cloudformation template in public bucket (#365)
 
 ### Changed
 

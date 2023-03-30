@@ -294,14 +294,6 @@ Resources:
       Application: !GetAtt Application.Id
       AttributeGroup: !GetAtt DefaultApplicationAttributes.Id
 
-  AppRegistryApplicationStackAssociationMieStack:
-    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
-    Properties:
-      Application: !GetAtt Application.Id
-      Resource:
-        !Ref MieStack
-      ResourceType: CFN_STACK
-
   AppRegistryApplicationStackAssociationOpenSearchStack:
     Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
     Properties:

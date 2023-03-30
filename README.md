@@ -1,4 +1,4 @@
-[![scheduled-workflow](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml)
+[![scheduled-workflow](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml)
 
 
 # Content Localization on AWS 
@@ -173,7 +173,7 @@ awscurl -X POST --region $REGION --data '{"Name":"ContentLocalizationWorkflow","
 
 The following Python code can be used in an AWS Lambda function to execute the image analysis workflow:
 
-* [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/doc/sigv4_post_sample.py)
+* [sigv4_post_sample.py](https://github.com/aws-solutions/content-localization-on-aws/blob/development/doc/sigv4_post_sample.py)
 
 
 ## Starting workflows from an S3 trigger
@@ -194,7 +194,7 @@ Workflows can be started automatically when files are copied to a designated S3 
 
     1. Click "Create function"
     2. Provide a function name and select the latest Python runtime version
-       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/doc/sigv4_post_sample.py) into a new Lambda function.
+       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/content-localization-on-aws/blob/development/doc/sigv4_post_sample.py) into a new Lambda function.
     3. Under "Layers", click Add a layer
     4. Select Custom layers, then select `media-insights-engine-python38` from the drop-down menu, and click Add.
     5. Make the following code changes to the copied code:

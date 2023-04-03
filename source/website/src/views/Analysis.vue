@@ -154,7 +154,6 @@
                 "
               >
                 <br />
-                <!-- <Waveform /> -->
               </div>
               <div v-else-if="currentView === 'ShotDetection'">
                 <br />
@@ -192,12 +191,10 @@
   import MediaSummaryBox from '@/components/MediaSummaryBox.vue'
   import LineChart from '@/components/LineChart.vue'
   import { mapState } from 'vuex'
- //import Waveform from "../components/Waveform";
 
   export default {
     name: 'Home',
     components: {
-      //Waveform,
       Header,
       ComponentLoadingError,
       MediaSummaryBox,
@@ -369,7 +366,6 @@
               const bucket = item.Results.S3Bucket;
               const key = item.Results.S3Key;
 
-              apiName = 'mieDataplaneApi';
               path = 'download';
               requestOpts = {
                 headers: {
@@ -430,7 +426,6 @@
       },
       async getVideoUrl() {
         // This function gets the video URL then initializes the video player
-        const bucket = this.s3_uri.split("/")[2];
         let s3uri = this.s3_uri
         let asset_id = this.$route.params.asset_id;
         // TODO: Get the path to the proxy mp4 from the mediaconvert operator - clarifying this comment, this should just be a from the dataplane results of the mediaconvert operator

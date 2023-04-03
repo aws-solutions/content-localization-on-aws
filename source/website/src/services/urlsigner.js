@@ -18,7 +18,6 @@ import axios from "axios";
 export default {
   getSignedURL(file, config) {
     return new Promise((resolve, reject) => {
-      // var fd = new FormData();
       const token = config.token;
       let request = new XMLHttpRequest(),
           signingURL = (typeof config.signingURL === "function") ?  config.signingURL(file) : config.signingURL;

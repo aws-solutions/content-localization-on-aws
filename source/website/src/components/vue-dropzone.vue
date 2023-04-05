@@ -115,24 +115,7 @@ export default {
     })
 
     this.dropzone.on('addedfile', function(file) {
-      if (vm.duplicateCheck) {
-        if (this.files.length) {
-          var _i, _len;
-          for (_i = 0, _len = this.files.length; _i < _len - 1; _i++) // -1 to exclude current file
-            {
-                if(this.files[_i].name === file.name && this.files[_i].size === file.size && this.files[_i].lastModifiedDate.toString() === file.lastModifiedDate.toString())
-                {
-                    this.removeFile(file);
-                    vm.$emit('vdropzone-duplicate-file', file)
-                }
-            }
-        }
-      }
-
-      vm.$emit('vdropzone-file-added', file)
-      if (vm.isS3 && vm.wasQueueAutoProcess && ! file.manuallyAdded) {
-        vm.getSignedAndUploadToS3(file);
-      }
+      vm.addedfile(file);
     })
 
     this.dropzone.on('addedfiles', function(files) {
@@ -148,8 +131,8 @@ export default {
       vm.$emit('vdropzone-success', file, response)
       if (vm.isS3) {
         if(vm.isS3OverridesServerPropagation){
-          var xmlResponse = (new window.DOMParser()).parseFromString(response, "text/xml");
-          var s3ObjectLocation = xmlResponse.firstChild.children[0].innerHTML;
+          let xmlResponse = (new window.DOMParser()).parseFromString(response, "text/xml");
+          let s3ObjectLocation = xmlResponse.firstChild.children[0].innerHTML;
           vm.$emit('vdropzone-s3-upload-success', s3ObjectLocation);
         }
           if (vm.wasQueueAutoProcess)
@@ -267,11 +250,11 @@ export default {
       if (this.dropzone.options.createImageThumbnails && containsImageFileType && file.size <= this.dropzone.options.maxThumbnailFilesize * 1024 * 1024) {
         fileUrl && this.dropzone.emit("thumbnail", file, fileUrl);
 
-        var thumbnails = file.previewElement.querySelectorAll('[data-dz-thumbnail]');
-        for (var i = 0; i < thumbnails.length; i++) {
-          thumbnails[i].style.width = this.dropzoneSettings.thumbnailWidth + 'px';
-          thumbnails[i].style.height = this.dropzoneSettings.thumbnailHeight + 'px';
-          thumbnails[i].style['object-fit'] = 'contain';
+        let thumbnails = file.previewElement.querySelectorAll('[data-dz-thumbnail]');
+        for (const thumbnail of thumbnails) {
+          thumbnail.style.width = this.dropzoneSettings.thumbnailWidth + 'px';
+          thumbnail.style.height = this.dropzoneSettings.thumbnailHeight + 'px';
+          thumbnail.style['object-fit'] = 'contain';
         }
       }
       this.dropzone.emit("complete", file)
@@ -348,6 +331,24 @@ export default {
     addFile: function(file) {
       return this.dropzone.addFile(file);
     },
+    addedfile: function(file) {
+      if (this.duplicateCheck) {
+        const files = this.dropzone.files;
+        for (let _i = 0, _len = files.length; _i < _len - 1; _i++) // -1 to exclude current file
+          {
+              if(files[_i].name === file.name && files[_i].size === file.size && files[_i].lastModified === file.lastModified)
+              {
+                  this.removeFile(file);
+                  this.$emit('vdropzone-duplicate-file', file)
+              }
+          }
+      }
+
+      this.$emit('vdropzone-file-added', file)
+      if (this.isS3 && this.wasQueueAutoProcess && ! file.manuallyAdded) {
+        this.getSignedAndUploadToS3(file);
+      }
+    },
     removeFile: function(file) {
       this.dropzone.removeFile(file)
     },
@@ -415,7 +416,6 @@ export default {
         })
       } catch (err) {
         console.log("Error: " + err)
-        // file.status = vm.dropzone.SUCCESS;
         vm.isUploading = null
         vm.uploadValue = null
         vm.file = null

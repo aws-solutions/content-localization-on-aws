@@ -113,6 +113,7 @@ Resources:
         SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainArn
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         ParentStackName: !Ref MieStack
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   WebStack:
     Type: "AWS::CloudFormation::Stack"

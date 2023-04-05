@@ -20,6 +20,9 @@ Parameters:
   ParentStackName:
     Description: Name of the parent Cloud Formation stack
     Type: String
+  MieKMSArn:
+    Description: ARN of the Media Insights KMS Key
+    Type: String
 
 Resources:
   ContentAnalysisUserPool:
@@ -274,6 +277,17 @@ Resources:
                     ],
                     "Effect": "Allow",
                     "Resource": "${searchdomain}/*"
+                  },
+                  {
+                    "Action": [
+                      "kms:GenerateDataKey*",
+                      "kms:DescribeKey",
+                      "kms:Encrypt",
+                      "kms:Decrypt",
+                      "kms:ReEncrypt*"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "${kmskey}"
                   }
                 ]
               }
@@ -283,7 +297,8 @@ Resources:
               wfapi: !Ref WorkflowApiId,
               dataapi: !Ref DataplaneApiId,
               searchdomain: !Ref SearchDomainArn,
-              dataplanebucket: !Ref DataplaneBucket
+              dataplanebucket: !Ref DataplaneBucket,
+              kmskey: !Ref MieKMSArn
             }
 
   AddAdminUserToAdminGroup:

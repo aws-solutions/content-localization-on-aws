@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Removed Hawkeye scan from github actions (deprecated)
 * Upgrade Media Insights on AWS dependency to v5.1.0
 * Refactored some code for maintainability
+* Updated e2e tests for bug fixes and compatibility with new Media Insights on AWS version
 
 ## [2.0.2] - 2023-01-11
 

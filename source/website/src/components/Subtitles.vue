@@ -261,10 +261,6 @@ to highlight the fields in the custom vocab schema. -->
         </b-table>
       </div>
       <br>
-      <!-- Uncomment to enable Upload button -->
-      <!--      <b-button id="showModal" size="sm" class="mb-2" @click="showModal()">-->
-      <!--        <b-icon icon="upload" color="white"></b-icon> Upload JSON-->
-      <!--      </b-button> &nbsp;-->
       <!-- this is the download button -->
       <b-dropdown v-if="webCaptions.length > 0" id="download-dropdown" text="Download VTT/SRT" class="mb-2" size="sm" dropup no-caret>
         <template slot="button-content">
@@ -299,13 +295,6 @@ to highlight the fields in the custom vocab schema. -->
         Saving edits
       </b-button>
 
-      <!-- Uncomment to enable Upload button -->
-      <!--      <b-modal ref="my-modal" hide-footer title="Upload a file">-->
-      <!--        <p>Upload a timed subtitles file in the Webcaptions JSON format.</p>-->
-      <!--        <div>-->
-      <!--          <input type="file" @change="uploadCaptionsFile">-->
-      <!--        </div>-->
-      <!--      </b-modal>-->
       <div v-if="webCaptions.length > 0 && workflow_status !== 'Complete' && workflow_status !== 'Error' && workflow_status !== 'Waiting'" style="color:red">
         Editing is disabled until workflow completes.
       </div>
@@ -407,13 +396,7 @@ export default {
     validVocabularyName: function() {
       const letterNumber = /^[0-9a-zA-Z]+$/;
       // The name can be up to 200 characters long. Valid characters are a-z, A-Z, and 0-9.
-      if (this.customVocabularyCreateNew === "" || (this.customVocabularyCreateNew.match(letterNumber) && this.customVocabularyCreateNew.length<200)) {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      return !!(this.customVocabularyCreateNew === "" || (this.customVocabularyCreateNew.match(letterNumber) && this.customVocabularyCreateNew.length<200));
     },
     customVocabularyName: function () {
       if (this.customVocabularyCreateNew !== "")
@@ -443,7 +426,7 @@ export default {
       return vocab_file
     },
     inputListeners: function () {
-      var vm = this
+      let vm = this
       // `Object.assign` merges objects together to form a new object
       return Object.assign({},
         // We add all the listeners from the parent
@@ -632,10 +615,10 @@ export default {
       }
     },
     toHHMMSS(secs) {
-      var sec_num = parseInt(secs, 10)
-      var hours   = Math.floor(sec_num / 3600)
-      var minutes = Math.floor(sec_num / 60) % 60
-      var seconds = sec_num % 60
+      let sec_num = parseInt(secs, 10)
+      let hours   = Math.floor(sec_num / 3600)
+      let minutes = Math.floor(sec_num / 60) % 60
+      let seconds = sec_num % 60
 
       return [hours,minutes,seconds]
         .map(v => v < 10 ? "0" + v : v)
@@ -680,61 +663,61 @@ export default {
       let old_phrase = ''
       let new_phrase = ''
       let next_word = ''
-      for (let i=0; i<=(diff.length-1); i++) {
+      diff.forEach((element, i, diff) => {
+        const isLast = i === diff.length - 1;
         // If element contains key removed
-        if ("removed" in diff[i] && diff[i].removed !== undefined) {
-          old_phrase += diff[i].value+' '
+        if (element.removed) {
+          old_phrase += element.value+' '
         }
         // If element contains key added
-        else if ("added" in diff[i] && diff[i].added !== undefined) {
-          new_phrase += diff[i].value+' '
+        else if (element.added) {
+          new_phrase += element.value+' '
         }
         // If the element is the last element and
         // does not contain "removed" or "added" keys, then it
         // contains the text that follows the edited phrase.
-        else if (i === diff.length - 1) {
-          next_word = diff[i].value.trim().split(" ")[0]
+        else if (isLast) {
+          next_word = element.value.trim().split(" ")[0]
           console.log("next word: " + next_word)
         }
         // otherwise if element is just words, or if it's the last element,
         // then save word change to custom vocabulary
-        if (i === (diff.length-1) || !("added" in diff[i] || "removed" in diff[i])) {
+        if (isLast || !("added" in element || "removed" in element)) {
           // if this value is a space and next value contains key 'added',
           // then break so that we can add that value to the new_phrase
-          if (i !== (diff.length-1) && diff[i].value === ' ' && "added" in diff[i+1] && diff[i+1].added !== 'undefined') {
-            continue
-          } else {
-            // or if this is the last element
-            // or if this value is anything other than a space
-            // then save to custom vocabulary
-            if (old_phrase != '' && new_phrase != '') {
-              // replace multiple spaces with a single space
-              // and remove spaces at beginning or end of word
-              old_phrase = old_phrase.replace(/ +(?= )/g, '').trim();
-              new_phrase = new_phrase.replace(/ +(?= )/g, '').trim();
-              // If the edited phrase ends with a apostrophe or a hyphen,
-              // then we'll concatenate that phrase with the first word in
-              // the text that follows the edited phrase. We need to do this
-              // because the custom vocabulary will fail to save if it
-              // contains any phrases that end with an apostrophe or a hyphen.
-              if (new_phrase.slice(-1).match(/[',-]/i)) {
-                new_phrase = new_phrase + next_word
-              }
-              // Transcribe requires numbers to be spelled out in the phrase field.
-              // Transcribe also requires spaces to be dashes in the phrase field.
-              // So we make those changes here:
-              let new_phrase_with_numbers_as_words = this.phrase_formatter(new_phrase)
-              // remove old_phrase from custom vocab, if it already exists
-              this.customVocabularyUnsaved = this.customVocabularyUnsaved.filter(item => {return item.original_phrase !== old_phrase;});
-              // add old_phrase to custom vocab
-              this.customVocabularyUnsaved.push({"original_phrase": old_phrase, "new_phrase": new_phrase_with_numbers_as_words, "sounds_like":"", "IPA":"", "display_as": new_phrase})
-              console.log("CUSTOM VOCABULARY: " + JSON.stringify(this.customVocabularyUnsaved))
-            }
-            old_phrase = ''
-            new_phrase = ''
+          if (!isLast && element.value === ' ' && "added" in diff[i+1]) {
+            return;
           }
+          // or if this is the last element
+          // or if this value is anything other than a space
+          // then save to custom vocabulary
+          if (old_phrase != '' && new_phrase != '') {
+            // replace multiple spaces with a single space
+            // and remove spaces at beginning or end of word
+            old_phrase = old_phrase.replace(/ +(?= )/g, '').trim();
+            new_phrase = new_phrase.replace(/ +(?= )/g, '').trim();
+            // If the edited phrase ends with a apostrophe or a hyphen,
+            // then we'll concatenate that phrase with the first word in
+            // the text that follows the edited phrase. We need to do this
+            // because the custom vocabulary will fail to save if it
+            // contains any phrases that end with an apostrophe or a hyphen.
+            if (new_phrase.slice(-1).match(/[',-]/i)) {
+              new_phrase = new_phrase + next_word
+            }
+            // Transcribe requires numbers to be spelled out in the phrase field.
+            // Transcribe also requires spaces to be dashes in the phrase field.
+            // So we make those changes here:
+            let new_phrase_with_numbers_as_words = this.phrase_formatter(new_phrase)
+            // remove old_phrase from custom vocab, if it already exists
+            this.customVocabularyUnsaved = this.customVocabularyUnsaved.filter(item => item.original_phrase !== old_phrase);
+            // add old_phrase to custom vocab
+            this.customVocabularyUnsaved.push({"original_phrase": old_phrase, "new_phrase": new_phrase_with_numbers_as_words, "sounds_like":"", "IPA":"", "display_as": new_phrase})
+            console.log("CUSTOM VOCABULARY: " + JSON.stringify(this.customVocabularyUnsaved))
+          }
+          old_phrase = ''
+          new_phrase = ''
         }
-      }
+      }, this);
       this.webCaptions[index].caption = new_caption
     },
     captionClickHandler(index) {
@@ -758,8 +741,7 @@ export default {
     },
     webToVtt() {
       let vtt = 'WEBVTT\n\n'
-      for (let i = 0; i < this.webCaptions.length; i++) {
-        const caption = this.webCaptions[i]
+      for (const caption of this.webCaptions) {
         vtt += this.formatTimeVTT(caption["start"]) + ' --> ' + this.formatTimeVTT(caption["end"]) + '\n';
         vtt += caption["caption"] + '\n\n';
       }
@@ -777,7 +759,7 @@ export default {
         timeline_position = 0
       }
       if (this.$refs.selectableTable) {
-        var element = document.getElementById("caption" + timeline_position);
+        let element = document.getElementById("caption" + timeline_position);
         element.scrollIntoView();
       }
     },
@@ -796,14 +778,14 @@ export default {
             timeline_position = 0
           }
           if (this.$refs.selectableTable) {
-            var element = document.getElementById("caption" + (timeline_position));
+            let element = document.getElementById("caption" + (timeline_position));
             element.scrollIntoView();
           }
         }.bind(this));
       }
     },
     handleVideoPlay() {
-      var last_position = 0;
+      let last_position = 0;
       // Advance the selected row in the caption table when the video is playing
       this.player.on('timeupdate', function () {
         const current_position = Math.round(this.player.currentTime());
@@ -986,12 +968,10 @@ export default {
       let stage_name = workflow.StartAt
       let stage = workflow["Stages"][stage_name]
       let end = false
-      while (end == false) {
+      while (!end) {
           console.log("Stage: "+ stage_name)
           // If the current stage is End then end the loop.
-          if ("End" in stage && stage["End"] == true){
-              end = true
-          }
+          end = !!stage["End"]
           // Avoid disabling Translate or TransformText stages because
           // their results need to be updated to reflect subtitle edits.
           if (stage_name !== "Translate" && stage_name !== "TransformText") {
@@ -1038,7 +1018,6 @@ export default {
 
       try {
         let response = await this.$Amplify.API.post(apiName, path, requestOpts);
-        //console.log("Media assigned asset id: " + asset_id);
         if (response.status !== 200) {
           console.log("ERROR: Failed to start workflow.");
           console.log(response.data.Code);
@@ -1227,7 +1206,7 @@ export default {
             let unsavedCustomVocabularies = this.unsaved_custom_vocabularies
             // Delete any vocabs in vuex state with the same name
             // as the current one being saved.
-            unsavedCustomVocabularies = this.unsaved_custom_vocabularies.filter(item => (item.Name !== customVocabularyName))
+            unsavedCustomVocabularies = unsavedCustomVocabularies.filter(item => (item.Name !== customVocabularyName))
             // Save the unsaved vocab in vuex state.
             unsavedCustomVocabularies = unsavedCustomVocabularies.concat({"Name":customVocabularyName, "vocabulary":this.customVocabularyUnion})
             this.$store.commit('updateUnsavedCustomVocabularies', unsavedCustomVocabularies);
@@ -1356,7 +1335,7 @@ export default {
             //     })
             // })
             // console.log(low_confidence_words)
-            // FIXME - why do we need to sort as we read this?  Isn't it already sorted?
+            // why do we need to sort as we read this?  Isn't it already sorted?
             // this.sortWebCaptions()
             this.isBusy = false
             if (cursor)

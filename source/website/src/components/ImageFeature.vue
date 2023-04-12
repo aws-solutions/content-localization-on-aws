@@ -48,8 +48,8 @@ export default {
   mounted: function () {
     window.addEventListener('resize', function () {
       // Update canvas size when window is resized
-      var canvas = document.getElementById('canvas');
-      var image_feature = document.getElementById('imageFeature');
+      let canvas = document.getElementById('canvas');
+      let image_feature = document.getElementById('imageFeature');
       canvas.width = image_feature.clientWidth;
       canvas.height = image_feature.clientHeight;
     });
@@ -57,8 +57,8 @@ export default {
   methods: {
     onImageLoad() {
       // Set canvas size to videoPlayer size
-      var canvas = document.getElementById('canvas');
-      var image_feature = document.getElementById('imageFeature');
+      let canvas = document.getElementById('canvas');
+      let image_feature = document.getElementById('imageFeature');
       canvas.width = image_feature.clientWidth;
       canvas.height = image_feature.clientHeight;
     },

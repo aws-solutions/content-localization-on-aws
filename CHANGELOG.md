@@ -11,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Added ServiceCatalog AppRegistry resources
 * Added unit tests for lambda code written in Python
+* Added KMS Key parameter to Auth stack and KMS permissions to Cognito Admin role
 
 ### Fixed
 
-* The "Download Data" button on the **Celebrities** works now.
+* The "Download Data" button on the **Celebrities** tab works now.
 * Fixed upload of WebVTT files as "Existing Subtitles".
 * Incorrect Cloudformation template in public bucket (#365)
 
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Removed Hawkeye scan from github actions (deprecated)
 * Upgrade Media Insights on AWS dependency to v5.1.0
+* Refactored some code for maintainability
 
 ## [2.0.2] - 2023-01-11
 

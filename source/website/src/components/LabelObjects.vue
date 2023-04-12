@@ -233,12 +233,11 @@
       saveFile() {
         const elasticsearch_data = JSON.stringify(this.elasticsearch_data);
         const blob = new Blob([elasticsearch_data], {type: 'text/plain'});
-        const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+        const a = document.createElement('a');
         a.download = "data.json";
         a.href = window.URL.createObjectURL(blob);
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        const e = new MouseEvent('click', { view: window });
         a.dispatchEvent(e);
       },
       updateConfidence (event) {
@@ -272,44 +271,42 @@
         const boxMap = new Map();
         const markers = [];
         const es_data = this.elasticsearch_data;
-        es_data.forEach( function(record) {
-          if (record.Name === label) {
-            // Save label name overlaying on video timeline
-            markers.push({'time': record.Timestamp/1000, 'text': record.Name, 'overlayText': record.Name});
-            // Save bounding box info if it exists
-            if (record.Instances.length > 0) {
-              // Iterate through all the boxes recorded for the label at this time
-              for (let i=0; i<record.Instances.length; i++) {
-                const item = record.Instances[i];
-                // TODO: move image processing to a separate component
-                if (this.mediaType === "image") {
-                  // use timestamp to index boxes in the boxMap collection
-                  const boxinfo = {
-                    'instance': i,
-                    'name': record.Name,
-                    'confidence': (record.Confidence * 1).toFixed(2),
-                    'x': item.BoundingBox.Left * canvas.width,
-                    'y': item.BoundingBox.Top * canvas.height,
-                    'width': item.BoundingBox.Width * canvas.width,
-                    'height': item.BoundingBox.Height * canvas.height
-                  };
-                  boxMap.set(i, [boxinfo])
-                } else {
-                  // Use time resolution of 0.1 second
-                  const timestamp = Math.round(record.Timestamp/100);
-                  const boxinfo = {'instance':i, 'timestamp':Math.ceil(record.Timestamp/100), 'name':record.Name, 'confidence':(record.Confidence * 1).toFixed(2), 'x':item.BoundingBox.Left*canvas.width, 'y':item.BoundingBox.Top*canvas.height, 'width':item.BoundingBox.Width*canvas.width, 'height':item.BoundingBox.Height*canvas.height};
-                  // If there are multiple bounding boxes for this instance at this
-                  // timestamp, then save them together in an array.
-                  if (boxMap.has(timestamp)) {
-                    boxMap.get(timestamp).push(boxinfo)
-                  } else {
-                    boxMap.set(timestamp, [boxinfo])
-                  }
-                }
-              }
+        const mediaType = this.mediaType;
+        es_data.filter(record => record.Name === label).forEach(record => {
+          // Save label name overlaying on video timeline
+          markers.push({'time': record.Timestamp/1000, 'text': record.Name, 'overlayText': record.Name});
+          // Save bounding box info if it exists
+          if (record.Instances.length === 0) {
+            return
+          }
+          // Iterate through all the boxes recorded for the label at this time
+          for (let i=0; i<record.Instances.length; i++) {
+            const item = record.Instances[i];
+            // TODO: move image processing to a separate component
+            if (mediaType === "image") {
+              // use timestamp to index boxes in the boxMap collection
+              const boxinfo = {
+                'instance': i,
+                'name': record.Name,
+                'confidence': (record.Confidence * 1).toFixed(2),
+                'x': item.BoundingBox.Left * canvas.width,
+                'y': item.BoundingBox.Top * canvas.height,
+                'width': item.BoundingBox.Width * canvas.width,
+                'height': item.BoundingBox.Height * canvas.height
+              };
+              boxMap.set(i, [boxinfo])
+            } else {
+              // Use time resolution of 0.1 second
+              const timestamp = Math.round(record.Timestamp/100);
+              const boxinfo = {'instance':i, 'timestamp':Math.ceil(record.Timestamp/100), 'name':record.Name, 'confidence':(record.Confidence * 1).toFixed(2), 'x':item.BoundingBox.Left*canvas.width, 'y':item.BoundingBox.Top*canvas.height, 'width':item.BoundingBox.Width*canvas.width, 'height':item.BoundingBox.Height*canvas.height};
+              // If there are multiple bounding boxes for this instance at this
+              // timestamp, then save them together in an array.
+              const boxinfos = boxMap.get(timestamp) || [];
+              boxinfos.push(boxinfo);
+              boxMap.set(timestamp, boxinfos);
             }
           }
-        }.bind(this));
+        });
         if (boxMap.size > 0) {
           this.drawBoxes(boxMap);
         }
@@ -441,25 +438,13 @@
         es_data.forEach( function(record) {
           // Define timestamp with millisecond resolution
           const millisecond = Math.round(record.Timestamp);
-          if (this.selectedLabel) {
-            // If label is defined, then enumerate timestamps for that label
-            if (record.Name === this.selectedLabel) {
-              if (record.Instances.length > 0) {
-                for (let i = 0; i < record.Instances.length; i++) {
-                  saveTimestamp(millisecond);
-                }
-              } else {
-                saveTimestamp(millisecond);
-              }
-            }
-          } else {
-            // No label has been selected, so enumerate timestamps for all label names.
+          // If no label has been selected, enumerate timestamps for all label names.
+          // Otherwise, if label is defined, then enumerate timestamps for that label.
+          if (!this.selectedLabel || record.Name === this.selectedLabel) {
             // Iterate through bounding boxes if present.
-            if (record.Instances.length > 0) {
-              for (let i = 0; i < record.Instances.length; i++) {
-                saveTimestamp(millisecond);
-              }
-            } else {
+            // Otherwise, save timestamp at least once.
+            const len = record.Instances.length || 1;
+            for (let i = 0; i < len; i++) {
               saveTimestamp(millisecond);
             }
           }

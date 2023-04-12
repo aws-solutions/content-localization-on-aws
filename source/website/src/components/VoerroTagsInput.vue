@@ -370,41 +370,40 @@ export default {
                 this.tagFromSearch(this.searchResults[this.searchSelection]);
 
                 this.input = '';
-            } else {
-                // If we're adding an unexisting tag
-                let text = this.input.trim();
+            }
+            // If we're adding an unexisting tag
+            let text = this.input.trim();
 
-                // If the new tag is not an empty string and passes validation
-                if (!this.onlyExistingTags && text.length && this.validate(text)) {
-                    this.input = '';
+            // If the new tag is not an empty string and passes validation
+            if (!this.onlyExistingTags && text.length && this.validate(text)) {
+                this.input = '';
 
-                    // Determine if the inputted tag exists in the existingTags
-                    // array
-                    let newTag = {
-                        key: '',
-                        value: text,
-                    };
+                // Determine if the inputted tag exists in the existingTags
+                // array
+                let newTag = {
+                    key: '',
+                    value: text,
+                };
 
-                    const searchQuery = this.escapeRegExp(
-                        this.caseSensitiveTags
-                            ? newTag.value
-                            : newTag.value.toLowerCase()
-                    );
+                const searchQuery = this.escapeRegExp(
+                    this.caseSensitiveTags
+                        ? newTag.value
+                        : newTag.value.toLowerCase()
+                );
 
-                    for (let tag of this.existingTags) {
-                        const compareable = this.caseSensitiveTags
-                            ? tag.value
-                            : tag.value.toLowerCase();
+                for (let tag of this.existingTags) {
+                    const compareable = this.caseSensitiveTags
+                        ? tag.value
+                        : tag.value.toLowerCase();
 
-                        if (searchQuery === compareable) {
-                            newTag = Object.assign({}, tag);
+                    if (searchQuery === compareable) {
+                        newTag = Object.assign({}, tag);
 
-                            break;
-                        }
+                        break;
                     }
-
-                    this.addTag(newTag);
                 }
+
+                this.addTag(newTag);
             }
         },
 
@@ -515,43 +514,25 @@ export default {
                 return false;
             }
 
-            if (this.oldInput != this.input || (!this.searchResults.length && this.typeaheadActivationThreshold == 0) || this.typeaheadAlwaysShow || this.typeaheadShowOnFocus) {
-                this.searchResults = [];
-                this.searchSelection = 0;
-                let input = this.input.trim();
-
-                if ((input.length && input.length >= this.typeaheadActivationThreshold) || this.typeaheadActivationThreshold == 0 || this.typeaheadAlwaysShow) {
-                    // Find all the existing tags which include the search text
-                    const searchQuery = this.escapeRegExp(
-                        this.caseSensitiveTags ? input : input.toLowerCase()
-                    );
-
-                    // AJAX search
-                    if (this.typeaheadUrl.length > 0) {
-                        // Commented out to resolve lint warning:
-                        // this.existingTags.slice();
-                        const xhttp = new XMLHttpRequest();
-                        const that = this;
-
-                        xhttp.onreadystatechange = function () {
-                            if (this.readyState == 4 && this.status == 200) {
-                                // Commented out to resolve lint warning:
-                                // that.existingTags = JSON.parse(xhttp.responseText);
-                                that.doSearch(searchQuery);
-                            }
-                        }
-
-                        const endpoint = this.typeaheadUrl.replace(':search', searchQuery);
-                        xhttp.open('GET', endpoint, true);
-                        xhttp.send();
-                    } else {
-                        // Search the existing collection
-                        this.doSearch(searchQuery);
-                    }
-                }
-
-                this.oldInput = this.input;
+            if (!(this.oldInput != this.input || (!this.searchResults.length && this.typeaheadActivationThreshold == 0) || this.typeaheadAlwaysShow || this.typeaheadShowOnFocus)) {
+                return false;
             }
+
+            this.searchResults = [];
+            this.searchSelection = 0;
+            let input = this.input.trim();
+
+            if (input.length >= this.typeaheadActivationThreshold || this.typeaheadActivationThreshold == 0 || this.typeaheadAlwaysShow) {
+                // Find all the existing tags which include the search text
+                const searchQuery = this.escapeRegExp(
+                    this.caseSensitiveTags ? input : input.toLowerCase()
+                );
+
+                // Search the existing collection
+                this.doSearch(searchQuery);
+            }
+
+            this.oldInput = this.input;
         },
 
         /**

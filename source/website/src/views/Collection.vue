@@ -292,36 +292,36 @@
             this.asset_list = [];
             this.retrieveAndFormatAsssets();
             this.isBusy = false;
+            return
+          }
+
+          // Get the list of assets that contain metadata matching the user-specified search query.
+          let elasticData = await this.elasticsearchQuery(query);
+          if (elasticData.hits.total === 0) {
+            // the search returned no data
+            this.asset_list = [];
+            this.noSearchResults = true;
+            this.isBusy = false;
           }
           else {
-            // Get the list of assets that contain metadata matching the user-specified search query.
-            let elasticData = await this.elasticsearchQuery(query);
-            if (elasticData.hits.total === 0) {
-              // the search returned no data
-              this.asset_list = [];
-              this.noSearchResults = true;
-              this.isBusy = false;
-            }
-            else {
-              let assets = [];
-              this.asset_list = [];
-              this.noSearchResults = false;
-              let buckets = elasticData.aggregations.distinct_assets.buckets;
-              for (var i = 0, len = buckets.length; i < len; i++) {
-                let assetId = buckets[i].key;
-                let assetInfo = await this.getAssetInformation(assetId);
-                if (assetInfo !== null) {
-                  assets.push(assetInfo)
-                }
-            }
-            if (assets.length === 0) {
-              this.noSearchResults = true;
-              this.isBusy = false
-            }
-            else {
-              this.pushAssetsToTable(assets);
-              this.isBusy = false
-            }
+            let assets = [];
+            this.asset_list = [];
+            this.noSearchResults = false;
+            let buckets = elasticData.aggregations.distinct_assets.buckets;
+            for (let i = 0, len = buckets.length; i < len; i++) {
+              let assetId = buckets[i].key;
+              let assetInfo = await this.getAssetInformation(assetId);
+              if (assetInfo !== null) {
+                assets.push(assetInfo)
+              }
+          }
+          if (assets.length === 0) {
+            this.noSearchResults = true;
+            this.isBusy = false
+          }
+          else {
+            this.pushAssetsToTable(assets);
+            this.isBusy = false
           }
         }
       },
@@ -384,8 +384,8 @@
         }
       },
       async pushAssetsToTable(assets) {
-        for (var i = 0, len = assets.length; i < len; i++) {
-          var assetId;
+        for (let i = 0, len = assets.length; i < len; i++) {
+          let assetId;
           if (typeof assets[i] === 'object') {
             // If the asset list is coming from Elasticsearch, we get the assetId like this:
             assetId = assets[i].asset_id

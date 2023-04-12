@@ -87,6 +87,7 @@ Resources:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         NodeType: !Ref OpensearchNodeSize
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   # Deploy Auth stack
 

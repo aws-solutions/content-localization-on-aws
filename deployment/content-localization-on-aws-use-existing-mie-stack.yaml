@@ -63,6 +63,9 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         NodeType: !Ref OpensearchNodeSize
+        MieKMSArn:
+          Fn::ImportValue:
+            !Sub "${MieStackName}:MieKMSArn"
 
   # Deploy Auth stack
 

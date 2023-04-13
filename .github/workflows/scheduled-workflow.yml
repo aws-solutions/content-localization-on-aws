@@ -55,7 +55,7 @@ jobs:
       - name: Checkout MIE release branch
         uses: actions/checkout@v2
         with:
-          repository: awslabs/aws-media-insights-engine
+          repository: aws-solutions/media-insights-on-aws
           ref: master
 
       - name: Initialize AWS credentials

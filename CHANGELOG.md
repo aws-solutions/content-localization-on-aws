@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Upgrade Media Insights on AWS dependency to v5.1.0
 * Refactored some code for maintainability
 * Updated e2e tests for bug fixes and compatibility with new Media Insights on AWS version
+* Updated references to "Media Insights Engine" to "Media Insights on AWS"
+* Separated s3 sync commands in build script to a separate script (sync-s3-dist.sh)
 
 ## [2.0.2] - 2023-01-11
 

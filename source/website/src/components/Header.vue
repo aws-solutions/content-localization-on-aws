@@ -44,7 +44,7 @@
             Collection
           </b-nav-item>
           <b-nav-item
-            href="" @click.stop.prevent="openWindow('https://github.com/awslabs/aws-media-insights-engine/blob/master/IMPLEMENTATION_GUIDE.md')"
+            href="" @click.stop.prevent="openWindow('https://docs.aws.amazon.com/solutions/latest/media-insights-on-aws/solution-overview.html')"
           >
             Help
           </b-nav-item>

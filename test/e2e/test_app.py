@@ -44,7 +44,7 @@ def browser():
 
 # Test the happy path through the Content Localization app by loading and verifying data after a successful workflow run.  No
 # CRUD interactions such as creating vocabularies are included here
-# This test assumes that the first workflow in the sollection is the one created by the
+# This test assumes that the second workflow in the collection is the one created by the
 # workflow_with_customizations fixture
 def test_complete_app(browser, workflow_with_customizations, testing_env_variables):
 
@@ -109,13 +109,13 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
     # Find the base test asset in the collection
     # FIXME - it would be better to find the workflow with the correct assetId, but I can't figure out how to do it with selenium.  
-    # Instead, we ae taking the first workflow in the list and assume it is the one for the test
+    # Instead, we are taking the second workflow in the list and assume it is the one for the test
 
     ####### TRANSCRIPT COMPONENT
     # Navigate to the transcript
     #Analyze
     #browser.find_element_by_link_text("Analyze").click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[2]/td[6]/a[1]").click()
     time.sleep(5)
     #Speech Recognition is the default tab
     #Transcript
@@ -244,6 +244,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[2]/ul/li[3]/a")
     
     # Test terminologies
+    # Save Edits button
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[2]").click()
     # Save terminology button
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[1]").click()
     # Check the table for the edits

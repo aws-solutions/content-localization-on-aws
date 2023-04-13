@@ -100,7 +100,7 @@ def stack_resources(testing_env_variables):
         
             resources[output["OutputKey"]] = output["OutputValue"]
     
-    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'MediaInsightsEnginePython39Layer', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', 'StackName', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation"]
+    expected_resources = ['WorkflowApiRestID', 'DataplaneBucket', 'DataPlaneHandlerArn', 'WorkflowCustomResourceArn', 'AnalyticsStreamArn', 'DataplaneApiEndpoint', 'WorkflowApiEndpoint', 'DataplaneApiRestID', 'OperatorLibraryStack', 'PollyOperation', 'ContentModerationOperationImage', 'GenericDataLookupOperation', 'comprehendEntitiesOperation', 'FaceSearch', 'FaceSearchOperationImage', 'MediainfoOperationImage', 'TextDetection', 'TextDetectionOperationImage', 'CreateSRTCaptionsOperation', 'ContentModeration', 'WebCaptionsOperation', 'WebToVTTCaptionsOperation', 'PollyWebCaptionsOperation', 'WaitOperation', 'TranslateWebCaptionsOperation', 'CelebRecognition', 'LabelDetection', 'FaceDetection', 'PersonTracking', 'MediaconvertOperation', 'FaceDetectionOperationImage', 'MediainfoOperation', 'ThumbnailOperation', 'TechnicalCueDetection', 'CreateVTTCaptionsOperation', 'CelebrityRecognitionOperationImage', 'TranslateOperation', 'comprehendPhrasesOperation', 'WebToSRTCaptionsOperation', 'shotDetection', 'LabelDetectionOperationImage', "Version", "TranscribeAudioOperation", "TranscribeVideoOperation", "MieKMSArn", "MieKMSAlias", "MieSQSQueue", "MediaInsightsEnginePython39LayerArn", "MieSNSTopic", "MieKMSId"]
     
     assert set(resources.keys()) == set(expected_resources)
 
@@ -166,6 +166,14 @@ class WorkflowAPI:
             self.stack_resources["WorkflowApiEndpoint"] + '/service/translate/create_terminology', headers=headers, json=body, verify=True, auth=self.auth, timeout=REQUEST_TIMEOUT)
 
         return create_terminology_response
+    
+    def get_terminology_request(self, body):
+        headers = {"Content-Type": "application/json"}
+        print("POST /service/translate/get_terminology")
+        get_terminology_response = requests.post(
+            self.stack_resources["WorkflowApiEndpoint"] + '/service/translate/get_terminology', headers=headers, json=body, verify=True, auth=self.auth, timeout=REQUEST_TIMEOUT)
+
+        return get_terminology_response
 
     def create_vocabulary_request(self, body):
         headers = {"Content-Type": "application/json"}
@@ -334,8 +342,24 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
     assert create_terminology_request.status_code == 200
 
     # wait for terminology to complete
-    # FIXME - should us a polling loop here
-    time.sleep(60)
+
+    processing = True
+    retry = 20
+
+    while create_terminology_request.status_code == 200 and processing:
+        if retry == 0:
+            break
+        
+        body = {"terminology_name": "uitestterminology"}
+        get_terminology_response = workflow_api.get_terminology_request(body)
+
+        if get_terminology_response.status_code == 200:
+            processing = False
+        else:
+            print('Sleeping for 60 seconds before retrying')
+            retry = retry - 1
+            time.sleep(60)
+
     yield create_terminology_body
     delete_terminology_body = {
         "terminology_name": "uitestterminology"

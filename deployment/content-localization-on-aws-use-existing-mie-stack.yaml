@@ -63,6 +63,9 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         NodeType: !Ref OpensearchNodeSize
+        MieKMSArn:
+          Fn::ImportValue:
+            !Sub "${MieStackName}:MieKMSArn"
 
   # Deploy Auth stack
 
@@ -95,6 +98,9 @@ Resources:
           Fn::ImportValue:
             !Sub "${MieStackName}:DataplaneBucket"
         ParentStackName: !Ref AWS::StackId
+        MieKMSArn:
+          Fn::ImportValue:
+            !Sub "${MieStackName}:MieKMSArn"
 
   # Deploy Video Workflow
   VideoWorkflow:
@@ -206,13 +212,6 @@ Resources:
     Properties:
       Application: !GetAtt Application.Id
       AttributeGroup: !GetAtt DefaultApplicationAttributes.Id
-
-  AppRegistryApplicationStackAssociationMieStack:
-    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
-    Properties:
-      Application: !GetAtt Application.Id
-      Resource: !Ref MieStackName
-      ResourceType: CFN_STACK
 
   AppRegistryApplicationStackAssociationOpenSearchStack:
     Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation

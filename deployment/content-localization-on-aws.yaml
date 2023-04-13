@@ -19,12 +19,12 @@ Parameters:
       - "r4.xlarge.search"
 
 Conditions:
-  EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], Yes]
+  EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], "Yes"]
 
 Mappings:
   MediaInsightsEngine:
     Release:
-      Version: "v4.0.1"
+      Version: "v5.1.0"
   Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
@@ -40,7 +40,7 @@ Mappings:
       AppRegistryApplicationName: "ContentLocalizationOnAws"
   AnonymousData:
     SendAnonymousData:
-      Data: Yes
+      Data: "Yes"
 
 Resources:
   # Deploy MIE Framework
@@ -50,17 +50,17 @@ Resources:
     Properties:
       TemplateURL: !Join
         - ""
-        - - "https://solutions-reference.s3.amazonaws.com/aws-media-insights-engine/"
+        - - "https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/"
           - !FindInMap
             - MediaInsightsEngine
             - Release
             - Version
-          - "/media-insights-stack.template"
+          - "/media-insights-on-aws-stack.template"
       Parameters:
-        DeployAnalyticsPipeline: Yes
-        DeployTestResources: No
+        DeployAnalyticsPipeline: "Yes"
+        DeployTestResources: "No"
         MaxConcurrentWorkflows: 5
-        EnableXrayTrace: Yes
+        EnableXrayTrace: "Yes"
         SendAnonymousData: !FindInMap [AnonymousData,SendAnonymousData,Data]
         SolutionId: SO0164
         SolutionVersion: "%%VERSION%%"
@@ -87,6 +87,7 @@ Resources:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         NodeType: !Ref OpensearchNodeSize
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   # Deploy Auth stack
 
@@ -113,6 +114,7 @@ Resources:
         SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainArn
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         ParentStackName: !Ref MieStack
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   WebStack:
     Type: "AWS::CloudFormation::Stack"
@@ -293,14 +295,6 @@ Resources:
     Properties:
       Application: !GetAtt Application.Id
       AttributeGroup: !GetAtt DefaultApplicationAttributes.Id
-
-  AppRegistryApplicationStackAssociationMieStack:
-    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
-    Properties:
-      Application: !GetAtt Application.Id
-      Resource:
-        !Ref MieStack
-      ResourceType: CFN_STACK
 
   AppRegistryApplicationStackAssociationOpenSearchStack:
     Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation

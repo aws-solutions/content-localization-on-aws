@@ -344,8 +344,12 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
     # wait for terminology to complete
 
     processing = True
+    retry = 20
 
     while create_terminology_request.status_code == 200 and processing:
+        if retry == 0:
+            break
+        
         body = {"terminology_name": "uitestterminology"}
         get_terminology_response = workflow_api.get_terminology_request(body)
 
@@ -353,6 +357,7 @@ def terminology(workflow_api, dataplane_api, stack_resources, testing_env_variab
             processing = False
         else:
             print('Sleeping for 60 seconds before retrying')
+            retry = retry - 1
             time.sleep(60)
 
     yield create_terminology_body

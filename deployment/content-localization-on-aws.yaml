@@ -22,7 +22,7 @@ Conditions:
   EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], "Yes"]
 
 Mappings:
-  MediaInsightsEngine:
+  MediaInsights:
     Release:
       Version: "v5.1.0"
   Application:
@@ -43,7 +43,7 @@ Mappings:
       Data: "Yes"
 
 Resources:
-  # Deploy MIE Framework
+  # Deploy Media Insights on AWS Framework
 
   MieStack:
     Type: "AWS::CloudFormation::Stack"
@@ -52,7 +52,7 @@ Resources:
         - ""
         - - "https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/"
           - !FindInMap
-            - MediaInsightsEngine
+            - MediaInsights
             - Release
             - Version
           - "/media-insights-on-aws-stack.template"

@@ -23,7 +23,7 @@ Parameters:
     Type: String
     Description: "Name of the dataplane bucket"
   AnalyticsStreamArn:
-    Description: "Arn of the MIE kinesis data stream"
+    Description: "Arn of the Media Insights on AWS kinesis data stream"
     Type: String
   MieKMSArn:
     Description: ARN of the Media Insights KMS Key

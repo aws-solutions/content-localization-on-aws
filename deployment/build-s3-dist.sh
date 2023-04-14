@@ -8,7 +8,7 @@
 #
 # USAGE:
 #  ./build-s3-dist.sh [-h] [-v] --template-bucket {TEMPLATE_BUCKET} --code-bucket {CODE_BUCKET} --version {VERSION} --region {REGION} --profile {PROFILE}
-#    TEMPLATE_BUCKET should be the name for the S3 bucket location where MIE
+#    TEMPLATE_BUCKET should be the name for the S3 bucket location where Media Insights on AWS
 #      cloud formation templates should be saved.
 #    CODE_BUCKET should be the name for the S3 bucket location where cloud
 #      formation templates should find Lambda source code packages.
@@ -338,56 +338,6 @@ cp "./dist/anonymous-data-logger.zip" "$regional_dist_dir/anonymous-data-logger.
 # Clean up the build directories
 rm -rf dist
 rm -rf package
-
-# Skip copy dist to S3 if building for solution builder because
-# that pipeline takes care of copying the dist in another script.
-if [ "$global_bucket" != "solutions-reference" ] && [ "$global_bucket" != "solutions-test-reference" ] &&  [ "$global_bucket" != "solutions-features-reference" ]; then
-
-  echo "------------------------------------------------------------------------------"
-  echo "Copy dist to S3"
-  echo "------------------------------------------------------------------------------"
-  echo "Validating ownership of distribution buckets before copying deployment assets to them..."
-  # Get account id
-  account_id=$(aws sts get-caller-identity --query Account --output text $(if [ ! -z $profile ]; then echo "--profile $profile"; fi))
-  if [ $? -ne 0 ]; then
-    die "ERROR: Failed to get AWS account ID"
-  fi
-  # Validate ownership of $global_dist_dir
-  aws s3api head-bucket --bucket $global_bucket --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
-  if [ $? -ne 0 ]; then
-    die "ERROR: Your AWS account does not own s3://$global_bucket/"
-  fi
-  # Validate ownership of ${regional_bucket}-${region}
-  aws s3api head-bucket --bucket ${regional_bucket}-${region} --expected-bucket-owner $account_id $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
-  if [ $? -ne 0 ]; then
-    die "ERROR: Your AWS account does not own s3://${regional_bucket}-${region} "
-  fi
-  # Copy deployment assets to distribution buckets
-  cd "$build_dir"/ || exit 1
-  echo "Copying the prepared distribution to:"
-  echo "s3://$global_bucket/content-localization-on-aws/$version/"
-  echo "s3://${regional_bucket}-${region}/content-localization-on-aws/$version/"
-  set -x
-  aws s3 sync $global_dist_dir s3://$global_bucket/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
-  aws s3 sync $regional_dist_dir s3://${regional_bucket}-${region}/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
-  set +x
-
-  echo "------------------------------------------------------------------------------"
-  echo "S3 packaging complete"
-  echo "------------------------------------------------------------------------------"
-
-  echo ""
-  echo "Template to deploy:"
-  echo ""
-  echo "With existing MIE deployment:"
-  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws-use-existing-mie-stack.template"'"
-  echo "Without existing MIE deployment:"
-  echo "TEMPLATE='"https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws.template"'"
-
-  echo "https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws.template" > template_url_that_deploys_mie_as_nested_stack.txt
-  echo "https://"$global_bucket"."$s3domain"/content-localization-on-aws/"$version"/content-localization-on-aws-use-existing-mie-stack.template" > template_url_that_uses_an_existing_mie_stack.txt
-
-fi
 
 cleanup
 echo "Done"

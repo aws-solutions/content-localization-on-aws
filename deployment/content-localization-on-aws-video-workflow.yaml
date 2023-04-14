@@ -10,7 +10,7 @@ Parameters:
     # Description: "Name of the base media insights workflow stack"
     # Type: String
   OperatorLibraryStack:
-    Description: "Name of the MIE operator library stack"
+    Description: "Name of the Media Insights on AWS operator library stack"
     Type: String
 
 Resources:

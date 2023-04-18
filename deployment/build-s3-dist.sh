@@ -129,7 +129,6 @@ msg "- Profile: ${profile}"
 
 echo ""
 sleep 3
-s3domain="s3.$region.amazonaws.com"
 
 # Check if region is supported:
 if [ "$region" != "us-east-1" ] &&

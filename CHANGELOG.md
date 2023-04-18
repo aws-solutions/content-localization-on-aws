@@ -5,8 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## [Unreleased]
+## [2.1.0] - 2023-04-19
 
 ### Added
 
@@ -24,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Removed Hawkeye scan from github actions (deprecated)
-* Upgrade Media Insights on AWS dependency to v5.1.0
+* Upgrade Media Insights on AWS dependency to v5.1.1
 * Refactored some code for maintainability
 * Updated e2e tests for bug fixes and compatibility with new Media Insights on AWS version
 * Updated references to "Media Insights Engine" to "Media Insights on AWS"

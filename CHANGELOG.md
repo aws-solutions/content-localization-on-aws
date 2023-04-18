@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 
 ### Added
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The "Download Data" button on the **Celebrities** tab works now.
 * Fixed upload of WebVTT files as "Existing Subtitles".
 * Incorrect Cloudformation template in public bucket (#365)
+* Updated object ownership configuration on ContentAnalysisWebsiteBucket
 
 ### Changed
 

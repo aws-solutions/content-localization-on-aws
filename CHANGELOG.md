@@ -1,31 +1,51 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.3] - 04/17/2023
 
-### Fixed:
+## [Unreleased]
 
+### Added
+
+* Added ServiceCatalog AppRegistry resources
+* Added unit tests for lambda code written in Python
+* Added KMS Key parameter to Auth stack and KMS permissions to Cognito Admin role
+
+### Fixed
+
+* The "Download Data" button on the **Celebrities** tab works now.
+* Fixed upload of WebVTT files as "Existing Subtitles".
+* Incorrect Cloudformation template in public bucket (#365)
 * Updated object ownership configuration on ContentAnalysisWebsiteBucket
 
-## [2.0.2] - 01/11/2023
+### Changed
 
-### Fixed:
+* Removed Hawkeye scan from github actions (deprecated)
+* Upgrade Media Insights on AWS dependency to v5.1.0
+* Refactored some code for maintainability
+* Updated e2e tests for bug fixes and compatibility with new Media Insights on AWS version
+* Updated references to "Media Insights Engine" to "Media Insights on AWS"
+* Separated s3 sync commands in build script to a separate script (sync-s3-dist.sh)
+
+## [2.0.2] - 2023-01-11
+
+### Fixed
 
 * Updated python packages
 * Replaced deprecated python command with python3
 
-## [2.0.1] - 08/18/2022
+## [2.0.1] - 2022-08-18
 
-### Fixed:
+### Fixed
 
 * Version bumped python runtime for web helper lambda function which was preventing successful deployment
 
-## [2.0.0] - 03/01/2022
+## [2.0.0] - 2022-03-01
 
-### New:
+### Added
 
 * Upgrade MIE dependency to v4.0.1
 * Add support for using custom language models with Transcribe (#297)
@@ -36,12 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Save filenames to Opensearch so assets can be found by searching for their filename (#249)
 * Add an option to auto-detect source language (#209)
 
-### Fixed:
+### Fixed
 
 * Fix missing data in line chart for computer vision results (#303)
 * Fix opensearch throttling (#303)
 * Remove unused subtitles checkbox from Upload view (#300)
-* Avoid showing empty operator configurations in media summary view (#299) 
+* Avoid showing empty operator configurations in media summary view (#299)
 * Fix miscellaneous bugs in the workflow configuration used to save subtitle edits (#286, #289)
 * Fix invalid table format that's used when saving custom vocabularies (#260)
 * Fix video load error that occurs with large caption data (#239)
@@ -54,8 +74,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fix invalid table format that's used when saving custom vocabularies (#260)
 * Use the correct source language when saving a new or updated custom vocabulary (#258)
 * Fix bug in WebCaptions that occurs when using source language autodetection in Transcribe (#306)
-* Removed profanity checker due to insufficient support for non-english languages (#256) 
+* Removed profanity checker due to insufficient support for non-english languages (#256)
 
-## [1.0.0] - 2021-11-3
+## [1.0.0] - 2021-11-03
+
 ### Added
-- CHANGELOG version 1.0.0 release
+
+* CHANGELOG version 1.0.0 release

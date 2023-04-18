@@ -47,7 +47,7 @@ def send_response(event, context, response_status, response_data):
     opener = build_opener(HTTPHandler)
     request = Request(event['ResponseURL'], data=response_body.encode('utf-8'))
     request.add_header('Content-Type', '')
-    request.add_header('Content-Length', len(response_body))
+    request.add_header('Content-Length', str(len(response_body)))
     request.get_method = lambda: 'PUT'
     response = opener.open(request)
     LOGGER.info("Status code: {s}".format(s=response.getcode))
@@ -65,22 +65,6 @@ def write_to_s3(event, context, bucket, key, body):
         LOGGER.info('Wrote file back to s3 after variable replacement')
 
 
-def read_from_s3(event, context, bucket, key):
-    try:
-        obj = s3_client.get_object(
-            Bucket=bucket,
-            Key=key
-        )
-    except Exception as e:
-        LOGGER.info(
-            'Unable to read key: {key} in from s3 bucket: {bucket}. Error: {e}'.format(e=e, key=key, bucket=bucket))
-        send_response(event, context, "FAILED",
-                      {"Message": "Failed to read file from s3"})
-    else:
-        results = obj['Body'].read().decode('utf-8')
-        return results
-
-
 def copy_source(event, context):
     try:
         source_bucket = event["ResourceProperties"]["WebsiteCodeBucket"]
@@ -94,7 +78,7 @@ def copy_source(event, context):
             LOGGER.info("Checking if custom environment variables are present")
 
             try:
-                search = 'https://'+os.environ['SearchEndpoint']
+                search = 'https://' + os.environ['SearchEndpoint']
                 dataplane = os.environ['DataplaneEndpoint']
                 workflow = os.environ['WorkflowEndpoint']
                 dataplane_bucket = os.environ['DataplaneBucket']
@@ -112,22 +96,20 @@ def copy_source(event, context):
                 LOGGER.info(
                     "New variables: {v}".format(v=new_variables))
 
-                deployment_bucket = s3.Bucket(website_bucket)
+            with open('./webapp-manifest.json') as file:
+                manifest = json.load(file)
+                print('UPLOADING FILES::')
+                for key in manifest:
+                    print('s3://' + source_bucket + '/' + source_key + '/' + key)
+                    copy_source = {
+                        'Bucket': source_bucket,
+                        'Key': source_key + '/' + key
+                    }
+                    s3.meta.client.copy(copy_source, website_bucket, key)
+                    if replace_env_variables is True and key == "runtimeConfig.json":
+                        LOGGER.info("updating runtimeConfig.json")
+                        write_to_s3(event, context, website_bucket, key, json.dumps(new_variables))
 
-                with open('./webapp-manifest.json') as file:
-                    manifest = json.load(file)
-                    print('UPLOADING FILES::')
-                    for key in manifest:
-                        print('s3://'+source_bucket+'/'+source_key+'/'+key)
-                        copy_source = {
-                            'Bucket': source_bucket,
-                            'Key': source_key+'/'+key
-                        }
-                        s3.meta.client.copy(copy_source, website_bucket, key)
-                        if replace_env_variables is True and key == "runtimeConfig.json":
-                            LOGGER.info("updating runtimeConfig.json")
-                            write_to_s3(event, context, website_bucket, key, json.dumps(new_variables))
-                            
         except Exception as e:
             LOGGER.info("Unable to copy website source code into the website bucket: {e}".format(e=e))
             send_response(event, context, "FAILED", {"Message": "Unexpected event received from CloudFormation"})

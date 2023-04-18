@@ -6,19 +6,22 @@ Parameters:
     Description: Email address of the Content Localization Administrator
     Type: String
   WorkflowApiId:
-    Description: REST API ID of the MIE Workflow API
+    Description: REST API ID of the Media Insights on AWS Workflow API
     Type: String
   DataplaneApiId:
-    Description: REST API ID of the MIE Dataplane API
+    Description: REST API ID of the Media Insights on AWS Dataplane API
     Type: String
   SearchDomainArn:
     Description: ARN of the Opensearch Domain
     Type: String
   DataplaneBucket:
-    Description: Name of the MIE dataplane bucket
+    Description: Name of the Media Insights on AWS dataplane bucket
     Type: String
   ParentStackName:
     Description: Name of the parent Cloud Formation stack
+    Type: String
+  MieKMSArn:
+    Description: ARN of the Media Insights KMS Key
     Type: String
 
 Resources:
@@ -274,6 +277,17 @@ Resources:
                     ],
                     "Effect": "Allow",
                     "Resource": "${searchdomain}/*"
+                  },
+                  {
+                    "Action": [
+                      "kms:GenerateDataKey*",
+                      "kms:DescribeKey",
+                      "kms:Encrypt",
+                      "kms:Decrypt",
+                      "kms:ReEncrypt*"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "${kmskey}"
                   }
                 ]
               }
@@ -283,7 +297,8 @@ Resources:
               wfapi: !Ref WorkflowApiId,
               dataapi: !Ref DataplaneApiId,
               searchdomain: !Ref SearchDomainArn,
-              dataplanebucket: !Ref DataplaneBucket
+              dataplanebucket: !Ref DataplaneBucket,
+              kmskey: !Ref MieKMSArn
             }
 
   AddAdminUserToAdminGroup:

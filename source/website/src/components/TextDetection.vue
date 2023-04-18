@@ -177,21 +177,15 @@
           if (record.Type == 'WORD') {
             unique_words.set(record.DetectedText, unique_words.get(record.DetectedText) ? unique_words.get(record.DetectedText) + 1 : 1);
           }
-          // if (record.TextType == 'LINE') {
-          //   unique_lines.set(record.DetectedText, unique_lines.get(record.DetectedText) ? unique_lines.get(record.DetectedText) + 1 : 1);
-          // }
           if (record.BoundingBox) {
             // Save this word detection to a list of words that have bounding boxes
             this.saveBoxedDetectedText(record.DetectedText)
           }
         }.bind(this));
         const sorted_unique_words = new Map([...unique_words.entries()].slice().sort((a, b) => b[1] - a[1]));
-        //const sorted_unique_lines = new Map([...unique_lines.entries()].slice().sort((a, b) => b[1] - a[1]));
         // If Elasticsearch returned undefined words then delete them:
         sorted_unique_words.delete(undefined);
-        //sorted_unique_lines.delete(undefined);
         this.countDetectedWords(sorted_unique_words.size, es_data.length);
-        //this.countDetectedLines(sorted_unique_lines.size, es_data.length);
         console.log(sorted_unique_words)
         return sorted_unique_words
       },
@@ -241,18 +235,15 @@
       countDetectedWords(uniqueWordCount, totalWordCount) {
         this.count_distinct_words = uniqueWordCount;
         this.count_words = totalWordCount;
-        // this.count_distinct_lines = uniqueLineCount;
-        // this.count_lines = totalLineCount;
       },
       saveFile() {
         const elasticsearch_data = JSON.stringify(this.elasticsearch_data);
         const blob = new Blob([elasticsearch_data], {type: 'text/plain'});
-        const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+        const a = document.createElement('a');
         a.download = "data.json";
         a.href = window.URL.createObjectURL(blob);
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        const e = new MouseEvent('click', { view: window });
         a.dispatchEvent(e);
       },
       updateConfidence (event) {
@@ -286,40 +277,38 @@
         const boxMap = new Map();
         const markers = [];
         const es_data = this.elasticsearch_data;
-        es_data.forEach( function(record) {
-          if (record.DetectedText === word) {
-            // Save word text overlaying on video timeline
-            markers.push({'time': record.Timestamp/1000, 'text': record.DetectedText, 'overlayText': record.DetectedText});
-            // Save bounding box info if it exists
-            if (record.BoundingBox) {
-                const item = record;
-                // TODO: move image processing to a separate component
-                if (this.mediaType === "image") {
-                  // use timestamp to index boxes in the boxMap collection
-                  const boxinfo = {
-                    'name': item.DetectedText,
-                    'confidence': (item.Confidence * 1).toFixed(2),
-                    'x': item.BoundingBox.Left * canvas.width,
-                    'y': item.BoundingBox.Top * canvas.height,
-                    'width': item.BoundingBox.Width * canvas.width,
-                    'height': item.BoundingBox.Height * canvas.height
-                  };
-                  boxMap.set(i, [boxinfo])
+        es_data.filter(record => record.DetectedText === word).forEach(record => {
+          // Save word text overlaying on video timeline
+          markers.push({'time': record.Timestamp/1000, 'text': record.DetectedText, 'overlayText': record.DetectedText});
+          // Save bounding box info if it exists
+          if (record.BoundingBox) {
+              const item = record;
+              // TODO: move image processing to a separate component
+              if (this.mediaType === "image") {
+                // use timestamp to index boxes in the boxMap collection
+                const boxinfo = {
+                  'name': item.DetectedText,
+                  'confidence': (item.Confidence * 1).toFixed(2),
+                  'x': item.BoundingBox.Left * canvas.width,
+                  'y': item.BoundingBox.Top * canvas.height,
+                  'width': item.BoundingBox.Width * canvas.width,
+                  'height': item.BoundingBox.Height * canvas.height
+                };
+                boxMap.set(i, [boxinfo])
+              } else {
+                // Use time resolution of 0.1 second
+                const timestamp = Math.round(record.Timestamp/100);
+                const boxinfo = {'timestamp':Math.ceil(record.Timestamp/100), 'name':record.DetectedText, 'confidence':(record.Confidence * 1).toFixed(2), 'x':item.BoundingBox.Left*canvas.width, 'y':item.BoundingBox.Top*canvas.height, 'width':item.BoundingBox.Width*canvas.width, 'height':item.BoundingBox.Height*canvas.height};
+                // If there are multiple bounding boxes for this instance at this
+                // timestamp, then save them together in an array.
+                if (boxMap.has(timestamp)) {
+                  boxMap.get(timestamp).push(boxinfo)
                 } else {
-                  // Use time resolution of 0.1 second
-                  const timestamp = Math.round(record.Timestamp/100);
-                  const boxinfo = {'timestamp':Math.ceil(record.Timestamp/100), 'name':record.DetectedText, 'confidence':(record.Confidence * 1).toFixed(2), 'x':item.BoundingBox.Left*canvas.width, 'y':item.BoundingBox.Top*canvas.height, 'width':item.BoundingBox.Width*canvas.width, 'height':item.BoundingBox.Height*canvas.height};
-                  // If there are multiple bounding boxes for this instance at this
-                  // timestamp, then save them together in an array.
-                  if (boxMap.has(timestamp)) {
-                    boxMap.get(timestamp).push(boxinfo)
-                  } else {
-                    boxMap.set(timestamp, [boxinfo])
-                  }
+                  boxMap.set(timestamp, [boxinfo])
                 }
-            }
+              }
           }
-        }.bind(this));
+        }, this);
         if (boxMap.size > 0) {
           this.drawBoxes(boxMap);
         }

@@ -1,9 +1,9 @@
-[![scheduled-workflow](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/scheduled-workflow.yml) [![release-workflow](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/release-workflow.yml/badge.svg)](https://github.com/aws-samples/aws-media-insights-content-localization/actions/workflows/release-workflow.yml)
+[![scheduled-workflow](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml)
 
 
 # Content Localization on AWS 
 
-Welcome to the Content Localization on AWS project!   This project will help you extend the reach of your VOD content by quickly and efficiently creating accurate multi-language subtitles using AWS AI Services.  You can make manual corrections to the automatically created subtitles and use advanced AWS AI Service customization features to improve the results of the automation for your content domain. Content Localization is built on [Media Insights Engine (MIE)](https://github.com/awslabs/aws-media-insights-engine), a framework that helps accelerate the development of serverless applications that process video, images, audio, and text with artificial intelligence services and multimedia services on AWS. 
+Welcome to the Content Localization on AWS project!   This project will help you extend the reach of your VOD content by quickly and efficiently creating accurate multi-language subtitles using AWS AI Services.  You can make manual corrections to the automatically created subtitles and use advanced AWS AI Service customization features to improve the results of the automation for your content domain. Content Localization is built on [Media Insights on AWS](https://github.com/aws-solutions/media-insights-on-aws), a framework that helps accelerate the development of serverless applications that process video, images, audio, and text with artificial intelligence services and multimedia services on AWS. 
 
 ![Architecture Overview](doc/images/ContentLocalizationArchitectureOverview.png)
 Localization is the process of taking video content that was created for audiences in one geography and transforming it to make it relevant and accessible to audiences in a new geography.  Creating alternative language subtitle tracks is central to the localization process.  This application presents a guided experience for automatically generating and correcting subtitles for videos in multiple languages using AWS AI Services.  The corrections made by editors can be used to customize the results of AWS AI services for future workflows.  This type of AI/ML workflow, which incorporates user corrections is often referred to as “human in the loop”.
@@ -33,13 +33,13 @@ As a first step, this project seeks to create an efficient, customizable workflo
 
 # Deployment
 
-The following Cloudformation templates will deploy the Content Localization front-end application with a prebuilt version of the most recent MIE release.
+The following Cloudformation templates will deploy the Content Localization front-end application with a prebuilt version of the most recent Media Insights on AWS release.
 
 Region| Launch
 ------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-west-2.s3.us-west-2.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-us-east-1.s3.us-east-1.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://rodeolabz-eu-west-1.s3.eu-west-1.amazonaws.com/content-localization-on-aws/v2.0.0/content-localization-on-aws.template)
+US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
+US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
+EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
 
 For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
 
@@ -66,7 +66,7 @@ For more information about cost, see the pricing webpage for each AWS service yo
 
 # Subtitle workflow
 
-After uploading a video or image in the GUI, the application runs a workflow in MIE that extracts insights using a variety of media analysis services on AWS and stores them in a search engine for easy exploration. The following flow diagram illustrates this workflow:
+After uploading a video or image in the GUI, the application runs a workflow in Media Insights on AWS that extracts insights using a variety of media analysis services on AWS and stores them in a search engine for easy exploration. The following flow diagram illustrates this workflow:
 
 [Image: Workflow.png]
 This application includes the following features:
@@ -108,37 +108,38 @@ EMAIL=[specify your email]
 WEBAPP_STACK_NAME=[specify a stack name]
 REGION=[specify a region]
 VERSION=1.0.0
-git clone https://github.com/aws-samples/aws-media-insights-content-localization
-cd aws-media-insights-content-localization
+git clone https://github.com/aws-solutions/content-localization-on-aws
+cd content-localization-on-aws
 cd deployment
 DATETIME=$(date '+%s')
 DIST_OUTPUT_BUCKET=content-localization-on-aws--frontend-$DATETIME
 aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
 aws s3 mb s3://$TEMPLATE_OUTPUT_BUCKET --region $REGION
 ./build-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
+./sync-s3-dist.sh --template-bucket ${TEMPLATE_OUTPUT_BUCKET} --code-bucket ${DIST_OUTPUT_BUCKET} --version ${VERSION} --region ${REGION}
 ```
 
 
-Once you have built the demo app with the above commands, then it's time to deploy it. You have two options, depending on whether you want to deploy over an existing MIE stack or a new one:
+Once you have built the demo app with the above commands, then it's time to deploy it. You have two options, depending on whether you want to deploy over an existing Media Insights on AWS stack or a new one:
 
-#### *Option 1:* Install Content Localization on AWS over an existing MIE stack
+#### *Option 1:* Install Content Localization on AWS over an existing Media Insights on AWS stack
 
-Use these commands to deploy the demo app over an existing MIE stack:
+Use these commands to deploy the demo app over an existing Media Insights on AWS stack:
 
 
 ```
-MIE_STACK_NAME=[specify the name of your exising MIE stack]
-TEMPLATE=[copy "With existing MIE deployment" link from output of build script]
+MIE_STACK_NAME=[specify the name of your exising Media Insights on AWS stack]
+TEMPLATE=[copy "With existing Media Insights on AWS deployment" link from output of sync script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=MieStackName,ParameterValue=$MIE_STACK_NAME ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
 
-#### *Option 2:* Install Content Localization on AWS with a new MIE stack
+#### *Option 2:* Install Content Localization on AWS with a new Media Insights on AWS stack
 
-Use these commands to deploy the demo app over a new MIE stack:
+Use these commands to deploy the demo app over a new Media Insights on AWS stack:
 
 
 ```
-TEMPLATE=[copy "Without existing MIE deployment" link from output of build script]
+TEMPLATE=[copy "Without existing Media Insights on AWS deployment" link from output of sync script]
 aws cloudformation create-stack --stack-name $WEBAPP_STACK_NAME --template-url $TEMPLATE --region $REGION --parameters ParameterKey=AdminEmail,ParameterValue=$EMAIL --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --profile default --disable-rollback
 ```
 
@@ -173,7 +174,7 @@ awscurl -X POST --region $REGION --data '{"Name":"ContentLocalizationWorkflow","
 
 The following Python code can be used in an AWS Lambda function to execute the image analysis workflow:
 
-* [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/doc/sigv4_post_sample.py)
+* [sigv4_post_sample.py](https://github.com/aws-solutions/content-localization-on-aws/blob/development/doc/sigv4_post_sample.py)
 
 
 ## Starting workflows from an S3 trigger
@@ -185,7 +186,7 @@ Workflows can be started automatically when files are copied to a designated S3 
 
     1. Select Update nested stack then click "Update stack".
     2. Click "Use current template" then click Next
-    3. Write the S3 ARN in the `ExternalBucketArn` parameter which encompasses the objects you intend to process from your designated S3 bucket. For example, to allow MIE to process all the objects in a bucket named "sample_bucket", you could use `arn:aws:s3:::sample_bucket/*`.
+    3. Write the S3 ARN in the `ExternalBucketArn` parameter which encompasses the objects you intend to process from your designated S3 bucket. For example, to allow Media Insights on AWS to process all the objects in a bucket named "sample_bucket", you could use `arn:aws:s3:::sample_bucket/*`.
     4. Click Next.
     5. Click Next, again.
     6. Acknowledge the two options under Capabilities, then click "Update stack".
@@ -194,7 +195,7 @@ Workflows can be started automatically when files are copied to a designated S3 
 
     1. Click "Create function"
     2. Provide a function name and select the latest Python runtime version
-       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/aws-media-insights-content-localization/blob/development/doc/sigv4_post_sample.py) into a new Lambda function.
+       Copy and paste the code from [sigv4_post_sample.py](https://github.com/aws-solutions/content-localization-on-aws/blob/development/doc/sigv4_post_sample.py) into a new Lambda function.
     3. Under "Layers", click Add a layer
     4. Select Custom layers, then select `media-insights-engine-python38` from the drop-down menu, and click Add.
     5. Make the following code changes to the copied code:
@@ -214,7 +215,7 @@ Workflows can be started automatically when files are copied to a designated S3 
 ## Adding new operators and extending data stream consumers:
 ***(Difficulty: 60 minutes)***
 
-The GUI for this demo application loads media analysis data from Amazon OpenSearch. If you create a new analysis operator (see the MIE [Implementation Guide](https://github.com/awslabs/aws-media-insights-engine/blob/master/IMPLEMENTATION_GUIDE.md#4-implementing-a-new-operator-in-mie)) and you want to surface data from that new operator in this demo application, then edit `source/consumer/lambda_handler.py` and add your operator name to the list of `supported_operators`. Define a processing method to create OpenSearch records from metadata JSON objects. This method should concatenate pages, flatten JSON arrays, add the operator name, add the workflow name, and add any other fields that can be useful for analytics. Call this processing method alongside the other processing methods referenced in the `lambda_handler()` entrypoint.
+The GUI for this demo application loads media analysis data from Amazon OpenSearch. If you create a new analysis operator (see the Media Insights on AWS [Implementation Guide](https://docs.aws.amazon.com/solutions/latest/media-insights-on-aws/customization-guide.html#implementing-a-new-operator-in-media-insights-on-aws)) and you want to surface data from that new operator in this demo application, then edit `source/consumer/lambda_handler.py` and add your operator name to the list of `supported_operators`. Define a processing method to create OpenSearch records from metadata JSON objects. This method should concatenate pages, flatten JSON arrays, add the operator name, add the workflow name, and add any other fields that can be useful for analytics. Call this processing method alongside the other processing methods referenced in the `lambda_handler()` entrypoint.
 
 Finally, you will need to write front-end code to retrieve your new operator's data from OpenSearch and render it in the GUI.
 
@@ -325,7 +326,7 @@ aws s3 rb s3://<bucket-name> --force
 
 This solution collects anonymous operational metrics to help AWS improve the
 quality of features of the solution. For more information, including how to disable
-this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/collection-of-operational-metrics.html).
+this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/operational-metrics.html).
 
 When enabled, the following information is collected and sent to AWS:
 
@@ -367,7 +368,7 @@ to:
 
 # Help
 
-Join our Gitter chat at https://gitter.im/awslabs/aws-media-insights-engine. This public chat forum was created to foster communication between MIE developers worldwide.
+Join our Gitter chat at https://gitter.im/awslabs/aws-media-insights-engine. This public chat forum was created to foster communication between Media Insights on AWS developers worldwide.
 
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/awslabs/aws-media-insights-engine)
 

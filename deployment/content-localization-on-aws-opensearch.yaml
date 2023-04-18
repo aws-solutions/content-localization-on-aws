@@ -23,7 +23,10 @@ Parameters:
     Type: String
     Description: "Name of the dataplane bucket"
   AnalyticsStreamArn:
-    Description: "Arn of the MIE kinesis data stream"
+    Description: "Arn of the Media Insights on AWS kinesis data stream"
+    Type: String
+  MieKMSArn:
+    Description: ARN of the Media Insights KMS Key
     Type: String
 
 Mappings:
@@ -162,6 +165,14 @@ Resources:
                   - "s3:GetObject"
                   - "s3:PutObject"
                 Resource: !Sub "arn:aws:s3:::${MieDataplaneBucket}/*"
+              - Effect: Allow
+                Action:
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                  - "kms:Encrypt"
+                  - "kms:Decrypt"
+                  - "kms:ReEncrypt*"
+                Resource: !Ref MieKMSArn
 Outputs:
   DomainEndpoint:
     Value: !GetAtt OpensearchServiceDomain.DomainEndpoint

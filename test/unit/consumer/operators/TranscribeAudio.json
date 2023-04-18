@@ -1,0 +1,35 @@
+{
+  "jobName": "transcribe-55555555-aaaa-bbbb-cccc-666666666666",
+  "results": {
+    "transcripts": [
+      {
+        "transcript": "Welcome back to Boulder. It's a show about everything local from the farm to the Table."
+      }
+    ],
+    "items": [
+      { "start_time": "0.54", "end_time": "1.19", "alternatives": [ { "confidence": "1.0", "content": "Welcome" } ], "type": "pronunciation" },
+      { "start_time": "1.19", "end_time": "1.38", "alternatives": [ { "confidence": "1.0", "content": "back" } ], "type": "pronunciation" },
+      { "start_time": "1.38", "end_time": "1.48", "alternatives": [ { "confidence": "1.0", "content": "to" } ], "type": "pronunciation" },
+      { "start_time": "1.48", "end_time": "1.82", "alternatives": [ { "confidence": "0.9982", "content": "Boulder" } ], "type": "pronunciation" },
+      { "alternatives": [ { "confidence": "0.0", "content": "." } ], "type": "punctuation" },
+      { "start_time": "1.82", "end_time": "2.07", "alternatives": [ { "confidence": "0.9797", "content": "It's" } ], "type": "pronunciation" },
+      { "start_time": "2.08", "end_time": "2.37", "alternatives": [ { "confidence": "1.0", "content": "a" } ], "type": "pronunciation" },
+      { "start_time": "2.37", "end_time": "2.59", "alternatives": [ { "confidence": "1.0", "content": "show" } ], "type": "pronunciation" },
+      { "start_time": "2.59", "end_time": "2.94", "alternatives": [ { "confidence": "1.0", "content": "about" } ], "type": "pronunciation" },
+      { "start_time": "2.95", "end_time": "3.45", "alternatives": [ { "confidence": "0.9989", "content": "everything" } ], "type": "pronunciation" },
+      { "start_time": "3.45", "end_time": "3.91", "alternatives": [ { "confidence": "0.9987", "content": "local" } ], "type": "pronunciation" },
+      { "start_time": "3.91", "end_time": "4.15", "alternatives": [ { "confidence": "1.0", "content": "from" } ], "type": "pronunciation" },
+      { "start_time": "4.15", "end_time": "4.24", "alternatives": [ { "confidence": "1.0", "content": "the" } ], "type": "pronunciation" },
+      { "start_time": "4.25", "end_time": "4.68", "alternatives": [ { "confidence": "1.0", "content": "farm" } ], "type": "pronunciation" },
+      { "start_time": "4.68", "end_time": "4.79", "alternatives": [ { "confidence": "1.0", "content": "to" } ], "type": "pronunciation" },
+      { "start_time": "4.79", "end_time": "4.9", "alternatives": [ { "confidence": "1.0", "content": "the" } ], "type": "pronunciation" },
+      { "start_time": "4.9", "end_time": "5.35", "alternatives": [ { "confidence": "1.0", "content": "Table" } ], "type": "pronunciation" },
+      { "alternatives": [ { "confidence": "0.0", "content": "." } ], "type": "punctuation" }
+    ]
+  },
+  "status": "COMPLETED",
+  "TextTranscriptUri": {
+    "S3Bucket": "testDataplaneBucket",
+    "S3Key": "private/assets/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/workflows/11111111-2222-3333-4444-555555555555/transcript.txt"
+  }
+}

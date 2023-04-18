@@ -12,7 +12,7 @@
 #  and limitations under the License.                                                                                #
 ######################################################################################################################
 */
-var SriPlugin = require('webpack-subresource-integrity');
+const SriPlugin = require('webpack-subresource-integrity');
 
 module.exports = {
   configureWebpack: {

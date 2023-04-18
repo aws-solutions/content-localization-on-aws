@@ -1,0 +1,57 @@
+{
+  "JobStatus": "SUCCEEDED",
+  "VideoMetadata": [
+    {
+      "Codec": "h264",
+      "DurationMillis": 180066,
+      "Format": "QuickTime / MOV",
+      "FrameRate": "30.0",
+      "FrameHeight": 540,
+      "FrameWidth": 960,
+      "ColorRange": "LIMITED"
+    }
+  ],
+  "AudioMetadata": [
+    {
+      "Codec": "aac",
+      "DurationMillis": 180020,
+      "SampleRate": 48000,
+      "NumberOfChannels": 2
+    }
+  ],
+  "Segments": [
+    {
+      "Type": "TECHNICAL_CUE",
+      "StartTimestampMillis": 0,
+      "EndTimestampMillis": 180033,
+      "DurationMillis": 180033,
+      "StartTimecodeSMPTE": "00:00:00:00",
+      "EndTimecodeSMPTE": "00:03:00:01",
+      "DurationSMPTE": "00:03:00:01",
+      "TechnicalCueSegment": {
+        "Type": "Content",
+        "Confidence": "100.0"
+      },
+      "StartFrameNumber": 0,
+      "EndFrameNumber": 5401,
+      "DurationFrames": 5401
+    }
+  ],
+  "SelectedSegmentTypes": [
+    {
+      "Type": "TECHNICAL_CUE",
+      "ModelVersion": "2.0"
+    }
+  ],
+  "ResponseMetadata": {
+    "RequestId": "43ccc76d-7a0e-41d0-82c5-0ef6be152157",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "x-amzn-requestid": "43ccc76d-7a0e-41d0-82c5-0ef6be152157",
+      "content-type": "application/x-amz-json-1.1",
+      "content-length": "693",
+      "date": "Fri, 03 Mar 2023 20:32:32 GMT"
+    },
+    "RetryAttempts": 0
+  }
+}

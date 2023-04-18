@@ -594,7 +594,8 @@ export default {
         overlapping_terminologies = overlapping_terminologies.concat(this.customTerminology.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
       }
       // remove duplicate terminologies from the overlapping_terminologies list
-      overlapping_terminologies = overlapping_terminologies.sort().filter(function(item, pos, ary) {
+      overlapping_terminologies.sort();
+      overlapping_terminologies = overlapping_terminologies.filter(function(item, pos, ary) {
         return !pos || item !== ary[pos - 1];
       })
       return overlapping_terminologies
@@ -615,7 +616,8 @@ export default {
         overlapping_language_codes = overlapping_language_codes.concat(this.parallelData.filter(x => x.TargetLanguageCodes.includes(duplicate_language_codes[i])).map(x => x.Name))
       }
       // remove duplicate parallel data from the overlapping_parallel_data list
-      overlapping_language_codes = overlapping_language_codes.sort().filter(function(item, pos, ary) {
+      overlapping_language_codes.sort();
+      overlapping_language_codes = overlapping_language_codes.filter(function(item, pos, ary) {
         return !pos || item !== ary[pos - 1];
       })
       return overlapping_language_codes
@@ -664,7 +666,7 @@ export default {
           return "Face collection name is required.";
         }
         // Validate that the collection ID matches required regex
-        else if (new RegExp("[^a-zA-Z0-9_.\\-]").test(this.faceCollectionId)) {
+        else if (/[^a-zA-Z0-9_.\\-]/.test(this.faceCollectionId)) {
           return "Face collection name must match pattern [a-zA-Z0-9_.\\\\-]+";
         }
         // Validate that the collection ID is not too long
@@ -906,7 +908,7 @@ export default {
     {
       let errorMessage = '';
       console.log(file.type)
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf|text\/vtt/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -924,7 +926,7 @@ export default {
     fileRemoved: function( file )
     {
       let errorMessage = '';
-      if (!(file.type).match(/video\/.+|application\/mxf/g)) {
+      if (!(file.type).match(/video\/.+|application\/mxf|text\/vtt/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";
         else
@@ -941,12 +943,9 @@ export default {
     },
     runWorkflow: async function(file) {
       const vm = this;
-      let media_type;
-      let s3Key;
-      if ("s3_key" in file) {
-        media_type = file.type;
-        s3Key = file.s3_key; // add in public since amplify prepends that to all keys
-      } else {
+      let media_type = file.type;
+      let s3Key = file.s3_key; // add in public since amplify prepends that to all keys
+      if (!("s3_key" in file)) {
         media_type = this.$route.query.mediaType;
         s3Key = this.$route.query.s3key.split("/").pop();
       }
@@ -959,52 +958,45 @@ export default {
               "Unsupported media type, " + this.$route.query.mediaType + "."
           );
         }
-      } else {
-        if (
-            media_type.match(/video/g) || media_type === "application/mxf"
-        ) {
-          this.workflow_config = vm.videoWorkflowConfig;
-          this.workflow_config["Input"] = {
-            Media: {
-              Video: {
-                S3Bucket: this.DATAPLANE_BUCKET,
-                S3Key: s3Key
-              }
+      } else if (/video|^application\/mxf$/.test(media_type)) {
+        this.workflow_config = vm.videoWorkflowConfig;
+        this.workflow_config["Input"] = {
+          Media: {
+            Video: {
+              S3Bucket: this.DATAPLANE_BUCKET,
+              S3Key: s3Key
             }
           }
-
-
-          // Add optional parameters to workflow config:
-          if (this.customVocabulary !== null) {
-            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.VocabularyName = this.customVocabulary
-          }
-          if (this.customLanguageModel !== null) {
-            this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo.LanguageModelName = this.customLanguageModel
-          }
-          if (this.customTerminology !== null) {
-            this.workflow_config.Configuration.Translate.TranslateWebCaptions.TerminologyNames = this.customTerminology
-          }
-          if (this.parallelData !== null) {
-            this.workflow_config.Configuration.Translate.TranslateWebCaptions.ParallelDataNames = this.parallelData
-          }
-          if (this.existingSubtitlesFilename === "") {
-            if ("ExistingSubtitlesObject" in this.workflow_config.Configuration.WebCaptions.WebCaptions){
-                delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
-            }
-          }
-          else {
-            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject = {}
-            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Bucket=this.DATAPLANE_BUCKET
-            this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject.Key=this.existingSubtitlesFilename
-          }
-        } else if (media_type === '' && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
-          // VTT files may be uploaded for the Transcribe operator, but
-          // we won't run a workflow for VTT file types.
-          console.log("VTT file has been uploaded to s3://" + s3Key);
-          return;
-        } else {
-          vm.s3UploadError("Unsupported media type: " + media_type + ".");
         }
+
+
+        // Add optional parameters to workflow config:
+        vm.setIfNotNull(this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo, 'VocabularyName', this, 'customVocabulary');
+        vm.setIfNotNull(this.workflow_config.Configuration.AnalyzeVideo.TranscribeVideo, 'LanguageModelName', this, 'customLanguageModel');
+        vm.setIfNotNull(this.workflow_config.Configuration.Translate.TranslateWebCaptions, 'TerminologyNames', this, 'customTerminology');
+        vm.setIfNotNull(this.workflow_config.Configuration.Translate.TranslateWebCaptions, 'ParallelDataNames', this, 'parallelData');
+
+        this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject = {
+          Bucket: this.DATAPLANE_BUCKET,
+          Key: this.existingSubtitlesFilename
+        }
+        if (this.existingSubtitlesFilename === "") {
+          delete this.workflow_config.Configuration.WebCaptions.WebCaptions.ExistingSubtitlesObject
+        }
+      } else if ((media_type === '' || media_type === 'text/vtt') && (s3Key.split('.').pop().toLowerCase() === 'vtt')) {
+        // VTT files may be uploaded for the Transcribe operator, but
+        // we won't run a workflow for VTT file types.
+        console.log("VTT file has been uploaded to s3://" + s3Key);
+        // We need the existingSubtitlesFilename to contain the full S3 key.
+        // If it was auto-populated when we added the WebVTT file for upload,
+        // existingSubtitlesFilename will only contain the file name but not
+        // the full key. So, rewrite it now that we know the full S3 key.
+        if (this.existingSubtitlesFilename === s3Key.split('/').pop()) {
+          this.existingSubtitlesFilename = s3Key;
+        }
+        return;
+      } else {
+        vm.s3UploadError("Unsupported media type: " + media_type + ".");
       }
       console.log("workflow execution configuration:")
       console.log(JSON.stringify(this.workflow_config))
@@ -1040,6 +1032,12 @@ export default {
         console.log(error)
       }
     },
+    setIfNotNull(dst, dstProperty, src, srcProperty) {
+      let value = src[srcProperty];
+      if (value !== null) {
+        dst[dstProperty] = value;
+      }
+    },
     async getWorkflowStatus(wf_id) {
       const vm = this;
       let apiName = 'mieWorkflowApi'
@@ -1051,10 +1049,10 @@ export default {
       };
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
-        for (let i = 0; i < vm.executed_assets.length; i++) {
-          if (vm.executed_assets[i].wf_id === wf_id) {
-            vm.executed_assets[i].workflow_status = response.data.Status;
-            vm.executed_assets[i].state_machine_console_link =
+        for (const asset of vm.executed_assets) {
+          if (asset.wf_id === wf_id) {
+            asset.workflow_status = response.data.Status;
+            asset.state_machine_console_link =
                 "https://" + this.AWS_REGION + ".console.aws.amazon.com/states/home?region=" + this.AWS_REGION + "#/executions/details/" + response.data['StateMachineExecutionArn'];
             break;
           }

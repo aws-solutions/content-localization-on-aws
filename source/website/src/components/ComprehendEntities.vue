@@ -114,7 +114,7 @@ export default {
       else {
         let result = await response;
         let data = result.hits.hits;
-        for (var i = 0, len = data.length; i < len; i++) {
+        for (let i = 0, len = data.length; i < len; i++) {
           this.entities.push({ "EntityText": data[i]._source.EntityText, "EntityType": data[i]._source.EntityType, "Confidence": data[i]._source.Confidence, "BeginOffset": data[i]._source.BeginOffset, "EndOffset": data[i]._source.EndOffset})
         }
         this.isBusy = false

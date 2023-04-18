@@ -39,11 +39,12 @@ def browser():
     from selenium import webdriver
 
     browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
-    return browser
+    yield browser
+    browser.quit()
 
 # Test the happy path through the Content Localization app by loading and verifying data after a successful workflow run.  No
 # CRUD interactions such as creating vocabularies are included here
-# This test assumes that the first workflow in the sollection is the one created by the
+# This test assumes that the second workflow in the collection is the one created by the
 # workflow_with_customizations fixture
 def test_complete_app(browser, workflow_with_customizations, testing_env_variables):
 
@@ -108,13 +109,13 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
 
     # Find the base test asset in the collection
     # FIXME - it would be better to find the workflow with the correct assetId, but I can't figure out how to do it with selenium.  
-    # Instead, we ae taking the first workflow in the list and assume it is the one for the test
+    # Instead, we are taking the second workflow in the list and assume it is the one for the test
 
     ####### TRANSCRIPT COMPONENT
     # Navigate to the transcript
     #Analyze
     #browser.find_element_by_link_text("Analyze").click()
-    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[1]/td[6]/a[1]").click()
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div/div/div/div[1]/div/div/table/tbody/tr[2]/td[6]/a[1]").click()
     time.sleep(5)
     #Speech Recognition is the default tab
     #Transcript
@@ -212,12 +213,20 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     subtitle1_text = subtitle1.get_attribute("value")
     assert "Boulder" in subtitle1_text
 
-    subtitle3 = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[1]/div/table/tbody/tr[3]/td[2]/div/div/div[1]/textarea")
+    # Note that this test case had to change due to a change in an external service.
+    # The subtitles that are generated are slightly different. The modified subtitle was previously
+    # in table row 3 but now it is merged into the second subtitle so we find it in table row 2.
+    subtitle3 = browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[1]/div/table/tbody/tr[2]/td[2]/div/div/div[1]/textarea")
     subtitle3_text = subtitle3.get_attribute("value")
     assert "JEFF STEEN-replaced-by-terminology" in subtitle3_text
 
     # Edit a subtitle
-    subtitle1.send_keys("\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003\ue003 00terminology REPLACED BY EDITS00")
+    # For a clean edit, we need to back up to a space and avoid breaking a word.
+    # Originally we backspaced 12 times, which worked until it didn't. So, lets do at least 11
+    # then find the first space before that and calculate the number of characters we need to strip
+    # off the end to reach the space character.
+    num_characters_to_backspace_over = len(subtitle1_text) - (subtitle1_text[0:-11].rfind(' ') + 1)
+    subtitle1.send_keys(("\ue003" * num_characters_to_backspace_over) + "00terminology REPLACED BY EDITS00")
 
     # Check the file info
     time.sleep(2)
@@ -235,6 +244,8 @@ def test_complete_app(browser, workflow_with_customizations, testing_env_variabl
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/div[2]/ul/li[3]/a")
     
     # Test terminologies
+    # Save Edits button
+    browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[2]").click()
     # Save terminology button
     browser.find_element_by_xpath("/html/body/div/div/div[2]/div/div[1]/div[2]/div/div/button[1]").click()
     # Check the table for the edits

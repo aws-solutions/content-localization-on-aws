@@ -228,7 +228,7 @@ Resources:
       cfn_nag:
         rules_to_suppress:
           - id: W11
-            reason: "Website helper Lambda requires ability to read / write to both MIE website bucket and MIE build bucket"
+            reason: "Website helper Lambda requires ability to read / write to both Media Insights on AWS website bucket and build bucket"
     DependsOn: ContentAnalysisWebsiteBucket
     Properties:
       AssumeRolePolicyDocument:

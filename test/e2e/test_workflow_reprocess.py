@@ -33,7 +33,8 @@ def browser():
     ####### TESTING - remove headless to see browser actions
 
     browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_options)
-    return browser
+    yield browser
+    browser.quit()
 
 
 # Test the happy path through the app by loading and verifying data after a successful workflow run.  No

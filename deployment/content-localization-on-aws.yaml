@@ -24,7 +24,7 @@ Conditions:
 Mappings:
   MediaInsights:
     Release:
-      Version: "v5.1.0"
+      Version: "v5.1.1"
   Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"

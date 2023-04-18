@@ -138,6 +138,8 @@ cd "$build_dir"/ || exit 1
 echo "Copying the prepared distribution to:"
 echo "s3://$global_bucket/content-localization-on-aws/$version/"
 echo "s3://${regional_bucket}-${region}/content-localization-on-aws/$version/"
+
+s3domain="s3.$region.amazonaws.com"
 set -x
 aws s3 sync $global_dist_dir s3://$global_bucket/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)
 aws s3 sync $regional_dist_dir s3://${regional_bucket}-${region}/content-localization-on-aws/$version/ $(if [ ! -z $profile ]; then echo "--profile $profile"; fi)

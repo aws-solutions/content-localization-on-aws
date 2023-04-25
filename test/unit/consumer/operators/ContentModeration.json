@@ -1,0 +1,14 @@
+{
+    "ModerationLabels": [
+        {
+            "ModerationLabel": { "Error": "Intentionally missing expected properties" }
+        },
+        {
+            "ModerationLabel": {
+                "Name": "testName",
+                "ParentName": "parentName",
+                "Confidence": 50
+            }
+        }
+    ]
+}

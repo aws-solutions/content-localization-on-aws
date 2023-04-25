@@ -1,0 +1,103 @@
+{
+  "JobStatus": "SUCCEEDED",
+  "VideoMetadata": {
+    "Codec": "h264",
+    "DurationMillis": 180066,
+    "Format": "QuickTime / MOV",
+    "FrameRate": "30.0",
+    "FrameHeight": 540,
+    "FrameWidth": 960,
+    "ColorRange": "LIMITED"
+  },
+  "Celebrities": [
+    {
+      "Timestamp": 59500,
+      "Celebrity": {
+        "Urls": [
+          "www.wikidata.org/wiki/Q22004103"
+        ],
+        "Name": "Laura Dotson",
+        "Id": "Cy0co9x",
+        "Confidence": "77.20094299316406",
+        "Face": {
+          "BoundingBox": {
+            "Width": "0.061153411865234375",
+            "Height": "0.1457747220993042",
+            "Left": "0.651340901851654",
+            "Top": "0.34650906920433044"
+          },
+          "Landmarks": [
+            { "Type": "eyeLeft", "X": "0.6635822057723999", "Y": "0.4095280170440674" },
+            { "Type": "eyeRight", "X": "0.6910726428031921", "Y": "0.40344157814979553" },
+            { "Type": "mouthLeft", "X": "0.6698732972145081", "Y": "0.4566854238510132" },
+            { "Type": "mouthRight", "X": "0.6928272247314453", "Y": "0.45171236991882324" },
+            { "Type": "nose", "X": "0.6762213110923767", "Y": "0.43156084418296814" }
+          ],
+          "Pose": {
+            "Roll": "-8.534097671508789",
+            "Yaw": "-6.502280235290527",
+            "Pitch": "8.88282585144043"
+          },
+          "Quality": {
+            "Brightness": "66.57852172851562",
+            "Sharpness": "38.89601135253906"
+          },
+          "Confidence": "99.99699401855469"
+        },
+        "KnownGender": {
+          "Type": "Female"
+        }
+      }
+    },
+    {
+      "Timestamp": 60000,
+      "Celebrity": {
+        "Urls": [
+          "www.wikidata.org/wiki/Q22004103"
+        ],
+        "Name": "Laura Dotson",
+        "Id": "Cy0co9x",
+        "Confidence": "79.72498321533203",
+        "Face": {
+          "BoundingBox": {
+            "Width": "0.06206149980425835",
+            "Height": "0.14381197094917297",
+            "Left": "0.6475560069084167",
+            "Top": "0.3477523624897003"
+          },
+          "Landmarks": [
+            { "Type": "eyeLeft", "X": "0.6605901122093201", "Y": "0.4091332256793976" },
+            { "Type": "eyeRight", "X": "0.688330352306366", "Y": "0.40328481793403625" },
+            { "Type": "mouthLeft", "X": "0.6670447587966919", "Y": "0.4561467468738556" },
+            { "Type": "mouthRight", "X": "0.690250813961029", "Y": "0.4514188766479492" },
+            { "Type": "nose", "X": "0.6730112433433533", "Y": "0.43235015869140625" }
+          ],
+          "Pose": {
+            "Roll": "-9.182001113891602",
+            "Yaw": "-7.564344882965088",
+            "Pitch": "8.211339950561523"
+          },
+          "Quality": {
+            "Brightness": "66.87061309814453",
+            "Sharpness": "46.02980041503906"
+          },
+          "Confidence": "99.99813842773438"
+        },
+        "KnownGender": {
+          "Type": "Female"
+        }
+      }
+    }
+  ],
+  "ResponseMetadata": {
+    "RequestId": "0c25a889-4e86-4e5a-bb04-135aafba4e77",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "x-amzn-requestid": "0c25a889-4e86-4e5a-bb04-135aafba4e77",
+      "content-type": "application/x-amz-json-1.1",
+      "content-length": "1886",
+      "date": "Fri, 03 Mar 2023 20:35:21 GMT"
+    },
+    "RetryAttempts": 0
+  }
+}

@@ -199,12 +199,11 @@
       saveFile() {
         const elasticsearch_data = this.elasticsearch_data;
         const blob = new Blob([JSON.stringify(elasticsearch_data)], {type: 'text/plain'});
-        const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+        const a = document.createElement('a');
         a.download = "data.json";
         a.href = window.URL.createObjectURL(blob);
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        const e = new MouseEvent('click', { view: window });
         a.dispatchEvent(e);
       },
       updateConfidence (event) {

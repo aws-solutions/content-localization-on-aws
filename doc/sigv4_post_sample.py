@@ -2,7 +2,7 @@
 #
 # PURPOSE: This code sample shows how to start the ContentLocalizationWorkflow 
 #   using a sigv4 signed request to the workflow execution REST API in the Media
-#   Insights Engine.
+#   Insights on AWS solution.
 #
 ###############################################################################
 #
@@ -139,7 +139,7 @@ def lambda_handler(event, context):
     print('request_parameters = ' + str(request_parameters))
     print('headers = ' + str(headers))
 
-    r = requests.post(endpoint, data=request_parameters, headers=headers)
+    r = requests.post(endpoint, data=request_parameters, headers=headers, timeout=10)
 
     print('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     print('Response code: %d\n' % r.status_code)

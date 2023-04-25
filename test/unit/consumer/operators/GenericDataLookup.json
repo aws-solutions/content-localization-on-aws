@@ -1,0 +1,23 @@
+{
+    "Labels": [
+        {
+            "Label": { "Error": "Intentionally missing expected properties" }
+        },
+        {
+            "Label": {
+                "Confidence": 50,
+                "Name": "testName",
+                "Instances": [{
+                    "BoundingBox": {
+                        "Width": "0.36959773302078247",
+                        "Height": "0.6934193968772888",
+                        "Left": "0.3121304512023926",
+                        "Top": "0.17156612873077393"
+                    },
+                    "Confidence": "79.54973602294922"
+                }],
+                "Parents": []
+            }
+        }
+    ]
+}

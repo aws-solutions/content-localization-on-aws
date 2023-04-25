@@ -19,12 +19,12 @@ Parameters:
       - "r4.xlarge.search"
 
 Conditions:
-  EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], Yes]
+  EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], "Yes"]
 
 Mappings:
-  MediaInsightsEngine:
+  MediaInsights:
     Release:
-      Version: "v4.0.1"
+      Version: "v5.1.1"
   Application:
     SourceCode:
       GlobalS3Bucket: "%%GLOBAL_BUCKET_NAME%%"
@@ -32,29 +32,35 @@ Mappings:
       RegionalS3Bucket: "%%REGIONAL_BUCKET_NAME%%"
       CodeKeyPrefix: "content-localization-on-aws/%%VERSION%%"
       Version: "%%VERSION%%"
+  Solution:
+    Data:
+      SolutionId: "SO0164"
+      SolutionName: "Content Localization on AWS"
+      ApplicationType: "AWS-Solutions"
+      AppRegistryApplicationName: "ContentLocalizationOnAws"
   AnonymousData:
     SendAnonymousData:
-      Data: Yes
+      Data: "Yes"
 
 Resources:
-  # Deploy MIE Framework
+  # Deploy Media Insights on AWS Framework
 
   MieStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Join
         - ""
-        - - "https://solutions-reference.s3.amazonaws.com/aws-media-insights-engine/"
+        - - "https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/"
           - !FindInMap
-            - MediaInsightsEngine
+            - MediaInsights
             - Release
             - Version
-          - "/media-insights-stack.template"
+          - "/media-insights-on-aws-stack.template"
       Parameters:
-        DeployAnalyticsPipeline: Yes
-        DeployTestResources: No
+        DeployAnalyticsPipeline: "Yes"
+        DeployTestResources: "No"
         MaxConcurrentWorkflows: 5
-        EnableXrayTrace: Yes
+        EnableXrayTrace: "Yes"
         SendAnonymousData: !FindInMap [AnonymousData,SendAnonymousData,Data]
         SolutionId: SO0164
         SolutionVersion: "%%VERSION%%"
@@ -81,6 +87,7 @@ Resources:
         AnalyticsStreamArn: !GetAtt MieStack.Outputs.AnalyticsStreamArn
         MieDataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         NodeType: !Ref OpensearchNodeSize
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   # Deploy Auth stack
 
@@ -107,6 +114,7 @@ Resources:
         SearchDomainArn: !GetAtt OpensearchStack.Outputs.DomainArn
         DataplaneBucket: !GetAtt MieStack.Outputs.DataplaneBucket
         ParentStackName: !Ref MieStack
+        MieKMSArn: !GetAtt MieStack.Outputs.MieKMSArn
 
   WebStack:
     Type: "AWS::CloudFormation::Stack"
@@ -232,6 +240,93 @@ Resources:
       SolutionId: "SO0042"
       UUID: !GetAtt AnonymousDataUuid.UUID
       Version: !FindInMap ["Application", "SourceCode", "Version"]
+
+  # AppRegistry
+  Application:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Description: !Sub
+        - Service Catalog application to track and manage all your resources. The Solution ID is ${solutionId} and Solution Version is ${solutionVersion}.
+        -
+          solutionId: !FindInMap
+            - Solution
+            - Data
+            - SolutionId
+          solutionVersion: !FindInMap
+            - Application
+            - SourceCode
+            - Version
+      Name:
+        !Join
+          - "-"
+          - - !FindInMap [Solution, Data, "AppRegistryApplicationName"]
+            - !Ref AWS::Region
+            - !Ref AWS::AccountId
+            - !Ref AWS::StackName
+      Tags: {
+      'Solutions:SolutionID': !FindInMap [Solution, Data, "SolutionId"],
+      'Solutions:SolutionName': !FindInMap [Solution, Data, "SolutionName"],
+      'Solutions:SolutionVersion': !FindInMap [Application, SourceCode, "Version"],
+      'Solutions:ApplicationType': !FindInMap [Solution, Data, "ApplicationType"],
+      }
+
+  AppRegistryApplicationStackAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref AWS::StackId
+      ResourceType: CFN_STACK
+
+  DefaultApplicationAttributes:
+    Type: AWS::ServiceCatalogAppRegistry::AttributeGroup
+    Properties:
+      Name: !Join ['-', [!Ref 'AWS::Region', !Ref 'AWS::StackName']]
+      Description: Attribute group for solution information.
+      Attributes:       
+        { "ApplicationType" : !FindInMap [Solution, Data, "ApplicationType"],
+          "Version": !FindInMap [Application, SourceCode, "Version"],
+          "SolutionID": !FindInMap [Solution, Data, "SolutionId"],
+          "SolutionName": !FindInMap [Solution, Data, "SolutionName"]
+        }
+
+  AppRegistryApplicationAttributeAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::AttributeGroupAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      AttributeGroup: !GetAtt DefaultApplicationAttributes.Id
+
+  AppRegistryApplicationStackAssociationOpenSearchStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref OpensearchStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationAuthStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref AuthStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationWebStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref WebStack
+      ResourceType: CFN_STACK
+
+  AppRegistryApplicationStackAssociationVideoWorkflowStack:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt Application.Id
+      Resource:
+        !Ref VideoWorkflow
+      ResourceType: CFN_STACK
 
 Outputs:
   ContentLocalizationSolution:

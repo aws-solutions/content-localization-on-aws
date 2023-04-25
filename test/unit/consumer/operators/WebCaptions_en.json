@@ -1,0 +1,34 @@
+{
+  "WebCaptions": [
+    {
+      "start": "0.54",
+      "caption": "Welcome back to  00BOULDEREPLACEDBYSOURCELANGUAGEEDITS00",
+      "wordConfidence": [
+        { "w": "welcome", "c": "1.0" },
+        { "w": "back", "c": "1.0" },
+        { "w": "to", "c": "1.0" },
+        { "w": "boulder", "c": "0.9982" }
+      ],
+      "end": "1.82"
+    },
+    {
+      "start": "1.82",
+      "caption": "It's a show about everything local from the farm to the Table.",
+      "wordConfidence": [
+        { "w": "it's", "c": "0.9797" },
+        { "w": "a", "c": "1.0" },
+        { "w": "show", "c": "1.0" },
+        { "w": "about", "c": "1.0" },
+        { "w": "everything", "c": "0.9989" },
+        { "w": "local", "c": "0.9987" },
+        { "w": "from", "c": "1.0" },
+        { "w": "the", "c": "1.0" },
+        { "w": "farm", "c": "1.0" },
+        { "w": "to", "c": "1.0" },
+        { "w": "the", "c": "1.0" },
+        { "w": "table", "c": "1.0" }
+      ],
+      "end": "5.35"
+    }
+  ]
+}

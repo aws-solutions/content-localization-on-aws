@@ -124,10 +124,10 @@
                 min: 0,
                 callback: function(milliseconds) {
                   if (milliseconds >= 3600000) {
-                    return new Date(milliseconds).toISOString().substr(11, 12);
+                    return new Date(milliseconds).toISOString().substring(11, 23);
                   } else {
                     // drop hours portion if time is less than 1 hour
-                    return new Date(milliseconds).toISOString().substr(14, 9);
+                    return new Date(milliseconds).toISOString().substring(14, 23);
                   }
                 }
               }
@@ -139,8 +139,8 @@
         // TODO: set chart and canvas width equal to video player width
         // TODO: make columns resize equally when resizing window
         // Update canvas size when window is resized
-        var chart = document.getElementById('lineChart');
-        var canvas_overlay = document.getElementById('verticalLineCanvas');
+        let chart = document.getElementById('lineChart');
+        let canvas_overlay = document.getElementById('verticalLineCanvas');
         canvas_overlay.width=chart.width;
         canvas_overlay.height=chart.height;
 
@@ -148,7 +148,7 @@
     },
     methods: {
       handleClick(event) {
-        var canvas_overlay = document.getElementById('verticalLineCanvas');
+        let canvas_overlay = document.getElementById('verticalLineCanvas');
         if (canvas_overlay){
           const chart_width = this.chart.chart.chartArea.right - this.chart.chart.chartArea.left;
           const chart_left = this.chart.chart.chartArea.left;
@@ -165,7 +165,7 @@
       },
       getTimeUpdate() {
         // Send current time position for the video player to verticalLineCanvas
-        var last_position = 0;
+        let last_position = 0;
         if (this.player) {
           this.player.on('timeupdate', function () {
             const current_position = Math.round(this.player.currentTime() / this.player.duration() * 1000);
@@ -207,7 +207,7 @@
         this.chart.update();
 
         // Place canvas over line chart
-        var canvas_overlay = document.getElementById('verticalLineCanvas');
+        let canvas_overlay = document.getElementById('verticalLineCanvas');
         canvas_overlay.width=this.chart.width;
         canvas_overlay.height=this.chart.height;
         // Call getTimeUpdate to initialize the red player time marker
@@ -215,12 +215,12 @@
         this.getTimeUpdate()
       },
       drawVerticleLine(position) {
-        var canvas_overlay = document.getElementById('verticalLineCanvas');
+        let canvas_overlay = document.getElementById('verticalLineCanvas');
         if (!canvas_overlay) return;
-        var ctx = canvas_overlay.getContext('2d');
+        let ctx = canvas_overlay.getContext('2d');
         if (!ctx || !this.chart) return;
-        var scale = this.chart.scales['y-axis-1'];
-        var lineLeftOffset = (this.chart.chart.chartArea.right - this.chart.chart.chartArea.left) * position + this.chart.chart.chartArea.left;
+        let scale = this.chart.scales['y-axis-1'];
+        let lineLeftOffset = (this.chart.chart.chartArea.right - this.chart.chart.chartArea.left) * position + this.chart.chart.chartArea.left;
         ctx.clearRect(0, 0, canvas_overlay.width, canvas_overlay.height);
         ctx.beginPath();
         ctx.strokeStyle = '#ff0000';

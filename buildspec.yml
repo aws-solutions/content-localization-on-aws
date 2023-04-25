@@ -2,20 +2,22 @@ version: 0.2
 
 ###############################################################################
 # DO NOT MODIFY THIS FILE.
-# This file is used by the build pipeline for the [CAS solution](https://aws.amazon.com/solutions/implementations/aws-content-analysis/).
+# This file is used by the build pipeline for the [content-localization-on-aws solution](https://aws.amazon.com/solutions/implementations/content-localization-on-aws/).
 ###############################################################################
 
 phases:
   install:
     runtime-versions:
-      nodejs: 12
-      python: 3.8
+      nodejs: 16
+      python: 3.10
     commands:
       - echo "nothing to do in install"
   pre_build:
     commands:
       - echo "Installing dependencies and executing unit tests - `pwd`"
-      - cd deployment
+      - echo "Update npm to latest"
+      - npm install -g npm@latest
+      - cd deployment && chmod +x ./run-unit-tests.sh && ./run-unit-tests.sh
       - echo "Installing dependencies and executing unit tests completed `date`"
   build:
     commands:
@@ -34,6 +36,15 @@ phases:
       - echo "Post build completed on `date`"
 artifacts:
   files:
+      - source/**/*
       - deployment/**/*
+      - .github/**/*
+      - test/**/*
       - CHANGELOG.md
+      - CODE_OF_CONDUCT.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - NOTICE
+      - README.md
       - buildspec.yml
+      - sonar-project.properties

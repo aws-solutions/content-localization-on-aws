@@ -1,0 +1,121 @@
+{
+  "JobStatus": "SUCCEEDED",
+  "VideoMetadata": [
+    {
+      "Codec": "h264",
+      "DurationMillis": 180066,
+      "Format": "QuickTime / MOV",
+      "FrameRate": "30.0",
+      "FrameHeight": 540,
+      "FrameWidth": 960,
+      "ColorRange": "LIMITED"
+    }
+  ],
+  "AudioMetadata": [
+    {
+      "Codec": "aac",
+      "DurationMillis": 180020,
+      "SampleRate": 48000,
+      "NumberOfChannels": 2
+    }
+  ],
+  "Segments": [
+    {
+      "Type": "SHOT",
+      "StartTimestampMillis": 0,
+      "EndTimestampMillis": 1000,
+      "DurationMillis": 1000,
+      "StartTimecodeSMPTE": "00:00:00:00",
+      "EndTimecodeSMPTE": "00:00:01:00",
+      "DurationSMPTE": "00:00:01:00",
+      "ShotSegment": {
+        "Index": 0,
+        "Confidence": "99.99995422363281"
+      },
+      "StartFrameNumber": 0,
+      "EndFrameNumber": 30,
+      "DurationFrames": 30
+    },
+    {
+      "Type": "SHOT",
+      "StartTimestampMillis": 1033,
+      "EndTimestampMillis": 11766,
+      "DurationMillis": 10733,
+      "StartTimecodeSMPTE": "00:00:01:01",
+      "EndTimecodeSMPTE": "00:00:11:23",
+      "DurationSMPTE": "00:00:10:22",
+      "ShotSegment": {
+        "Index": 1,
+        "Confidence": "76.58549499511719"
+      },
+      "StartFrameNumber": 31,
+      "EndFrameNumber": 353,
+      "DurationFrames": 322
+    },
+    {
+      "Type": "SHOT",
+      "StartTimestampMillis": 11800,
+      "EndTimestampMillis": 12000,
+      "DurationMillis": 200,
+      "StartTimecodeSMPTE": "00:00:11:24",
+      "EndTimecodeSMPTE": "00:00:12:00",
+      "DurationSMPTE": "00:00:00:06",
+      "ShotSegment": {
+        "Index": 2,
+        "Confidence": "76.58549499511719"
+      },
+      "StartFrameNumber": 354,
+      "EndFrameNumber": 360,
+      "DurationFrames": 6
+    },
+    {
+      "Type": "SHOT",
+      "StartTimestampMillis": 12033,
+      "EndTimestampMillis": 13800,
+      "DurationMillis": 1767,
+      "StartTimecodeSMPTE": "00:00:12:01",
+      "EndTimecodeSMPTE": "00:00:13:24",
+      "DurationSMPTE": "00:00:01:23",
+      "ShotSegment": {
+        "Index": 3,
+        "Confidence": "89.5938491821289"
+      },
+      "StartFrameNumber": 361,
+      "EndFrameNumber": 414,
+      "DurationFrames": 53
+    },
+    {
+      "Type": "SHOT",
+      "StartTimestampMillis": 178033,
+      "EndTimestampMillis": 180033,
+      "DurationMillis": 2000,
+      "StartTimecodeSMPTE": "00:02:58:01",
+      "EndTimecodeSMPTE": "00:03:00:01",
+      "DurationSMPTE": "00:00:02:00",
+      "ShotSegment": {
+        "Index": 25,
+        "Confidence": "99.97348022460938"
+      },
+      "StartFrameNumber": 5341,
+      "EndFrameNumber": 5401,
+      "DurationFrames": 60
+    }
+  ],
+  "SelectedSegmentTypes": [
+    {
+      "Type": "SHOT",
+      "ModelVersion": "2.0"
+    }
+  ],
+  "ResponseMetadata": {
+    "RequestId": "d55cfcfb-f4f6-4b4b-9e00-dd6f973e1c9c",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "x-amzn-requestid": "d55cfcfb-f4f6-4b4b-9e00-dd6f973e1c9c",
+      "content-type": "application/x-amz-json-1.1",
+      "content-length": "8537",
+      "date": "Fri, 03 Mar 2023 20:32:22 GMT"
+    },
+    "RetryAttempts": 0
+  }
+}

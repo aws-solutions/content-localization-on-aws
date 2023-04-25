@@ -230,82 +230,61 @@
           };
           let response = await this.$Amplify.API.get(apiName, path, apiParams);
           if (!response) {
-            this.showElasticSearchAlert = true
+            this.showElasticSearchAlert = true;
+            return
           }
-          else {
-            let result = await response;
-            let data = result.hits.hits;
-            let es_data = [];
-            if (data.length === 0 && this.Confidence > 55) {
-              this.lowerConfidence = true;
-              this.lowerConfidenceMessage = 'Try lowering confidence threshold'
-            } else {
-              this.lowerConfidence = false;
-              for (let i = 0, len = data.length; i < len; i++) {
-                let item = data[i]._source;
-                if ("Emotions" in item) {
-                  for (let emotion = 0, emotionsLen = item.Emotions.length; emotion < emotionsLen; emotion++) {
-                    if (item.Emotions[emotion].Confidence >= this.Confidence) {
-                      es_data.push({"Name": item.Emotions[emotion].Type, "Timestamp": item.Timestamp})
-                    }
+
+          let result = await response;
+          let data = result.hits.hits;
+          let es_data = [];
+          if (data.length === 0 && this.Confidence > 55) {
+            this.lowerConfidence = true;
+            this.lowerConfidenceMessage = 'Try lowering confidence threshold'
+          } else {
+            this.lowerConfidence = false;
+            for (const item of data.map(d => d._source)) {
+              (item.Emotions||[]).filter(
+                  emotion => emotion.Confidence >= this.Confidence
+              ).forEach(
+                  emotion => es_data.push({"Name": emotion.Type, "Timestamp": item.Timestamp})
+              );
+
+              [
+                "Beard",
+                "Eyeglasses",
+                "EyesOpen",
+                "MouthOpen",
+                "Mustache",
+                "Smile",
+                "Sunglasses"
+              ].filter(
+                  feature => feature in item
+              ).filter(
+                  feature => item[feature].Confidence > this.Confidence
+              ).forEach(
+                  feature => es_data.push({"Name": feature, "Timestamp": item.Timestamp})
+              );
+
+              if ("Gender" in item) {
+                es_data.push({"Name": item.Gender.Value, "Timestamp": item.Timestamp})
+              }
+              if ("BoundingBox" in item) {
+                es_data.push({
+                  "Name": "Face",
+                  "Timestamp": item.Timestamp,
+                  "Confidence": item.Confidence,
+                  "BoundingBox": {
+                    "Width": item.BoundingBox.Width,
+                    "Height": item.BoundingBox.Height,
+                    "Left": item.BoundingBox.Left,
+                    "Top": item.BoundingBox.Top
                   }
-                }
-                if ("Beard" in item) {
-                  if (item.Beard.Confidence > this.Confidence) {
-                    es_data.push({"Name": "Beard", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("Eyeglasses" in item) {
-                  if (item.Eyeglasses.Confidence > this.Confidence) {
-                    es_data.push({"Name": "Eyeglasses", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("EyesOpen" in item) {
-                  if (item.EyesOpen.Confidence > this.Confidence) {
-                    es_data.push({"Name": "EyesOpen", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("MouthOpen" in item) {
-                  if (item.MouthOpen.Confidence > this.Confidence) {
-                    es_data.push({"Name": "MouthOpen", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("Mustache" in item) {
-                  if (item.Mustache.Confidence > this.Confidence) {
-                    es_data.push({"Name": "Mustache", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("Smile" in item) {
-                  if (item.Smile.Confidence > this.Confidence) {
-                    es_data.push({"Name": "Smile", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("Sunglasses" in item) {
-                  if (item.Sunglasses.Confidence > this.Confidence) {
-                    es_data.push({"Name": "Sunglasses", "Timestamp": item.Timestamp})
-                  }
-                }
-                if ("Gender" in item) {
-                  es_data.push({"Name": item.Gender.Value, "Timestamp": item.Timestamp})
-                }
-                if ("BoundingBox" in item) {
-                  es_data.push({
-                    "Name": "Face",
-                    "Timestamp": item.Timestamp,
-                    "Confidence": item.Confidence,
-                    "BoundingBox": {
-                      "Width": item.BoundingBox.Width,
-                      "Height": item.BoundingBox.Height,
-                      "Left": item.BoundingBox.Left,
-                      "Top": item.BoundingBox.Top
-                    }
-                  })
-                }
+                })
               }
             }
-            this.elasticsearch_data = JSON.parse(JSON.stringify(es_data));
-            this.isBusy = false
-        }
+          }
+          this.elasticsearch_data = JSON.parse(JSON.stringify(es_data));
+          this.isBusy = false
       },
       saveBoxedLabel(label_name) {
         if (!this.boxes_available.includes(label_name)) {
@@ -319,12 +298,11 @@
       saveFile() {
         const elasticsearch_data = JSON.stringify(this.elasticsearch_data);
         const blob = new Blob([elasticsearch_data], {type: 'text/plain'});
-        const e = document.createEvent('MouseEvents'),
-          a = document.createElement('a');
+        const a = document.createElement('a');
         a.download = "data.json";
         a.href = window.URL.createObjectURL(blob);
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        const e = new MouseEvent('click', { view: window });
         a.dispatchEvent(e);
       },
       updateConfidence (event) {
@@ -361,15 +339,29 @@
         const es_data = this.elasticsearch_data;
         let instance = 0;
         let i=0;
-        es_data.forEach(function (record) {
-          if (record.Name === label) {
-            markers.push({'time': record.Timestamp/1000, 'text': record.Name, 'overlayText': record.Name});
-            // Save bounding box info if it exists
-            if (record.BoundingBox) {
-              // TODO: move image processing to a separate component
-              if (this.mediaType === "image") {
+        es_data.filter(record => record.Name === label).forEach(function (record) {
+          markers.push({'time': record.Timestamp/1000, 'text': record.Name, 'overlayText': record.Name});
+          // Save bounding box info if it exists
+          if (record.BoundingBox) {
+            // TODO: move image processing to a separate component
+            if (this.mediaType === "image") {
+              const boxinfo = {
+                'instance': i,
+                'name': record.Name,
+                'confidence': (record.Confidence * 1).toFixed(2),
+                'x': record.BoundingBox.Left * canvas.width,
+                'y': record.BoundingBox.Top * canvas.height,
+                'width': record.BoundingBox.Width * canvas.width,
+                'height': record.BoundingBox.Height * canvas.height
+              };
+              boxMap.set(i++, [boxinfo])
+            } else {
+              // Use time resolution of 0.1 second
+              const timestamp = Math.round(record.Timestamp / 100);
+              if (boxMap.has(timestamp)) {
                 const boxinfo = {
-                  'instance': i,
+                  'instance': instance++,
+                  'timestamp': Math.ceil(record.Timestamp / 100),
                   'name': record.Name,
                   'confidence': (record.Confidence * 1).toFixed(2),
                   'x': record.BoundingBox.Left * canvas.width,
@@ -377,36 +369,20 @@
                   'width': record.BoundingBox.Width * canvas.width,
                   'height': record.BoundingBox.Height * canvas.height
                 };
-                boxMap.set(i++, [boxinfo])
+                boxMap.get(timestamp).push(boxinfo)
               } else {
-                // Use time resolution of 0.1 second
-                const timestamp = Math.round(record.Timestamp / 100);
-                if (boxMap.has(timestamp)) {
-                  const boxinfo = {
-                    'instance': instance++,
-                    'timestamp': Math.ceil(record.Timestamp / 100),
-                    'name': record.Name,
-                    'confidence': (record.Confidence * 1).toFixed(2),
-                    'x': record.BoundingBox.Left * canvas.width,
-                    'y': record.BoundingBox.Top * canvas.height,
-                    'width': record.BoundingBox.Width * canvas.width,
-                    'height': record.BoundingBox.Height * canvas.height
-                  };
-                  boxMap.get(timestamp).push(boxinfo)
-                } else {
-                  instance = 0;
-                  const boxinfo = {
-                    'instance': instance++,
-                    'timestamp': Math.ceil(record.Timestamp / 100),
-                    'name': record.Name,
-                    'confidence': (record.Confidence * 1).toFixed(2),
-                    'x': record.BoundingBox.Left * canvas.width,
-                    'y': record.BoundingBox.Top * canvas.height,
-                    'width': record.BoundingBox.Width * canvas.width,
-                    'height': record.BoundingBox.Height * canvas.height
-                  };
-                  boxMap.set(timestamp, [boxinfo])
-                }
+                instance = 0;
+                const boxinfo = {
+                  'instance': instance++,
+                  'timestamp': Math.ceil(record.Timestamp / 100),
+                  'name': record.Name,
+                  'confidence': (record.Confidence * 1).toFixed(2),
+                  'x': record.BoundingBox.Left * canvas.width,
+                  'y': record.BoundingBox.Top * canvas.height,
+                  'width': record.BoundingBox.Width * canvas.width,
+                  'height': record.BoundingBox.Height * canvas.height
+                };
+                boxMap.set(timestamp, [boxinfo])
               }
             }
           }

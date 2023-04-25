@@ -35,6 +35,3 @@ export default {
   props: ['thumbnailID', 'signedUrl'],
 }
 </script>
-
-<style scoped>
-</style>

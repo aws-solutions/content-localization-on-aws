@@ -324,7 +324,7 @@ aws s3 rb s3://<bucket-name> --force
 
 ## Collection of operational metrics
 
-This solution collects anonymous operational metrics to help AWS improve the
+This solution collects anonymized operational metrics to help AWS improve the
 quality of features of the solution. For more information, including how to disable
 this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/operational-metrics.html).
 
@@ -350,20 +350,20 @@ Example data:
 }
 ```
 
-To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymousUsage` in the `Mappings` section from:
+To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymizedData` in the `Mappings` section from:
 
 ```
-"Send" : {
-"AnonymousUsage" : { "Data" : "Yes" }
-},
+AnonymizedData:
+    SendAnonymizedData:
+      Data: "Yes"
 ```
 
 to:
 
 ```
-"Send" : {
-"AnonymousUsage" : { "Data" : "No" }
-},
+AnonymizedData:
+    SendAnonymizedData:
+      Data: "No"
 ```
 
 # Help

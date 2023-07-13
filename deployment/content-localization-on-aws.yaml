@@ -19,7 +19,7 @@ Parameters:
       - "r4.xlarge.search"
 
 Conditions:
-  EnableAnonymousData: !Equals [ !FindInMap [AnonymousData,SendAnonymousData,Data], "Yes"]
+  EnableAnonymizedData: !Equals [ !FindInMap [AnonymizedData,SendAnonymizedData,Data], "Yes"]
 
 Mappings:
   MediaInsights:
@@ -38,8 +38,8 @@ Mappings:
       SolutionName: "Content Localization on AWS"
       ApplicationType: "AWS-Solutions"
       AppRegistryApplicationName: "ContentLocalizationOnAws"
-  AnonymousData:
-    SendAnonymousData:
+  AnonymizedData:
+    SendAnonymizedData:
       Data: "Yes"
 
 Resources:
@@ -61,7 +61,7 @@ Resources:
         DeployTestResources: "No"
         MaxConcurrentWorkflows: 5
         EnableXrayTrace: "Yes"
-        SendAnonymousData: !FindInMap [AnonymousData,SendAnonymousData,Data]
+        SendAnonymousData: !FindInMap [AnonymizedData,SendAnonymizedData,Data]
         SolutionId: SO0164
         SolutionVersion: "%%VERSION%%"
 
@@ -225,14 +225,14 @@ Resources:
 
   # SendAnonymousData
   AnonymousDataUuid:
-    Condition: EnableAnonymousData
+    Condition: EnableAnonymizedData
     Type: "Custom::UUID"
     Properties:
       ServiceToken: !GetAtt AnonymousDataCustomResource.Arn
       Resource: UUID
 
   AnonymousMetric:
-    Condition: EnableAnonymousData
+    Condition: EnableAnonymizedData
     Type: "Custom::AnonymousMetric"
     Properties:
       ServiceToken: !GetAtt AnonymousDataCustomResource.Arn

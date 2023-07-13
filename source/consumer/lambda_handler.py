@@ -527,7 +527,7 @@ def delete_asset_all_indices(es_object, asset_id):
             body=delete_query
         )
     except Exception as e:
-        print("Unable to delete from elasticsearch: {es}:".format(es=e))
+        print("Unable to delete from elasticsearch: {es}:".format(es=e)) # nosec - not a SQL statement
     else:
         print(delete_request)
         print("Deleted asset: {asset} from elasticsearch".format(asset=asset_id))

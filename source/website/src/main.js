@@ -24,7 +24,8 @@ import "highlight.js/styles/github.css"
 import App from './App.vue'
 import store from './store'
 import router from './router.js'
-import Amplify, * as AmplifyModules from "aws-amplify";
+import { Amplify } from "aws-amplify";
+import * as AmplifyModules from "aws-amplify";
 import { AmplifyPlugin } from "aws-amplify-vue";
 
 const getRuntimeConfig = async () => {

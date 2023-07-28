@@ -45,15 +45,16 @@ def lambda_handler(event, context):
     method = 'POST'
     service = 'execute-api'
     # Host is the base URL for your REST API, where {restapi_id} is the API identifier, {region} is the Region of the API deployment. 
-    host = '{restapi_id}.execute-api.{region}.amazonaws.com'
-    region = '{region}'
+    region = os.environ.get('AWS_REGION')
+    rest_api_id = os.environ.get('REST_API_ID')
+    host = f"{rest_api_id}.execute-api.{region}.amazonaws.com"
     # Endpoint is the endpoint URL for your REST API resource, where {api_name} is the API name, and {method_name} is the name of the method resource of the API deployment. 
-    endpoint = 'https://{restapi_id}.execute-api.us-west-2.amazonaws.com/api/{api_name}/{method_name}'
+    endpoint = f'https://{host}/api/workflow/execution'
     # POST requests use a content type header.
     content_type = 'application/json'
 
     # Specify the Amazon S3 location for the input media file:
-    s3_bucket = '{s3_bucket}'
+    s3_bucket = event["Records"][0]["s3"]["bucket"]["name"]
     s3_key = event["Records"][0]["s3"]["object"]["key"]
     # Request parameters for executing the CasImageWorkflow in its default configuration
     request_parameters = '{"Name":"ContentLocalizationWorkflow","Configuration":{"PreprocessVideo":{"Thumbnail":{"ThumbnailPosition":"2","Enabled":true},"Mediainfo":{"Enabled":true}},"AnalyzeVideo":{"faceDetection":{"Enabled":false},"technicalCueDetection":{"Enabled":false},"shotDetection":{"Enabled":false},"celebrityRecognition":{"MediaType":"Video","Enabled":false},"labelDetection":{"MediaType":"Video","Enabled":true},"personTracking":{"MediaType":"Video","Enabled":false},"faceSearch":{"MediaType":"Video","Enabled":false,"CollectionId":"undefined"},"textDetection":{"MediaType":"Video","Enabled":false},"Mediaconvert":{"MediaType":"Video","Enabled":false},"TranscribeVideo":{"Enabled":true,"TranscribeLanguage":"en-US","MediaType":"Audio"}},"TransformText":{"WebToSRTCaptions":{"MediaType":"MetadataOnly","TargetLanguageCodes":["es","de","en"],"Enabled":true},"WebToVTTCaptions":{"MediaType":"MetadataOnly","TargetLanguageCodes":["es","de","en"],"Enabled":true},"PollyWebCaptions":{"MediaType":"MetadataOnly","Enabled":false,"SourceLanguageCode":"en"}},"WebCaptions":{"WebCaptions":{"MediaType":"MetadataOnly","SourceLanguageCode":"en","Enabled":true}},"Translate":{"Translate":{"MediaType":"Text","Enabled":false},"TranslateWebCaptions":{"MediaType":"MetadataOnly","Enabled":true,"TargetLanguageCodes":["es","de"],"SourceLanguageCode":"en","TerminologyNames":[],"ParallelDataNames":[]}},"AnalyzeText":{"ComprehendEntities":{"MediaType":"Text","Enabled":false},"ComprehendKeyPhrases":{"MediaType":"Text","Enabled":false}}}, "Input":{"Media":{"Video":{"S3Bucket": "' + s3_bucket + '", "S3Key":"' + s3_key + '"}}}}'
@@ -62,6 +63,8 @@ def lambda_handler(event, context):
     # to embed credentials in code.
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    if 'AWS_SESSION_TOKEN' in os.environ:
+        session_token = os.environ.get('AWS_SESSION_TOKEN')
     if access_key is None or secret_key is None:
         print('No access key is available.')
         sys.exit()
@@ -89,7 +92,10 @@ def lambda_handler(event, context):
     # Step 4: Create the canonical headers. Header names must be trimmed
     # and lowercase, and sorted in code point order from low to high.
     # Note that there is a trailing \n.
-    canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amz_date + '\n'
+    canonical_headers = 'host:' + host + '\n' + \
+        'x-amz-date:' + amz_date + '\n'
+    if session_token is not None:
+        canonical_headers += 'x-amz-security-token:' + session_token + '\n'
 
     # Step 5: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -97,6 +103,8 @@ def lambda_handler(event, context):
     # signed_headers include those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
     signed_headers = 'host;x-amz-date'
+    if session_token is not None:
+        signed_headers += ';x-amz-security-token'
 
     # Step 6: Create payload hash. In this example, the payload (body of
     # the request) contains the request parameters.
@@ -132,6 +140,8 @@ def lambda_handler(event, context):
     headers = {'Authorization': authorization_header,
                'Content-Type': content_type,
                'x-amz-date': amz_date}
+    if session_token:
+        headers['x-amz-security-token'] = session_token
 
     # ************* SEND THE REQUEST *************
     print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')

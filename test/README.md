@@ -32,7 +32,7 @@ Examples:
 
 * `./run_unit.sh`
 * `./run_unit.sh consumer`
-* `./run_unit.sh helper anonymous-data-logger`
+* `./run_unit.sh helper anonymized-data-logger`
 
 Otherwise it runs all available unit tests when no arguments are passed
 

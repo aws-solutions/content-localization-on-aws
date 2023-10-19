@@ -1,6 +1,6 @@
 {
-  "name": "AWS_Content_Localization",
-  "version": "0.1.0",
+  "name": "content-localization-on-aws",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -9,21 +9,21 @@
     "deploy": "aws s3 sync --acl public-read --profile mie --delete dist/ s3://[your_website_bucket]"
   },
   "dependencies": {
-    "aws-amplify": "5.2.7",
+    "aws-amplify": "5.3.2",
     "aws-amplify-vue": "2.1.5",
     "axios": "^1.4.0",
-    "bootstrap": "4.5.3",
-    "bootstrap-vue": "2.21.2",
-    "chart.js": "2.9.4",
+    "bootstrap": "4.6.1",
+    "bootstrap-vue": "^2.23.1",
+    "chart.js": "^4.4.0",
     "diff": "5.0.0",
     "dropzone": "5.9.3",
     "jquery": "3.6.0",
     "jwt-decode": "3.1.2",
-    "latest-version": "6.0.0",
+    "latest-version": "^7.0.0",
     "lodash": "4.17.21",
     "number-to-words": "1.2.4",
     "register-service-worker": "1.7.2",
-    "video.js": "7.15.4",
+    "video.js": "^8.5.2",
     "videojs-flash": "2.2.1",
     "videojs-hotkeys": "0.2.27",
     "videojs-markers": "1.0.1",
@@ -32,7 +32,7 @@
     "vue-router": "3.5.2",
     "vuex": "3.6.2",
     "vuex-persistedstate": "4.1.0",
-    "wavesurfer.js": "5.2.0"
+    "wavesurfer.js": "^7.3.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.6",
@@ -42,7 +42,7 @@
     "babel-eslint": "10.1.0",
     "eslint": "^7.0.0",
     "eslint-plugin-vue": "7.5.0",
-    "webpack-subresource-integrity": "1.5.2"
+    "webpack-subresource-integrity": "5.1.0"
   },
   "eslintConfig": {
     "root": false,
@@ -91,8 +91,11 @@
     "url": "git+https://github.com/aws-samples/aws-media-content-localization.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Amazon Web Services",
+    "url": "https://aws.amazon.com/solutions"
+  },
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/aws-samples/aws-media-content-localization/issues"
   },

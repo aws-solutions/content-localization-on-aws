@@ -119,13 +119,13 @@
         <template slot="button-content">
           <b-icon icon="download" color="white"></b-icon> Download
         </template>
-        <b-dropdown-item :href="vtt_url">
+        <!-- //NOSONAR --> <b-dropdown-item :href="vtt_url">
           Download VTT
         </b-dropdown-item>
-        <b-dropdown-item :href="srt_url">
+        <!-- //NOSONAR --> <b-dropdown-item :href="srt_url">
           Download SRT
         </b-dropdown-item>
-        <b-dropdown-item v-if="pollyaudio_url" :href="pollyaudio_url" target="_blank" download>
+        <!-- //NOSONAR --> <b-dropdown-item v-if="pollyaudio_url" :href="pollyaudio_url" target="_blank" download>
           Download Audio
         </b-dropdown-item>
         <b-dropdown-item v-else disabled>

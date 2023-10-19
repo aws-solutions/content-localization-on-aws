@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS %%VERSION%% - user authentication infrastructure"
+Description: "Content Localization on AWS user authentication infastructure %%VERSION%%"
 
 Parameters:
   AdminEmail:
@@ -92,7 +92,7 @@ Resources:
         - - index
           - .handler
       Role: !GetAtt CognitoRoleMapperLambdaExecutionRole.Arn
-      Runtime: python3.7
+      Runtime: python3.11
       Timeout: 30
 
   CognitoRoleMapperLambdaExecutionRole:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "(SO0164) Content Localization on AWS Version %%VERSION%% - Deploys the Content Localization on AWS Application over an existing Media Insights on AWS stack."
+Description: "(SO0164) Content Localization on AWS using an existing Media Insights on AWS stack %%VERSION%%"
 
 Parameters:
   MieStackName:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS %%VERSION%% - Deploys the Content Localization on AWS website resources"
+Description: "Content Localization on AWS website resources %%VERSION%%"
 
 Parameters:
   DataplaneEndpoint:
@@ -47,7 +47,7 @@ Resources:
               response_data = {'Data': stack_name.lower() + '-website'}
               cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, "CustomResourcePhysicalID")
       Handler: index.handler
-      Runtime: python3.8
+      Runtime: python3.11
       Role: !GetAtt WebsiteBucketNameExecutionRole.Arn
 
   WebsiteBucketNameFunctionPermissions:
@@ -121,22 +121,6 @@ Resources:
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
 
-  WebBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref ContentAnalysisWebsiteBucket
-      PolicyDocument:
-        Statement:
-          - Effect: Deny
-            Principal: "*"
-            Action: "*"
-            Resource:
-              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
-              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}"
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-
   CopyWebSource:
     DependsOn: ContentAnalysisWebsiteBucket
     Type: Custom::WebsiteDeployHelper
@@ -171,6 +155,15 @@ Resources:
               - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
             Principal:
               CanonicalUser: !GetAtt ContentAnalysisOriginAccessIdentity.S3CanonicalUserId
+          - Effect: Deny
+            Principal: "*"
+            Action: "*"
+            Resource:
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}/*"
+              - !Sub "arn:aws:s3:::${ContentAnalysisWebsiteBucket}"
+            Condition:
+              Bool:
+                aws:SecureTransport: false
 
   WebsiteDistribution:
     Type: AWS::CloudFront::Distribution
@@ -293,7 +286,7 @@ Resources:
       Handler: website_helper.lambda_handler
       MemorySize: 256
       Role: !GetAtt WebsiteHelperRole.Arn
-      Runtime: python3.9
+      Runtime: python3.11
       Timeout: 900
       Environment:
         Variables:
@@ -305,6 +298,7 @@ Resources:
           IdentityPoolId: !Ref IdentityPoolId
           AwsRegion: !Ref AWS::Region
           PoolClientId: !Ref PoolClientId
+          botoConfig: '{"user_agent_extra": "AwsSolution/SO0164/%%VERSION%%"}'
 
 Outputs:
   CloudfrontUrl:

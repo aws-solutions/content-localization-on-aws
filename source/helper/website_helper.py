@@ -12,6 +12,7 @@
 ######################################################################################################################
 
 import boto3
+from botocore import config
 import json
 import logging
 import os
@@ -21,8 +22,11 @@ from urllib.request import build_opener, HTTPHandler, Request
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-s3 = boto3.resource('s3')
-s3_client = boto3.client('s3')
+helper_config = json.loads(os.environ['botoConfig'])
+config = config.Config(**helper_config)
+
+s3 = boto3.resource('s3', config=config)
+s3_client = boto3.client('s3', config=config)
 
 replace_env_variables = False
 

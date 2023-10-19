@@ -266,10 +266,10 @@ to highlight the fields in the custom vocab schema. -->
         <template slot="button-content">
           <b-icon icon="download" color="white"></b-icon> Download
         </template>
-        <b-dropdown-item :href="vtt_url">
+        <!-- //NOSONAR --> <b-dropdown-item :href="vtt_url"> 
           Download VTT
-        </b-dropdown-item>
-        <b-dropdown-item :href="srt_url">
+        </b-dropdown-item> 
+        <!-- //NOSONAR --> <b-dropdown-item :href="srt_url">
           Download SRT
         </b-dropdown-item>
       </b-dropdown>&nbsp;

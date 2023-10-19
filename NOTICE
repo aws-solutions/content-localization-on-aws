@@ -25,7 +25,7 @@ botocore under the Apache License Version 2.0
 cfn-lint under the Massachusetts Institute of Technology license
 cfnresponse under the Apache License Version 2.0
 chalice under the Apache License Version 2.0
-char.js under the Massachusetts Institute of Technology license
+chart.js under the Massachusetts Institute of Technology license
 diff under the BSD with attribution (BSD-3) license
 dropzone under the Massachusetts Institute of Technology license
 elasticsearch-py under the Apache License Version 2.0
@@ -37,11 +37,11 @@ number-to-words under the Massachusetts Institute of Technology license
 pytest under the Massachusetts Institute of Technology license
 register-service-worker under the Massachusetts Institute of Technology license
 requests under the Apache License Version 2.0
-requests_aws4auth under the Massachusetts Institute of Technology license
+requests-aws4auth under the Massachusetts Institute of Technology license
 routerjs under the Massachusetts Institute of Technology license
 selenium under the Apache License Version 2.0
 urllib3 under the Massachusetts Institute of Technology license
-videojs under the Apache License Version 2.0
+video.js under the Apache License Version 2.0
 videojs-flash under the Apache License Version 2.0
 videojs-hotkeys under the Apache License Version 2.0
 videojs-markers under the Massachusetts Institute of Technology license
@@ -51,5 +51,5 @@ vue-highlightjs under the Massachusetts Institute of Technology license
 vue-router under the Massachusetts Institute of Technology license
 vuex under the Massachusetts Institute of Technology license
 vuex-persistedstate under the Massachusetts Institute of Technology license
-wavesurfer.js under the Creative Commons Attribution 3.0 Unported License
-webdriver_manager under the Apache License Version 2.0
+wavesurfer.js under the BSD with attribution (BSD-3) license
+webdriver-manager under the Apache License Version 2.0

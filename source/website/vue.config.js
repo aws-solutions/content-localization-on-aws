@@ -12,7 +12,7 @@
 #  and limitations under the License.                                                                                #
 ######################################################################################################################
 */
-const SriPlugin = require('webpack-subresource-integrity');
+const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 
 module.exports = {
   configureWebpack: {
@@ -20,8 +20,7 @@ module.exports = {
       crossOriginLoading: 'anonymous',
     },
     plugins: [
-      new SriPlugin({
-        hashFuncNames: ['sha256', 'sha384'],
+      new SubresourceIntegrityPlugin({
         enabled: true
       }),
     ],

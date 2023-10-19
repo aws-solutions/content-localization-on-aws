@@ -14,7 +14,7 @@ class Context():
         self.log_stream_name = log_stream_name
 
 
-class TestAnonymousDataLogger(unittest.TestCase):
+class TestAnonymizedDataLogger(unittest.TestCase):
 
     def setUp(self):
         import lib.cfnresponse as cfn
@@ -40,7 +40,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
@@ -56,7 +56,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
 
         # expected values
 
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -66,20 +66,20 @@ class TestAnonymousDataLogger(unittest.TestCase):
         assert cfn.send.call_args[0][1] == 'testContext'
         assert cfn.send.call_args[0][2] == 'SUCCESS'
         assert cfn.send.call_args[0][3]['UUID'] is not None
-        assert TestAnonymousDataLogger.is_uuid(cfn.send.call_args[0][3]['UUID'])
-        assert TestAnonymousDataLogger.is_uuid(cfn.send.call_args[0][4])
+        assert TestAnonymizedDataLogger.is_uuid(cfn.send.call_args[0][3]['UUID'])
+        assert TestAnonymizedDataLogger.is_uuid(cfn.send.call_args[0][4])
 
-    def test_handler_create_with_anonymous_metrics(self):
+    def test_handler_create_with_anonymized_metrics(self):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
             'RequestType': 'Create',
             'ResourceProperties': {
-                'Resource': 'AnonymousMetric',
+                'Resource': 'AnonymizedMetric',
                 'ServiceToken': 'testServiceToken',
                 'SolutionId': 'testSolutionId',
             },
@@ -87,7 +87,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = 'testContext'
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -111,7 +111,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
@@ -125,7 +125,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = Context()
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -144,7 +144,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
@@ -160,7 +160,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
 
         # expected values
 
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -170,20 +170,20 @@ class TestAnonymousDataLogger(unittest.TestCase):
         assert cfn.send.call_args[0][1] == 'testContext'
         assert cfn.send.call_args[0][2] == 'SUCCESS'
         assert cfn.send.call_args[0][3]['UUID'] is not None
-        assert TestAnonymousDataLogger.is_uuid(cfn.send.call_args[0][3]['UUID'])
-        assert TestAnonymousDataLogger.is_uuid(cfn.send.call_args[0][4])
+        assert TestAnonymizedDataLogger.is_uuid(cfn.send.call_args[0][3]['UUID'])
+        assert TestAnonymizedDataLogger.is_uuid(cfn.send.call_args[0][4])
 
-    def test_handler_update_with_anonymous_metrics(self):
+    def test_handler_update_with_anonymized_metrics(self):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
             'RequestType': 'Update',
             'ResourceProperties': {
-                'Resource': 'AnonymousMetric',
+                'Resource': 'AnonymizedMetric',
                 'ServiceToken': 'testServiceToken',
                 'SolutionId': 'testSolutionId',
             },
@@ -191,7 +191,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = 'testContext'
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -215,13 +215,13 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
             'RequestType': 'Delete',
             'ResourceProperties': {
-                'Resource': 'AnonymousMetric',
+                'Resource': 'AnonymizedMetric',
                 'ServiceToken': 'testServiceToken',
                 'SolutionId': 'testSolutionId',
             },
@@ -229,7 +229,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = 'testContext'
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -246,13 +246,13 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
             'RequestType': 'Not_Supported',
             'ResourceProperties': {
-                'Resource': 'AnonymousMetric',
+                'Resource': 'AnonymizedMetric',
                 'ServiceToken': 'testServiceToken',
                 'SolutionId': 'testSolutionId',
             },
@@ -260,7 +260,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = 'testContext'
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )
@@ -273,12 +273,12 @@ class TestAnonymousDataLogger(unittest.TestCase):
         # imports
         import lib.cfnresponse as cfn
         import lib.metrics as metrics
-        anonymous_data_logger = importlib.import_module('anonymous-data-logger')
+        anonymized_data_logger = importlib.import_module('anonymized-data-logger')
 
         # test parameters
         event_param = {
             'ResourceProperties': {
-                'Resource': 'AnonymousMetric',
+                'Resource': 'AnonymizedMetric',
                 'ServiceToken': 'testServiceToken',
                 'SolutionId': 'testSolutionId',
             },
@@ -286,7 +286,7 @@ class TestAnonymousDataLogger(unittest.TestCase):
         context_param = Context()
 
         # expected values
-        anonymous_data_logger.handler(
+        anonymized_data_logger.handler(
             event_param,
             context_param
         )

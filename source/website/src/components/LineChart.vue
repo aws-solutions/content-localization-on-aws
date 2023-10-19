@@ -29,7 +29,7 @@
 
 <script>
   import { mapState } from 'vuex'
-  import Chart from 'chart.js';
+  import Chart from 'chart.js/auto';
   import Loading from '@/components/Loading.vue'
 
   export default {

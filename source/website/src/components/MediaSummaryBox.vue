@@ -28,7 +28,7 @@
         {{ $route.params.asset_id }}
         <br>
         <label>Filename:&nbsp;</label>
-        <a
+        <!-- //NOSONAR --> <a
           :href="videoUrl" rel="noopener noreferrer"
           download
         >

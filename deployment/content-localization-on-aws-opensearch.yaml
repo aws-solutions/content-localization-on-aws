@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Content Localization on AWS %%VERSION%% - Opensearch Consumer stack"
+Description: "Content Localization on AWS Opensearch consumer stack %%VERSION%%"
 
 Parameters:
   NodeType:
@@ -92,7 +92,7 @@ Resources:
               "esconsumer.zip",
             ],
           ]
-      Runtime: "python3.7"
+      Runtime: "python3.11"
       Timeout: 900
       MemorySize: 2048
       Environment:

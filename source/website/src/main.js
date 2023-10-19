@@ -18,7 +18,7 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import 'dropzone/dist/min/dropzone.min.css'
+import 'dropzone/dist/dropzone.css'
 import "highlight.js/styles/github.css"
 
 import App from './App.vue'

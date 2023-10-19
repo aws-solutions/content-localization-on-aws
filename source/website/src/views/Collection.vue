@@ -113,7 +113,7 @@
                       </div>
                     </template>
                     <template #cell(Actions)="data">
-                      <b-link
+                      <!-- //NOSONAR --> <b-link
                         :href="(`/analysis/${data.item.asset_id}`)"
                       >
                         Analyze

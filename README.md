@@ -1,6 +1,3 @@
-[![scheduled-workflow](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml/badge.svg)](https://github.com/aws-solutions/content-localization-on-aws/actions/workflows/scheduled-workflow.yml)
-
-
 # Content Localization on AWS 
 
 Welcome to the Content Localization on AWS project!   This project will help you extend the reach of your VOD content by quickly and efficiently creating accurate multi-language subtitles using AWS AI Services.  You can make manual corrections to the automatically created subtitles and use advanced AWS AI Service customization features to improve the results of the automation for your content domain. Content Localization is built on [Media Insights on AWS](https://github.com/aws-solutions/media-insights-on-aws), a framework that helps accelerate the development of serverless applications that process video, images, audio, and text with artificial intelligence services and multimedia services on AWS. 
@@ -326,7 +323,7 @@ aws s3 rb s3://<bucket-name> --force
 
 This solution collects anonymized operational metrics to help AWS improve the
 quality of features of the solution. For more information, including how to disable
-this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/operational-metrics.html).
+this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/content-localization-on-aws/reference.html#anonymized-data-collection).
 
 When enabled, the following information is collected and sent to AWS:
 
@@ -350,7 +347,7 @@ Example data:
 }
 ```
 
-To opt out of this reporting, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymizedData` in the `Mappings` section from:
+To opt out of this reporting on the Content Localization on AWS stack, edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `AnonymizedData` in the `Mappings` section from:
 
 ```
 AnonymizedData:
@@ -365,6 +362,47 @@ AnonymizedData:
     SendAnonymizedData:
       Data: "No"
 ```
+
+To opt out of this reporting on the nested Media Insights on AWS stack, do one of the following options:
+
+### *Option 1:* Deploy Media Insights on AWS separately with metric reporting disabled
+
+1. Follow the instructions to disable metric reporting in the [Anonymized Data Collection](https://docs.aws.amazon.com/solutions/latest/media-insights-on-aws/reference.html#anonymized-data-collection) section of the Media Insights on AWS implementation guide, then deploy the solution
+2. Follow the instructions to [Install Content Localization on AWS over an existing Media Insights on AWS stack](#option-1-install-content-localization-on-aws-over-an-existing-media-insights-on-aws-stack) 
+
+### *Option 2:* Modify the source template that is used to deploy Media Insights on AWS as a nested stack
+
+1. Download the Media Insights on AWS template from `https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/<version>/media-insights-on-aws-stack.template` and replace `<version>` to get the specific Media Insights on AWS version you would like to deploy
+2. Follow the instructions to disable metric reporting in the [Anonymized Data Collection](https://docs.aws.amazon.com/solutions/latest/media-insights-on-aws/reference.html#anonymized-data-collection) section of the Media Insights on AWS implementation guide, but do not deploy this template
+3. Upload the template to an S3 bucket
+4. Edit [deployment/content-localization-on-aws.yaml](deployment/content-localization-on-aws.yaml) and change `TemplateURL` within the `MieStack` properties to point to the template you've uploaded to S3
+
+    from
+
+    ```
+    MieStack:
+        Type: "AWS::CloudFormation::Stack"
+        Properties:
+          TemplateURL: !Join
+            - ""
+            - - "https://solutions-reference.s3.amazonaws.com/media-insights-on-aws/"
+              - !FindInMap
+                - MediaInsights
+                - Release
+                - Version
+              - "/media-insights-on-aws-stack.template"
+    ```
+
+    to
+
+    ```
+    MieStack:
+        Type: "AWS::CloudFormation::Stack"
+        Properties:
+          TemplateURL: "<new url>"
+    ```
+
+5. Use the instructions in previous sections to [build](#building-the-solution-from-source-code) and [deploy](#option-2-install-content-localization-on-aws-with-a-new-media-insights-on-aws-stack) Content Localization on AWS
 
 # Help
 

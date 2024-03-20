@@ -36,16 +36,15 @@
         <b-col>
           <b>Select a vocabulary to overwrite:</b>
           <b-form-group v-if="customVocabularyList.length>0">
-            <b-form-radio-group
-              id="custom-vocab-selection"
-              v-model="customVocabularySelected"
-              name="custom-vocab-list"
-              :options="customVocabularyList"
-              text-field="name_and_status"
-              value-field="name"
-              disabled-field="notEnabled"
-              stacked
-            >
+            <b-form-radio-group v-for="(vocabulary, index) in customVocabularyList" :key="vocabulary">
+              <div>
+                <input
+                  :id="'vocabulary_' + index"
+                  v-model="customVocabularySelected"
+                  type="radio"
+                  :value=vocabulary.name />
+                  <label :for="'vocabulary_' + index">&nbsp;{{ vocabulary.name_and_status }}</label>
+              </div>
             </b-form-radio-group>
           </b-form-group>
           <div v-if="customVocabularyList.length > 0 && customVocabularySelected !== ''">
@@ -63,11 +62,16 @@
           <b-form-input v-if="customVocabularyList.length>0" v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name (optional)" :state="validVocabularyName ? null : false" @focus="customVocabularySelected=''"></b-form-input>
           <b-form-input v-else v-model="customVocabularyCreateNew" size="sm" placeholder="Enter vocabulary name" :state="validVocabularyName ? null : false"></b-form-input>
           Vocabulary Language:
-          <b-form-select
-            v-model="vocabulary_language_code"
-            :options="transcribeLanguages"
-            size="sm"
-          />
+          <div>
+            <select v-model="vocabulary_language_code">
+              <option 
+                v-for="language in transcribeLanguages" :key="language"
+                :value=language.value
+              >
+                {{ language.text }}
+              </option>
+            </select>
+          </div>
           <hr>
           <label>Draft vocabulary name: </label> {{ customVocabularyName }}
           <div v-if="customVocabularySelected === '' && customVocabularyCreateNew === ''" style="color:red">

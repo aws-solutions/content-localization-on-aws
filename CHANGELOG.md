@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2024-03-20
+
+### Changed
+
+* Added resource dependency on OpensearchServiceDomain
+* Upgraded to Media Insights on AWS v5.1.6
+* Enabled versioning on website bucket
+
+### Security
+
+* Upgraded vulnerable packages 
+* Replaced some bootstrap-vue code that was incompatible with Vue 2 to 3 migration build
+
 ## [2.1.2] - 2023-10-19
 
 ### Changed

@@ -91,12 +91,16 @@
           <b-card-group deck>
             <b-card header="Video Operators">
               <b-form-group>
-                <b-form-checkbox-group
-                  id="checkbox-group-1"
-                  v-model="enabledOperators"
-                  :options="videoOperators"
-                  name="flavour-1"
-                ></b-form-checkbox-group>
+                <b-form-checkbox-group v-for="(operator, index) in videoOperators" :key="operator">
+                  <div>
+                    <input
+                      :id="'operator_' + index"
+                      v-model="enabledOperators"
+                      type="checkbox"
+                      :value="operator.value" />
+                      <label :for="'operator_' + index">{{ operator.text }}</label>
+                  </div>
+                </b-form-checkbox-group>
                 <label>Thumbnail position: </label>
                 <b-form-input v-model="thumbnail_position" type="range" min="1" max="20" step="1"></b-form-input> {{ thumbnail_position }} sec
                 <b-form-input v-if="enabledOperators.includes('faceSearch')" id="face_collection_id" v-model="faceCollectionId" placeholder="Enter face collection id"></b-form-input>
@@ -107,47 +111,56 @@
             </b-card>
             <b-card header="Audio Operators">
               <b-form-group>
-                <b-form-checkbox-group id="checkbox-group-2" v-model="enabledOperators" name="audioOperators">
-                  <b-form-checkbox value="Transcribe">
-                    Transcribe
-                  </b-form-checkbox>
+                <b-form-checkbox-group>
+                  <div>
+                    <input
+                      v-model="enabledOperators"
+                      id="transcribe-operator"
+                      type="checkbox"
+                      value="Transcribe" />
+                      <label for="transcribe-operator">Transcribe</label>
+                  </div>
                   <div v-if="enabledOperators.includes('Transcribe')">
                     <label>Source Language</label>
-                    <b-form-select v-model="transcribeLanguage" :options="transcribeLanguages">
-                    </b-form-select>
+                    <div>
+                      <select v-model="transcribeLanguage">
+                        <option
+                          v-for="language in transcribeLanguages" :key="language"
+                          :value=language.value
+                        >
+                          {{ language.text }}
+                        </option>
+                      </select>
+                    </div>
                     <!-- Custom vocab and CLM options are disabled when source language 
                     autodetect is enabled in order to prevent users from selecting 
                     incompatible customizations. -->
                     <div v-if="transcribeLanguage !== 'auto'">
                       Custom Vocabulary
-                      <b-form-select
-                        v-model="customVocabulary"
-                        :options="customVocabularyList"
-                        text-field="name_and_status"
-                        value-field="name"
-                        disabled-field="notEnabled"
-                      >
-                        <template #first>
-                          <b-form-select-option :value="null">
-                            (optional)
-                          </b-form-select-option>
-                        </template>
-                      </b-form-select>
+                      <div>
+                        <select v-model="customVocabulary">
+                          <option disabled :value="null">(optional)</option>
+                          <option
+                            v-for="vocabulary in customVocabularyList" :key="vocabulary"
+                            :value=vocabulary.name
+                          >
+                            {{ vocabulary.name_and_status }}
+                          </option>
+                        </select>
+                      </div>
                       <br>
                       Custom Language Models
-                      <b-form-select
-                        v-model="customLanguageModel"
-                        :options="customLanguageModelList"
-                        text-field="name_and_status"
-                        value-field="name"
-                        disabled-field="notEnabled"
-                      >
-                        <template #first>
-                          <b-form-select-option :value="null">
-                            (optional)
-                          </b-form-select-option>
-                        </template>
-                      </b-form-select>
+                      <div>
+                        <select v-model="customLanguageModel">
+                          <option disabled :value="null">(optional)</option>
+                          <option
+                            v-for="language in customLanguageModelList" :key="language"
+                            :value="language.name"
+                          >
+                            {{ language.name_and_status }}
+                          </option>
+                        </select>
+                      </div>
                       <br>
                     </div>
                     Use Existing Subtitles
@@ -161,23 +174,39 @@
             </b-card>
             <b-card header="Text Operators">
               <b-form-group>
-                <b-form-checkbox-group
-                  id="checkbox-group-3"
-                  v-model="enabledOperators"
-                  name="textOperators"
-                >
-                  <b-form-checkbox value="ComprehendEntities">
-                    Comprehend Entities
-                  </b-form-checkbox>
-                  <b-form-checkbox value="ComprehendKeyPhrases">
-                    Comprehend Key Phrases
-                  </b-form-checkbox>
-                  <b-form-checkbox value="Translate">
-                    Translate
-                  </b-form-checkbox>
-                  <b-form-checkbox value="Polly">
-                    Generate audio translations with Amazon Polly
-                  </b-form-checkbox>
+                <b-form-checkbox-group>
+                  <div>
+                    <input
+                      v-model="enabledOperators"
+                      id="comprehend-entities"
+                      type="checkbox"
+                      value="ComprehendEntities" />
+                      <label for="comprehend-entities">Comprehend Entities</label>
+                  </div>
+                  <div>
+                    <input
+                      v-model="enabledOperators"
+                      id="comprehend-key-phrases"
+                      type="checkbox"
+                      value="ComprehendKeyPhrases" />
+                      <label for="comprehend-key-phrases">Comprehend Key Phrases</label>
+                  </div>
+                  <div>
+                    <input
+                      v-model="enabledOperators"
+                      id="translate-operator"
+                      type="checkbox"
+                      value="Translate" />
+                      <label for="translate-text-operator">Translate</label>
+                  </div>
+                  <div class="flex-checkbox">
+                    <input
+                      v-model="enabledOperators"
+                      id="polly-operator"
+                      type="checkbox"
+                      value="Polly" />
+                      <label for="polly">Generate audio translations with Amazon Polly</label>
+                  </div>
                 </b-form-checkbox-group>
                 <div v-if="pollyFormError" style="color:red">
                   {{ pollyFormError }}
@@ -198,23 +227,29 @@
                    the source language that the user specified for Transcribe. -->
                   <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
-                    <b-form-select
-                      v-model="customTerminology"
-                      :options="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                      multiple
-                    >
-                    </b-form-select>
+                    <div>
+                      <select class="custom-select" v-model="customTerminology" multiple>
+                        <option
+                          v-for="terminology in customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode)"
+                          :key="terminology"
+                          :value="{'Name': terminology.Name, 'TargetLanguageCodes': terminology.TargetLanguageCodes}"
+                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'" />
+                      </select>
+                    </div>
                   </div>
                   <!-- If the user specified auto-detect for the Transcribe source
                    language then show all custom terminologies. -->
                   <div v-else-if="sourceLanguageCode === 'auto' && customTerminologyList.length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
-                    <b-form-select
-                      v-model="customTerminology"
-                      :options="customTerminologyList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                      multiple
-                    >
-                    </b-form-select>
+                    <div>
+                      <select class="custom-select" v-model="customTerminology" multiple>
+                        <option
+                          v-for="terminology in customTerminologyList"
+                          :key="terminology"
+                          :value="{'Name': terminology.Name, 'TargetLanguageCodes': terminology.TargetLanguageCodes}"
+                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'" />
+                      </select>
+                    </div>
                   </div>
                   <div v-else>
                     <b>Custom Terminologies:</b>
@@ -232,23 +267,29 @@
                    the source language that the user specified for Transcribe. -->
                   <div v-if="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
-                    <b-form-select
-                      v-model="parallelData"
-                      :options="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                      multiple
-                    >
-                    </b-form-select>
+                    <div>
+                      <select class="custom-select" v-model="parallelData" multiple>
+                        <option
+                          v-for="data in parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode)"
+                          :key="data"
+                          :value="{'Name': data.Name, 'TargetLanguageCodes': data.TargetLanguageCodes}"
+                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'" />
+                      </select>
+                    </div>
                   </div>
                   <!-- If the user specified auto-detect for the Transcribe source
                    language then show all parallel data sets. -->
                   <div v-else-if="sourceLanguageCode === 'auto' && parallelDataList.length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
-                    <b-form-select
-                      v-model="parallelData"
-                      :options="parallelDataList.map( x => { return {'text': x.Name + ' (' + x.TargetLanguageCodes + ')' , 'value': {'Name': x.Name, 'TargetLanguageCodes': x.TargetLanguageCodes}}})"
-                      multiple
-                    >
-                    </b-form-select>
+                    <div>
+                      <select class="custom-select" v-model="parallelData" multiple>
+                        <option
+                          v-for="data in parallelDataList"
+                          :key="data"
+                          :value="{'Name': data.Name, 'TargetLanguageCodes': data.TargetLanguageCodes}"
+                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'" />
+                      </select>
+                    </div>
                   </div>
                   <div v-else>
                     <b>Parallel Data:</b>
@@ -1214,6 +1255,13 @@ input[type=text] {
 
 label {
   font-weight: bold;
+  word-wrap: normal;
+  margin-left: 4px;
+}
+
+.flex-checkbox {
+  display: flex;
+  flex-direction: row;
 }
 
 </style>

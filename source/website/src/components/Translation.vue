@@ -46,11 +46,17 @@
     >
       <!-- show radio buttons for each available translation language -->
       <b-form-group>
-        <b-form-radio-group
-          v-model="selected_lang_code"
-          :options="alphabetized_language_collection"
-          @change="getWebCaptions"
-        ></b-form-radio-group>
+        <b-form-radio-group v-for="(language, index) in alphabetized_language_collection" :key="language">
+          <div>
+            <input
+              :id="'language_' + index"
+              v-model="selected_lang_code"
+              type="radio"
+              :value=language.value
+              @change="getWebCaptions" />
+              <label :for="'language_' + index">&nbsp;{{ language.text }}</label>
+          </div>
+        </b-form-radio-group>
       </b-form-group>
       <!-- show translation text when language has been selected -->
       <div v-if="selected_lang_code !== ''" id="event-line-editor" class="event-line-editor">
@@ -162,16 +168,15 @@
           Load an existing terminology:
         </div>
         <b-form-group v-if="customTerminologyList.length > 0">
-          <b-form-checkbox-group
-            id="custom-terminology-selection"
-            v-model="customTerminologySelected"
-            name="custom-terminology-list"
-            :options="customTerminologyList"
-            text-field="name_and_status"
-            value-field="name"
-            disabled-field="notEnabled"
-            stacked
-          >
+          <b-form-checkbox-group v-for="(terminology, index) in customTerminologyList" :key="terminology">
+            <div>
+                <input
+                  :id="'terminology_' + index"
+                  v-model="customTerminologySelected"
+                  type="checkbox"
+                  :value=terminology />
+                  <label :for="'terminology_' + index">&nbsp;{{ terminology }}</label>
+            </div>
           </b-form-checkbox-group>
         </b-form-group>
         <div v-if="customTerminologySelected.length > 0">
@@ -285,20 +290,30 @@ Uncomment the following buttons to get options for adding or removing languages 
       </b-modal>
       <b-modal ref="add-language-modal" title="Add Language" ok-title="Save" :ok-disabled="newLanguageCode === ''" @ok="add_language_request()">
         <p>Select language to add:</p>
-        <b-form-select
-          v-model="newLanguageCode"
-          placeholder="language code"
-          :options="translateLanguages"
-          size="sm"
-        />
+        <div>
+          <select v-model="newLanguageCode">
+            <option
+              v-for="language in translateLanguages" :key="language"
+              :value=language.value
+            >
+              {{ language.text }}
+            </option>
+          </select>
+        </div>
       </b-modal>
       <b-modal ref="remove-language-modal" title="Remove Language" ok-title="Remove" :ok-disabled="removeLanguageCode === ''" @ok="remove_language_request()">
         <p>Select language to remove:</p>
         <b-form-group>
-          <b-form-radio-group
-            v-model="removeLanguageCode"
-            :options="alphabetized_language_collection.map(x => x.value)"
-          ></b-form-radio-group>
+          <b-form-radio-group v-for="(language, index) in alphabetized_language_collection" :key="language">
+            <div>
+              <input
+                :id="'language_' + index"
+                v-model="removeLanguageCode"
+                type="radio"
+                :value=language.value />
+                <label :for="'language_' + index">&nbsp;{{ language.value }}</label>
+            </div>
+          </b-form-radio-group>
         </b-form-group>
       </b-modal>
       <div v-if="webCaptions.length > 0 && workflow_status !== 'Complete' && workflow_status !== 'Error' && workflow_status !== 'Waiting'" style="color:red">

@@ -120,6 +120,8 @@ Resources:
             ExpirationInDays: 10
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
+      VersioningConfiguration:
+        Status: Enabled
 
   CopyWebSource:
     DependsOn: ContentAnalysisWebsiteBucket

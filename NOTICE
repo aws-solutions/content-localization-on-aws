@@ -13,6 +13,7 @@ THIRD PARTY COMPONENTS
 **********************
 This software includes third party software subject to the following copyrights:
 
+attrs under the Massachusetts Institute of Technology license
 aws-amplify under the Apache License Version 2.0
 aws-amplify-vue under the Apache License Version 2.0
 aws_xray_sdk under the Apache License Version 2.0
@@ -26,20 +27,38 @@ cfn-lint under the Massachusetts Institute of Technology license
 cfnresponse under the Apache License Version 2.0
 chalice under the Apache License Version 2.0
 chart.js under the Massachusetts Institute of Technology license
+colorama under the BSD license
+configparser under the Massachusetts Institute of Technology license
+coverage under the Apache License Version 2.0
+crayons under the Massachusetts Institute of Technology license
 diff under the BSD with attribution (BSD-3) license
 dropzone under the Massachusetts Institute of Technology license
 elasticsearch-py under the Apache License Version 2.0
+exceptiongroup under the Massachusetts Institute of Technology license
+h11 under the Massachusetts Institute of Technology license
+iniconfig under the Massachusetts Institute of Technology license
+jmespath under the Massachusetts Institute of Technology license
 jquery under the Massachusetts Institute of Technology license
 jwt-decode under the Massachusetts Institute of Technology license
 latest-version under the Massachusetts Institute of Technology license
 lodash under the Massachusetts Institute of Technology license
 number-to-words under the Massachusetts Institute of Technology license
+outcome under the Apache License Version 2.0
+pluggy under the Massachusetts Institute of Technology license
+PySocks under the BSD license
 pytest under the Massachusetts Institute of Technology license
+pytest-cov under the Massachusetts Institute of Technology license
+python-dateutil under the Apache License Version 2.0
 register-service-worker under the Massachusetts Institute of Technology license
 requests under the Apache License Version 2.0
 requests-aws4auth under the Massachusetts Institute of Technology license
 routerjs under the Massachusetts Institute of Technology license
+s3transfer under the Apache License Version 2.0
 selenium under the Apache License Version 2.0
+sniffio under the Apache License Version 2.0
+tomli under the Massachusetts Institute of Technology license
+trio under the Apache License Version 2.0
+trio-websocket under the Massachusetts Institute of Technology license
 urllib3 under the Massachusetts Institute of Technology license
 video.js under the Apache License Version 2.0
 videojs-flash under the Apache License Version 2.0
@@ -51,5 +70,8 @@ vue-highlightjs under the Massachusetts Institute of Technology license
 vue-router under the Massachusetts Institute of Technology license
 vuex under the Massachusetts Institute of Technology license
 vuex-persistedstate under the Massachusetts Institute of Technology license
+@vue/compat under the Massachusetts Institute of Technology license
+@vue/compiler-sfc under the Massachusetts Institute of Technology license
 wavesurfer.js under the BSD with attribution (BSD-3) license
 webdriver-manager under the Apache License Version 2.0
+wsproto under the Massachusetts Institute of Technology license

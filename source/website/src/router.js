@@ -53,23 +53,4 @@ const router = new VueRouter({
   ]
 });
 
-router.beforeResolve(async (to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    try {
-      await Vue.prototype.$Amplify.Auth.currentAuthenticatedUser();
-      next();
-    } catch (e) {
-      console.log(e);
-      next({
-        path: "/",
-        query: {
-          redirect: to.fullPath
-        }
-      });
-    }
-  }
-  console.log(next);
-  next();
-});
-
 export default router;

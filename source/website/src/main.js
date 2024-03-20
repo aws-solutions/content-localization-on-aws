@@ -12,7 +12,7 @@
 #  and limitations under the License.                                                                                #
 ######################################################################################################################
 */
-import Vue from 'vue'
+import { createApp } from 'vue'
 import VueHighlightJS from 'vue-highlightjs'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 
@@ -27,6 +27,11 @@ import router from './router.js'
 import { Amplify } from "aws-amplify";
 import * as AmplifyModules from "aws-amplify";
 import { AmplifyPlugin } from "aws-amplify-vue";
+
+const app = createApp({
+  router,
+  ...App
+})
 
 const getRuntimeConfig = async () => {
   const runtimeConfig = await fetch('/runtimeConfig.json');
@@ -72,8 +77,7 @@ getRuntimeConfig().then(function(json) {
   };
   console.log("Runtime config: " + JSON.stringify(json));
   Amplify.configure(awsconfig);
-  Vue.config.productionTip = false;
-  Vue.mixin({
+  app.mixin({
     data() {
       return {
         // Distribute runtime configs into every Vue component
@@ -86,14 +90,30 @@ getRuntimeConfig().then(function(json) {
     },
   });
 
-  Vue.use(AmplifyPlugin, AmplifyModules);
-  Vue.use(BootstrapVue);
-  Vue.use(BootstrapVueIcons);
-  Vue.use(VueHighlightJS)
+  app.use(AmplifyPlugin, AmplifyModules);
+  app.use(BootstrapVue);
+  app.use(store);
+  app.use(BootstrapVueIcons);
+  app.use(VueHighlightJS)
 
-  new Vue({
-    router,
-    store,
-    render: h => h(App),
-  }).$mount('#app')
+  router.beforeResolve(async (to, from, next) => {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      try {
+        await app.prototype.$Amplify.Auth.currentAuthenticatedUser();
+        next();
+      } catch (e) {
+        console.log(e);
+        next({
+          path: "/",
+          query: {
+            redirect: to.fullPath
+          }
+        });
+      }
+    }
+    console.log(next);
+    next();
+  });
+
+  app.mount('#app')
 });

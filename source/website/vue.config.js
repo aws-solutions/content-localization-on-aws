@@ -15,17 +15,21 @@
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 
 module.exports = {
-  configureWebpack: {
-    output: {
-      crossOriginLoading: 'anonymous',
-    },
-    plugins: [
-      new SubresourceIntegrityPlugin({
-        enabled: true
-      }),
-    ],
-    performance: {
-      hints: false
-    }
+  chainWebpack: (config) => {
+    config.resolve.alias.set('vue', '@vue/compat')
+
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap((options) => {
+        return {
+          ...options,
+          compilerOptions: {
+            compatConfig: {
+              MODE: 2
+            }
+          }
+        }
+      })
   }
-};
+}

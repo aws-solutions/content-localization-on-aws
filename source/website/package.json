@@ -1,6 +1,6 @@
 {
   "name": "content-localization-on-aws",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -49,7 +49,9 @@
   },
   "overrides": {
     "ip": "^2.0.0",
-    "postcss": "^8.4.31"
+    "postcss": "^8.4.31",
+    "webpack-dev-middleware": "^5.3.4",
+    "follow-redirects": "^1.15.6"
   },
   "eslintConfig": {
     "root": false,

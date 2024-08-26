@@ -1,6 +1,6 @@
 {
   "name": "content-localization-on-aws",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -9,9 +9,9 @@
     "deploy": "aws s3 sync --acl public-read --profile mie --delete dist/ s3://[your_website_bucket]"
   },
   "dependencies": {
-    "aws-amplify": "5.3.12",
-    "aws-amplify-vue": "2.1.5",
-    "axios": "1.6.7",
+    "aws-amplify": "5.3.21",
+    "aws-amplify-vue": "2.1.9",
+    "axios": "^1.7.4",
     "bootstrap": "4.6.1",
     "bootstrap-vue": "^2.23.1",
     "chart.js": "^4.4.0",
@@ -51,7 +51,16 @@
     "ip": "^2.0.0",
     "postcss": "^8.4.31",
     "webpack-dev-middleware": "^5.3.4",
-    "follow-redirects": "^1.15.6"
+    "follow-redirects": "^1.15.6",
+    "aws-amplify": {
+      "fast-xml-parser": "^4.4.1"
+    },
+    "@aws-amplify/storage": {
+      "fast-xml-parser": "^4.4.1"
+    },
+    "@aws-amplify/api-rest": {
+      "axios": "^1.7.4"
+    }
   },
   "eslintConfig": {
     "root": false,

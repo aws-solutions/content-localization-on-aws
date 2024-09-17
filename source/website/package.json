@@ -1,6 +1,6 @@
 {
   "name": "content-localization-on-aws",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -60,7 +60,8 @@
     },
     "@aws-amplify/api-rest": {
       "axios": "^1.7.4"
-    }
+    },
+    "path-to-regexp": ">=8.1.0"
   },
   "eslintConfig": {
     "root": false,

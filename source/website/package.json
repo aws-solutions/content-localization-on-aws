@@ -1,6 +1,6 @@
 {
   "name": "content-localization-on-aws",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

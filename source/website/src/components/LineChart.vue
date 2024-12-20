@@ -1,16 +1,6 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -31,6 +21,7 @@
   import { mapState } from 'vuex'
   import Chart from 'chart.js/auto';
   import Loading from '@/components/Loading.vue'
+  import { shallowRef } from 'vue';
 
   export default {
     name: "LineChart",
@@ -41,7 +32,7 @@
       return {
         duration: undefined,
         chartConfig: {},
-        chart: undefined,
+        chart: shallowRef(null),
         isBusy: false
       }
     },
@@ -63,7 +54,7 @@
     activated: function () {
       console.log('activated component:', this.operator)
     },
-    beforeDestroy: function () {
+    beforeUnmount: function () {
       this.chart = Object
     },
     mounted: function () {
@@ -80,48 +71,48 @@
           }]
         },
         options: {
-          legend: {
-            display: false
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: true,
+              text: ''
+            },
+            tooltips: {
+              enabled: false
+            },
           },
-          title: {
-            display: true,
-            text: ''
-          },
-          tooltips: {
-            enabled: false
+          ticks: {
+            stepSize: 1
           },
           responsive: true,
           maintainAspectRatio: false,
           aspectRatio: 1.5,
           scales: {
-            yAxes: [{
+            y: {
               display: true,
-              fixedStepSize: 1,
-              scaleLabel: {
-                display: true,
-                labelString: 'Label Quantity'
+              beginAtZero: true,
+              min: 0,
+              title: {
+                text: 'Label Quantity'
               },
               ticks: {
-                beginAtZero: true,
-                min: 0,
-                padding: 25,
                 callback: function(value) {
                   if (Math.floor(value) === value) {
                     return value;
                   }
                 }
               }
-            }],
-            xAxes: [{
+            },
+            x: {
               display: true,
-              scaleLabel: {
-                display: true,
-                labelString: 'Time (mm:ss)'
+              beginAtZero: true,
+              min: 0,
+              title: {
+                text: 'Time (mm:ss)'
               },
               ticks: {
-                beginAtZero: true,
-                minRotation: 30,
-                min: 0,
                 callback: function(milliseconds) {
                   if (milliseconds >= 3600000) {
                     return new Date(milliseconds).toISOString().substring(11, 23);
@@ -131,7 +122,7 @@
                   }
                 }
               }
-            }]
+            }
           },
         }
       };
@@ -150,8 +141,8 @@
       handleClick(event) {
         let canvas_overlay = document.getElementById('verticalLineCanvas');
         if (canvas_overlay){
-          const chart_width = this.chart.chart.chartArea.right - this.chart.chart.chartArea.left;
-          const chart_left = this.chart.chart.chartArea.left;
+          const chart_width = this.chart.chartArea.right - this.chart.chartArea.left;
+          const chart_left = this.chart.chartArea.left;
           // Ignore clicks that are on the chart but to the left of the y-axis
           if (event.offsetX < chart_left) {
             return
@@ -180,8 +171,8 @@
         const lengthOfVideo = this.player.duration();
         const data = this.chart_tuples;
         const ctx = document.getElementById('lineChart');
-        this.chartConfig.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
-        if (this.chart === undefined) {
+        this.chartConfig.options.plugins.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
+        if (!this.chart) {
           this.chart = new Chart(ctx, {
             type: this.chartConfig.type,
             data: {
@@ -192,16 +183,16 @@
             options: this.chartConfig.options,
           });
         } else {
-          this.chart.options.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
+          this.chart.options.plugins.title.text = this.selected_label ? this.selected_label + " (instances / sec)" : "Total Labels (instances / sec)";
           this.chart.data.datasets[0].data = null;
           this.chart.data.datasets[0].data = data;
           this.chart.lineAtIndex = .25;
         }
         if (lengthOfVideo) {
-          this.chart.options.scales.xAxes[0].ticks.max = lengthOfVideo*1000;
+          this.chart.options.scales.x.max = lengthOfVideo * 1000;
         }
         if (lengthOfVideo > 3600) {
-          this.chart.options.scales.xAxes[0].scaleLabel.labelString = "Time (hh:mm:ss)";
+          this.chart.options.scales.x.title.text = "Time (hh:mm:ss)";
         }
         // render the above updates to xAxes
         this.chart.update();
@@ -219,8 +210,8 @@
         if (!canvas_overlay) return;
         let ctx = canvas_overlay.getContext('2d');
         if (!ctx || !this.chart) return;
-        let scale = this.chart.scales['y-axis-1'];
-        let lineLeftOffset = (this.chart.chart.chartArea.right - this.chart.chart.chartArea.left) * position + this.chart.chart.chartArea.left;
+        let scale = this.chart.scales['y'];
+        let lineLeftOffset = (this.chart.chartArea.right - this.chart.chartArea.left) * position + this.chart.chartArea.left;
         ctx.clearRect(0, 0, canvas_overlay.width, canvas_overlay.height);
         ctx.beginPath();
         ctx.strokeStyle = '#ff0000';

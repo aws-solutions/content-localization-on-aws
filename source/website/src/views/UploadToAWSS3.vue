@@ -1,20 +1,11 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <div>
-    <Header :is-upload-active="true" />
+    <HeaderView :is-upload-active="true" />
     <br>
     <b-container>
       <b-alert
@@ -97,8 +88,9 @@
                       :id="'operator_' + index"
                       v-model="enabledOperators"
                       type="checkbox"
-                      :value="operator.value" />
-                      <label :for="'operator_' + index">{{ operator.text }}</label>
+                      :value="operator.value"
+                    />
+                    <label :for="'operator_' + index">{{ operator.text }}</label>
                   </div>
                 </b-form-checkbox-group>
                 <label>Thumbnail position: </label>
@@ -114,11 +106,12 @@
                 <b-form-checkbox-group>
                   <div>
                     <input
-                      v-model="enabledOperators"
                       id="transcribe-operator"
+                      v-model="enabledOperators"
                       type="checkbox"
-                      value="Transcribe" />
-                      <label for="transcribe-operator">Transcribe</label>
+                      value="Transcribe"
+                    />
+                    <label for="transcribe-operator">Transcribe</label>
                   </div>
                   <div v-if="enabledOperators.includes('Transcribe')">
                     <label>Source Language</label>
@@ -126,7 +119,7 @@
                       <select v-model="transcribeLanguage">
                         <option
                           v-for="language in transcribeLanguages" :key="language"
-                          :value=language.value
+                          :value="language.value"
                         >
                           {{ language.text }}
                         </option>
@@ -139,10 +132,12 @@
                       Custom Vocabulary
                       <div>
                         <select v-model="customVocabulary">
-                          <option disabled :value="null">(optional)</option>
+                          <option disabled :value="null">
+                            (optional)
+                          </option>
                           <option
                             v-for="vocabulary in customVocabularyList" :key="vocabulary"
-                            :value=vocabulary.name
+                            :value="vocabulary.name"
                           >
                             {{ vocabulary.name_and_status }}
                           </option>
@@ -152,7 +147,9 @@
                       Custom Language Models
                       <div>
                         <select v-model="customLanguageModel">
-                          <option disabled :value="null">(optional)</option>
+                          <option disabled :value="null">
+                            (optional)
+                          </option>
                           <option
                             v-for="language in customLanguageModelList" :key="language"
                             :value="language.name"
@@ -177,35 +174,39 @@
                 <b-form-checkbox-group>
                   <div>
                     <input
-                      v-model="enabledOperators"
                       id="comprehend-entities"
+                      v-model="enabledOperators"
                       type="checkbox"
-                      value="ComprehendEntities" />
-                      <label for="comprehend-entities">Comprehend Entities</label>
+                      value="ComprehendEntities"
+                    />
+                    <label for="comprehend-entities">Comprehend Entities</label>
                   </div>
                   <div>
                     <input
-                      v-model="enabledOperators"
                       id="comprehend-key-phrases"
+                      v-model="enabledOperators"
                       type="checkbox"
-                      value="ComprehendKeyPhrases" />
-                      <label for="comprehend-key-phrases">Comprehend Key Phrases</label>
+                      value="ComprehendKeyPhrases"
+                    />
+                    <label for="comprehend-key-phrases">Comprehend Key Phrases</label>
                   </div>
                   <div>
                     <input
-                      v-model="enabledOperators"
                       id="translate-operator"
+                      v-model="enabledOperators"
                       type="checkbox"
-                      value="Translate" />
-                      <label for="translate-text-operator">Translate</label>
+                      value="Translate"
+                    />
+                    <label for="translate-text-operator">Translate</label>
                   </div>
                   <div class="flex-checkbox">
                     <input
-                      v-model="enabledOperators"
                       id="polly-operator"
+                      v-model="enabledOperators"
                       type="checkbox"
-                      value="Polly" />
-                      <label for="polly">Generate audio translations with Amazon Polly</label>
+                      value="Polly"
+                    />
+                    <label for="polly">Generate audio translations with Amazon Polly</label>
                   </div>
                 </b-form-checkbox-group>
                 <div v-if="pollyFormError" style="color:red">
@@ -228,12 +229,13 @@
                   <div v-if="customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <div>
-                      <select class="custom-select" v-model="customTerminology" multiple>
+                      <select v-model="customTerminology" class="custom-select" multiple>
                         <option
                           v-for="terminology in customTerminologyList.filter(x => x.SourceLanguageCode === sourceLanguageCode)"
                           :key="terminology"
                           :value="{'Name': terminology.Name, 'TargetLanguageCodes': terminology.TargetLanguageCodes}"
-                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'" />
+                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'"
+                        />
                       </select>
                     </div>
                   </div>
@@ -242,12 +244,13 @@
                   <div v-else-if="sourceLanguageCode === 'auto' && customTerminologyList.length > 0">
                     <b>Custom Terminologies:</b> ({{ customTerminology.length }} selected)
                     <div>
-                      <select class="custom-select" v-model="customTerminology" multiple>
+                      <select v-model="customTerminology" class="custom-select" multiple>
                         <option
                           v-for="terminology in customTerminologyList"
                           :key="terminology"
                           :value="{'Name': terminology.Name, 'TargetLanguageCodes': terminology.TargetLanguageCodes}"
-                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'" />
+                          :label="terminology.Name + ' (' + terminology.TargetLanguageCodes + ')'"
+                        />
                       </select>
                     </div>
                   </div>
@@ -268,12 +271,13 @@
                   <div v-if="parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode).length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
                     <div>
-                      <select class="custom-select" v-model="parallelData" multiple>
+                      <select v-model="parallelData" class="custom-select" multiple>
                         <option
                           v-for="data in parallelDataList.filter(x => x.SourceLanguageCode === sourceLanguageCode)"
                           :key="data"
                           :value="{'Name': data.Name, 'TargetLanguageCodes': data.TargetLanguageCodes}"
-                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'" />
+                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'"
+                        />
                       </select>
                     </div>
                   </div>
@@ -282,12 +286,13 @@
                   <div v-else-if="sourceLanguageCode === 'auto' && parallelDataList.length > 0">
                     <b>Parallel Data:</b> ({{ parallelData.length }} selected)
                     <div>
-                      <select class="custom-select" v-model="parallelData" multiple>
+                      <select v-model="parallelData" class="custom-select" multiple>
                         <option
                           v-for="data in parallelDataList"
                           :key="data"
                           :value="{'Name': data.Name, 'TargetLanguageCodes': data.TargetLanguageCodes}"
-                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'" />
+                          :label="data.Name + ' (' + data.TargetLanguageCodes + ')'"
+                        />
                       </select>
                     </div>
                   </div>
@@ -392,7 +397,7 @@
 
 <script>
 import vueDropzone from '@/components/vue-dropzone.vue';
-import Header from '@/components/Header.vue'
+import HeaderView from '@/components/HeaderView.vue'
 import VoerroTagsInput from '@/components/VoerroTagsInput.vue';
 import '@/components/VoerroTagsInput.css';
 
@@ -401,7 +406,7 @@ import { mapState } from 'vuex'
 export default {
   components: {
     vueDropzone,
-    Header,
+    HeaderView,
     VoerroTagsInput
   },
   data() {
@@ -904,7 +909,7 @@ export default {
     this.listParallelDataRequest()
     this.listLanguageModelsRequest()
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearInterval(this.workflow_status_polling)
   },
   methods: {
@@ -948,7 +953,6 @@ export default {
     fileAdded: function( file )
     {
       let errorMessage = '';
-      console.log(file.type)
       if (!(file.type).match(/video\/.+|application\/mxf|text\/vtt/g)) {
         if (file.type === "")
           errorMessage = "Unsupported file type: unknown";

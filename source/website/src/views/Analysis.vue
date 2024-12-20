@@ -1,20 +1,11 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <div>
-    <Header />
+    <HeaderView />
     <b-container fluid>
       <b-alert
         v-model="showElasticSearchAlert"
@@ -183,19 +174,20 @@
 </template>
 
 <script>
-  import Header from '@/components/Header.vue'
+  import { mapState } from 'vuex'
+
+  import HeaderView from '@/components/HeaderView.vue'
   import VideoPlayer from '@/components/VideoPlayer.vue'
   import ImageFeature from '@/components/ImageFeature.vue'
   import Loading from '@/components/Loading.vue'
   import ComponentLoadingError from '@/components/ComponentLoadingError.vue'
   import MediaSummaryBox from '@/components/MediaSummaryBox.vue'
   import LineChart from '@/components/LineChart.vue'
-  import { mapState } from 'vuex'
 
   export default {
     name: 'Home',
     components: {
-      Header,
+      HeaderView,
       ComponentLoadingError,
       MediaSummaryBox,
       Loading,

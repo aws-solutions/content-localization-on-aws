@@ -1,16 +1,6 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -43,7 +33,7 @@ import videojs from 'video.js'
 import '@/../node_modules/video.js/dist/video-js.css'
 import '@/../node_modules/videojs-markers/dist/videojs.markers.css'
 import '@/../node_modules/videojs-markers/dist/videojs-markers.js'
-import '@/../node_modules/videojs-hotkeys/build/videojs.hotkeys.min.js'
+import '@/../node_modules/videojs-hotkeys/videojs.hotkeys.min.js'
 
 export default {
   name: 'VideoPlayer',
@@ -73,7 +63,7 @@ export default {
       });
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.player) {
       this.player.dispose();
       this.$store.commit('updatePlayer', null)
@@ -144,7 +134,8 @@ export default {
 
 <style>
   .video-js .vjs-current-time, .vjs-no-flex .vjs-current-time {
-    display: block; }
+    display: block;
+  }
 </style>
 <style scoped>
   .canvas {

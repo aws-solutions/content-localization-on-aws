@@ -1,20 +1,22 @@
 {
   "name": "content-localization-on-aws",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint --no-fix",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint -c eslint.config.js --fix src",
     "deploy": "aws s3 sync --acl public-read --profile mie --delete dist/ s3://[your_website_bucket]"
   },
   "dependencies": {
     "aws-amplify": "5.3.21",
     "aws-amplify-vue": "2.1.9",
-    "axios": "^1.7.4",
+    "axios": "^1.7.7",
     "bootstrap": "4.6.1",
     "bootstrap-vue": "^2.23.1",
-    "chart.js": "^4.4.0",
+    "chart.js": "^4.4.6",
     "diff": "5.0.0",
     "dropzone": "5.9.3",
     "jquery": "3.6.0",
@@ -22,10 +24,9 @@
     "latest-version": "^7.0.0",
     "lodash": "4.17.21",
     "number-to-words": "1.2.4",
-    "register-service-worker": "1.7.2",
-    "video.js": "^8.5.2",
+    "video.js": "^8.19.1",
     "videojs-flash": "2.2.1",
-    "videojs-hotkeys": "0.2.27",
+    "videojs-hotkeys": "0.2.30",
     "videojs-markers": "1.0.1",
     "vue": "^3.4.21",
     "@vue/compat": "^3.4.21",
@@ -34,74 +35,25 @@
     "vue-router": "3.5.2",
     "vuex": "^4.1.0",
     "vuex-persistedstate": "4.1.0",
-    "wavesurfer.js": "^7.3.2"
+    "wavesurfer.js": "^7.8.9"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-eslint": "^5.0.8",
-    "@vue/cli-plugin-pwa": "^5.0.8",
-    "@vue/cli-service": "^5.0.8",
-    "@vue/babel-preset-app": "^5.0.8",
-    "babel-eslint": "10.1.0",
-    "eslint": "^7.0.0",
-    "eslint-plugin-vue": "7.5.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "eslint": "^9.16.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^6.0.3",
     "webpack-subresource-integrity": "5.1.0"
   },
   "overrides": {
-    "ip": "^2.0.0",
-    "rollup": ">=4.22.4",
-    "postcss": "^8.4.31",
-    "webpack-dev-middleware": "^5.3.4",
-    "follow-redirects": "^1.15.6",
-    "aws-amplify": {
-      "fast-xml-parser": "^4.4.1"
-    },
-    "@aws-amplify/storage": {
-      "fast-xml-parser": "^4.4.1"
-    },
-    "@aws-amplify/api-rest": {
-      "axios": "^1.7.4"
-    },
-    "path-to-regexp": ">=8.1.0"
-  },
-  "eslintConfig": {
-    "root": false,
-    "env": {
-      "node": false
-    },
-    "extends": [
-      "plugin:vue/recommended",
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {
-      "no-console": "off",
-      "no-undef": "off",
-      "vue/require-prop-types": "off",
-      "vue/attribute-hyphenation": "off",
-      "vue/valid-v-for": "off",
-      "vue/max-attributes-per-line": "off",
-      "vue/html-self-closing": "off"
-    },
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "eslintIgnore": [
-    "source/website/src/dist/*.js",
-    "source/website/src/dist/min/*.js"
-  ],
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+    "vue": "^3.4.21"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions"
   ],
   "description": "This application allows users to generate subtitles for videos using human-in-the-loop workflows for AI enhanced transcription and translation services on AWS.",
-  "main": "babel.config.js",
   "directories": {
     "doc": "../../doc",
     "test": "../../test"

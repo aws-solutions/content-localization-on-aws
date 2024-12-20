@@ -1,16 +1,6 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -42,8 +32,9 @@
                   :id="'vocabulary_' + index"
                   v-model="customVocabularySelected"
                   type="radio"
-                  :value=vocabulary.name />
-                  <label :for="'vocabulary_' + index">&nbsp;{{ vocabulary.name_and_status }}</label>
+                  :value="vocabulary.name"
+                />
+                <label :for="'vocabulary_' + index">&nbsp;{{ vocabulary.name_and_status }}</label>
               </div>
             </b-form-radio-group>
           </b-form-group>
@@ -66,7 +57,7 @@
             <select v-model="vocabulary_language_code">
               <option 
                 v-for="language in transcribeLanguages" :key="language"
-                :value=language.value
+                :value="language.value"
               >
                 {{ language.text }}
               </option>
@@ -267,7 +258,7 @@ to highlight the fields in the custom vocab schema. -->
       <br>
       <!-- this is the download button -->
       <b-dropdown v-if="webCaptions.length > 0" id="download-dropdown" text="Download VTT/SRT" class="mb-2" size="sm" dropup no-caret>
-        <template slot="button-content">
+        <template #button-content>
           <b-icon icon="download" color="white"></b-icon> Download
         </template>
         <!-- //NOSONAR --> <b-dropdown-item :href="vtt_url"> 
@@ -308,7 +299,8 @@ to highlight the fields in the custom vocab schema. -->
 
 <script>
 import { mapState } from 'vuex'
-const converter = require('number-to-words');
+import converter from 'number-to-words';
+import { diffWords } from 'diff';
 
 export default {
   name: "Subtitles",
@@ -482,7 +474,7 @@ export default {
     this.getWorkflowId();
     this.getAssetWorkflowStatus();
   },
-  beforeDestroy: function () {
+  beforeUnmount: function () {
     this.transcript = ''
     clearInterval(this.workflow_status_polling)
     clearInterval(this.vocab_status_polling)
@@ -658,8 +650,7 @@ export default {
     },
     changeCaption(new_caption, index) {
       // We're using the diff package to determine what words were added or removed from the subtitles
-      const Diff = require('diff');
-      const diff = Diff.diffWords(this.webCaptions[index].caption, new_caption);
+      const diff = diffWords(this.webCaptions[index].caption, new_caption);
       // Diff returns a dictionary that contains "added" or "removed" keys for words
       // which were added or removed. So, we'll look for those keys now:
       console.log("Caption edit:")
@@ -790,17 +781,19 @@ export default {
     },
     handleVideoPlay() {
       let last_position = 0;
-      // Advance the selected row in the caption table when the video is playing
-      this.player.on('timeupdate', function () {
-        const current_position = Math.round(this.player.currentTime());
-        if (current_position !== last_position) {
-          let timeline_position = this.webCaptions.findIndex(function(item){return (parseInt(item.start) <= current_position && parseInt(item.end) >= current_position)})
-          if (this.$refs.selectableTable) {
-            this.$refs.selectableTable.selectRow(timeline_position)
+      if (this.player) {
+        // Advance the selected row in the caption table when the video is playing
+        this.player.on('timeupdate', function () {
+          const current_position = Math.round(this.player.currentTime());
+          if (current_position !== last_position) {
+            let timeline_position = this.webCaptions.findIndex(function(item){return (parseInt(item.start) <= current_position && parseInt(item.end) >= current_position)})
+            if (this.$refs.selectableTable) {
+              this.$refs.selectableTable.selectRow(timeline_position)
+            }
+            last_position = current_position;
           }
-          last_position = current_position;
-        }
-      }.bind(this));
+        }.bind(this));
+      }
     },
     getWorkflowId: async function() {
       let apiName = 'mieWorkflowApi'
@@ -1314,39 +1307,39 @@ export default {
       try {
         let response = await this.$Amplify.API.get(apiName, path, requestOpts);
         if (response.status !== 200) {
-            console.log("ERROR: Failed to download captions.");
-            console.log(response.data.Code);
-            console.log(response.data.Message);
-            console.log("Response: " + response.status);
-            this.isBusy = false
-            this.noSubtitles = true
-          }
-          if (response.data.results) {
-            cursor = response.data.cursor;
-            this.webCaptions = response.data.results["WebCaptions"]
-            console.log("low confidence words:")
-            // TODO: highlight low confidence words in GUI
-            // const low_confidence_words = []
-            // const confidence_threshold = 0.90
-            // console.log("confidence threshold: " + confidence_threshold)
-            // this.webCaptions.forEach(item => {
-            //   item.wordConfidence.filter(word => word.c < "0.99")
-            //     .forEach(word => {
-            //       // add low confidence word to array if it hasn't already been added
-            //       if (low_confidence_words.includes(word.w) === false) {
-            //         low_confidence_words.push(word.w)
-            //       }
-            //     })
-            // })
-            // console.log(low_confidence_words)
-            // why do we need to sort as we read this?  Isn't it already sorted?
-            // this.sortWebCaptions()
-            this.isBusy = false
-            if (cursor)
-              this.getWebCaptionPages(url,cursor)
-          } else {
-            this.videoOptions.captions = []
-          }
+          console.log("ERROR: Failed to download captions.");
+          console.log(response.data.Code);
+          console.log(response.data.Message);
+          console.log("Response: " + response.status);
+          this.isBusy = false
+          this.noSubtitles = true
+        }
+        if (response.data.results) {
+          cursor = response.data.cursor;
+          this.webCaptions = response.data.results["WebCaptions"]
+          console.log("low confidence words:")
+          // TODO: highlight low confidence words in GUI
+          // const low_confidence_words = []
+          // const confidence_threshold = 0.90
+          // console.log("confidence threshold: " + confidence_threshold)
+          // this.webCaptions.forEach(item => {
+          //   item.wordConfidence.filter(word => word.c < "0.99")
+          //     .forEach(word => {
+          //       // add low confidence word to array if it hasn't already been added
+          //       if (low_confidence_words.includes(word.w) === false) {
+          //         low_confidence_words.push(word.w)
+          //       }
+          //     })
+          // })
+          // console.log(low_confidence_words)
+          // why do we need to sort as we read this?  Isn't it already sorted?
+          // this.sortWebCaptions()
+          this.isBusy = false
+          if (cursor)
+            this.getWebCaptionPages(url,cursor)
+        } else {
+          this.videoOptions.captions = []
+        }
       } catch (error) {
         this.noSubtitles = true
         this.isBusy = false

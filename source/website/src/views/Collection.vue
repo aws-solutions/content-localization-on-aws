@@ -1,21 +1,12 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <div>
     <div class="headerTextBackground">
-      <Header :is-collection-active="true" />
+      <HeaderView :is-collection-active="true" />
       <b-container fluid>
         <b-alert
           v-model="showElasticSearchAlert"
@@ -83,6 +74,8 @@
               <b-row class="my-1">
                 <b-col>
                   <b-table
+                    v-model:sort-by="sortBy"
+                    v-model:sort-desc="sortDesc"
                     striped
                     hover
                     fixed
@@ -90,8 +83,6 @@
                     show-empty
                     :fields="fields"
                     :items="asset_list"
-                    :sort-by.sync="sortBy"
-                    :sort-desc.sync="sortDesc"
                     :current-page="currentPage"
                     :per-page="perPage"
                   >
@@ -114,10 +105,10 @@
                     </template>
                     <template #cell(Actions)="data">
                       <!-- //NOSONAR --> <b-link
-                        :href="(`/analysis/${data.item.asset_id}`)"
-                      >
-                        Analyze
-                      </b-link>
+                                           :href="(`/analysis/${data.item.asset_id}`)"
+                                         >
+                                           Analyze
+                                         </b-link>
                       <br>
                       <b-link
                         class="text-danger"
@@ -150,7 +141,7 @@
                   v-model="currentPage"
                   :total-rows="totalRows"
                   :per-page="perPage"
-                  class="my-0"
+                  class="justify-content-center"
                 />
               </b-row>
             </div>
@@ -162,14 +153,14 @@
 </template>
 
 <script>
-  import Header from '@/components/Header.vue'
+  import HeaderView from '@/components/HeaderView.vue'
   import VideoThumbnail from '@/components/VideoThumbnail.vue'
   import Loading from '@/components/Loading.vue'
 
   export default {
-    name: "Run",
+    name: "CollectionView",
     components: {
-      Header,
+      HeaderView,
       Loading,
       VideoThumbnail
     },

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.11] - 2024-12-23
+
+### Changed
+
+- Changed build tool from vue-loader to vite-js
+
+### Fixed
+
+- Fixed an issue in Analysis page graph where it failed to update upon analysis context change
+
+### Security
+
+- Upgraded vulnerable packages
+
+### Removed
+
+- removed unused libraries after migration to vite-js
+
 ## [2.1.10] - 2024-10-31
 
 ### Security

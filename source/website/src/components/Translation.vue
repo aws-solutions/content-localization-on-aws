@@ -1,16 +1,6 @@
 <!-- 
-######################################################################################################################
-#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
-#                                                                                                                    #
-#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
-#  with the License. A copy of the License is located at                                                             #
-#                                                                                                                    #
-#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
-#                                                                                                                    #
-#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
-#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
-#  and limitations under the License.                                                                                #
-######################################################################################################################
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
@@ -52,9 +42,10 @@
               :id="'language_' + index"
               v-model="selected_lang_code"
               type="radio"
-              :value=language.value
-              @change="getWebCaptions" />
-              <label :for="'language_' + index">&nbsp;{{ language.text }}</label>
+              :value="language.value"
+              @change="getWebCaptions"
+            />
+            <label :for="'language_' + index">&nbsp;{{ language.text }}</label>
           </div>
         </b-form-radio-group>
       </b-form-group>
@@ -122,7 +113,7 @@
       <br>
       <!-- this is the download button -->
       <b-dropdown id="download-dropdown" text="Download VTT/SRT" class="mb-2" size="sm" dropup no-caret>
-        <template slot="button-content">
+        <template #button-content>
           <b-icon icon="download" color="white"></b-icon> Download
         </template>
         <!-- //NOSONAR --> <b-dropdown-item :href="vtt_url">
@@ -170,12 +161,13 @@
         <b-form-group v-if="customTerminologyList.length > 0">
           <b-form-checkbox-group v-for="(terminology, index) in customTerminologyList" :key="terminology">
             <div>
-                <input
-                  :id="'terminology_' + index"
-                  v-model="customTerminologySelected"
-                  type="checkbox"
-                  :value=terminology />
-                  <label :for="'terminology_' + index">&nbsp;{{ terminology }}</label>
+              <input
+                :id="'terminology_' + index"
+                v-model="customTerminologySelected"
+                type="checkbox"
+                :value="terminology"
+              />
+              <label :for="'terminology_' + index">&nbsp;{{ terminology }}</label>
             </div>
           </b-form-checkbox-group>
         </b-form-group>
@@ -294,7 +286,7 @@ Uncomment the following buttons to get options for adding or removing languages 
           <select v-model="newLanguageCode">
             <option
               v-for="language in translateLanguages" :key="language"
-              :value=language.value
+              :value="language.value"
             >
               {{ language.text }}
             </option>
@@ -310,8 +302,9 @@ Uncomment the following buttons to get options for adding or removing languages 
                 :id="'language_' + index"
                 v-model="removeLanguageCode"
                 type="radio"
-                :value=language.value />
-                <label :for="'language_' + index">&nbsp;{{ language.value }}</label>
+                :value="language.value"
+              />
+              <label :for="'language_' + index">&nbsp;{{ language.value }}</label>
             </div>
           </b-form-radio-group>
         </b-form-group>
@@ -325,6 +318,7 @@ Uncomment the following buttons to get options for adding or removing languages 
 
 <script>
 import {mapState} from "vuex";
+import {diffWords} from 'diff';
 
 export default {
   name: "Translation",
@@ -613,7 +607,7 @@ export default {
     this.getWorkflowId();
     this.pollWorkflowStatus();
   },
-  beforeDestroy: function () {
+  beforeUnmount: function () {
     clearInterval(this.workflow_status_polling)
   },
   methods: {
@@ -956,8 +950,7 @@ export default {
       this.webCaptions[index].end = new_time
     },
     changeCaption(new_caption, index) {
-      const Diff = require('diff');
-      const diff = Diff.diffWords(this.webCaptions[index].caption, new_caption);
+      const diff = diffWords(this.webCaptions[index].caption, new_caption);
       // if no words were removed (i.e. only new words were added)...
       console.log("Translation edit:")
       console.log(diff)

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 TODO: Update release date when time is known
 
+## [2.1.14] - 2025-05-30
+
+### Security
+
+- Updated `Media Insights on AWS` version to v5.1.11
+
 ## [2.1.13] - 2025-04-04
 
 ### Security

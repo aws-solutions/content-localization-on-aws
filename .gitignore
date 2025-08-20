@@ -8,7 +8,6 @@ deployment/template_url_that_uses_an_existing_mie_stack.txt
 *package
 *dist
 webapp-manifest.json
-source/website/public/runtimeConfig.json
 *.iml
 .idea/
 *.pyc

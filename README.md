@@ -1,3 +1,5 @@
+# NOTE: This solution is no longer being supported
+
 # Content Localization on AWS 
 
 Welcome to the Content Localization on AWS project!   This project will help you extend the reach of your VOD content by quickly and efficiently creating accurate multi-language subtitles using AWS AI Services.  You can make manual corrections to the automatically created subtitles and use advanced AWS AI Service customization features to improve the results of the automation for your content domain. Content Localization is built on [Media Insights on AWS](https://github.com/aws-solutions/media-insights-on-aws), a framework that helps accelerate the development of serverless applications that process video, images, audio, and text with artificial intelligence services and multimedia services on AWS. 

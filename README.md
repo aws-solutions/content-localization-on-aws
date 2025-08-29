@@ -30,18 +30,6 @@ As a first step, this project seeks to create an efficient, customizable workflo
 * Identify text or phrases in the visual content that may need to be translated.
 * Use shot boundary and location of visual artifacts withing the content to help with placement of subtitles within relative to the content.
 
-# Deployment
-
-The following Cloudformation templates will deploy the Content Localization front-end application with a prebuilt version of the most recent Media Insights on AWS release.
-
-Region| Launch
-------|-----
-US West (Oregon) | [![Launch in us-west-2](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
-US East (N. Virginia) | [![Launch in us-east-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
-EU West (Ireland) | [![Launch in eu-west-1](doc/images/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=clo&templateURL=https://solutions-reference.s3.amazonaws.com/content-localization-on-aws/latest/content-localization-on-aws.template)
-
-For more installation options, see the [Advanced Installation](#advanced-installation-options) section.
-
 # Screenshots
 
 Translation analysis:
